@@ -1,0 +1,33 @@
+{
+  "name": "grocery-manager",
+  "version": "1.0.0",
+  "description": "Website quản lý giá sản phẩm cho tạp hoá (500-2000 SKU), full-stack trên Google Apps Script + Google Sheets.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "push": "clasp push",
+    "push:watch": "clasp push --watch",
+    "deploy": "clasp push && clasp deploy -d \"$(date +%Y-%m-%d_%H:%M:%S)\"",
+    "open": "clasp open",
+    "open:webapp": "clasp open --webapp",
+    "logs": "clasp logs",
+    "status": "clasp status"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lamngockhuong/grocery-manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lamngockhuong/grocery-manager/issues"
+  },
+  "homepage": "https://github.com/lamngockhuong/grocery-manager#readme",
+  "devDependencies": {
+    "@google/clasp": "^3.2.0"
+  }
+}
