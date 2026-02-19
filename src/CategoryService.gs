@@ -43,18 +43,18 @@ var CategoryService = (function() {
   function createCategory(data) {
     Auth.requireAdmin();
     if (!data.name || !data.name.trim()) {
-      throw new Error('Ten danh muc khong duoc de trong');
+      throw new Error('Tên danh mục không được để trống');
     }
     // Check duplicate name
     var existing = getCategories();
     var dup = existing.some(function(c) {
       return c.name.toLowerCase() === data.name.trim().toLowerCase();
     });
-    if (dup) throw new Error('Danh muc "' + data.name + '" da ton tai');
+    if (dup) throw new Error('Danh mục "' + data.name + '" đã tồn tại');
 
     if (data.parent_id) {
       var parent = getCategoryById(data.parent_id);
-      if (!parent) throw new Error('Danh muc cha khong ton tai');
+      if (!parent) throw new Error('Danh mục cha không tồn tại');
     }
 
     var record = {
@@ -70,11 +70,11 @@ var CategoryService = (function() {
   function updateCategory(id, data) {
     Auth.requireAdmin();
     var existing = getCategoryById(id);
-    if (!existing) throw new Error('Danh muc khong ton tai');
+    if (!existing) throw new Error('Danh mục không tồn tại');
 
     var updateData = {};
     if (data.name !== undefined) {
-      if (!data.name.trim()) throw new Error('Ten danh muc khong duoc de trong');
+      if (!data.name.trim()) throw new Error('Tên danh mục không được để trống');
       updateData.name = data.name.trim();
     }
     if (data.parent_id !== undefined) {
@@ -94,7 +94,7 @@ var CategoryService = (function() {
       return p.category_id === id && p.status === 'active';
     });
     if (hasProducts) {
-      throw new Error('Khong the xoa danh muc dang co san pham');
+      throw new Error('Không thể xoá danh mục đang có sản phẩm');
     }
 
     // Check if category has children
@@ -103,7 +103,7 @@ var CategoryService = (function() {
       return c.parent_id === id;
     });
     if (hasChildren) {
-      throw new Error('Khong the xoa danh muc dang co danh muc con');
+      throw new Error('Không thể xoá danh mục đang có danh mục con');
     }
 
     SheetHelper.remove(SHEETS.CATEGORIES, id);

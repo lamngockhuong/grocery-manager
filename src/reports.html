@@ -1,13 +1,13 @@
 <div class="container">
-  <h5>Bao Cao</h5>
+  <h5>Báo Cáo</h5>
 
   <!-- Tab navigation -->
   <div class="row">
     <div class="col s12">
       <ul class="tabs" id="report-tabs">
-        <li class="tab col s4"><a href="#report-low-stock" class="active">Sap het hang</a></li>
-        <li class="tab col s4"><a href="#report-price-history">Lich su gia</a></li>
-        <li class="tab col s4"><a href="#report-inventory-summary">Tong hop ton kho</a></li>
+        <li class="tab col s4"><a href="#report-low-stock" class="active">Sắp hết hàng</a></li>
+        <li class="tab col s4"><a href="#report-price-history">Lịch sử giá</a></li>
+        <li class="tab col s4"><a href="#report-inventory-summary">Tổng hợp tồn kho</a></li>
       </ul>
     </div>
   </div>
@@ -17,10 +17,10 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr><th>San pham</th><th>Danh muc</th><th>Ton kho</th><th>Toi thieu</th><th>Thieu</th></tr>
+          <tr><th>Sản phẩm</th><th>Danh mục</th><th>Tồn kho</th><th>Tối thiểu</th><th>Thiếu</th></tr>
         </thead>
         <tbody id="report-low-stock-tbody">
-          <tr><td colspan="5" class="center grey-text">Dang tai...</td></tr>
+          <tr><td colspan="5" class="center grey-text">Đang tải...</td></tr>
         </tbody>
       </table>
     </div>
@@ -31,20 +31,20 @@
     <div class="row" style="margin-top:10px">
       <div class="col s12 m4">
         <div class="input-field">
-          <select id="ph-product-filter"><option value="">Tat ca san pham</option></select>
-          <label>San pham</label>
+          <select id="ph-product-filter"><option value="">Tất cả sản phẩm</option></select>
+          <label>Sản phẩm</label>
         </div>
       </div>
       <div class="col s6 m3">
         <div class="input-field">
           <input type="date" id="ph-start-date">
-          <label for="ph-start-date">Tu ngay</label>
+          <label for="ph-start-date">Từ ngày</label>
         </div>
       </div>
       <div class="col s6 m3">
         <div class="input-field">
           <input type="date" id="ph-end-date">
-          <label for="ph-end-date">Den ngay</label>
+          <label for="ph-end-date">Đến ngày</label>
         </div>
       </div>
       <div class="col s12 m2" style="padding-top:20px">
@@ -56,10 +56,10 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr><th>San pham</th><th>Gia nhap cu&rarr;moi</th><th>Gia ban cu&rarr;moi</th><th>Ngay</th><th class="hide-on-small">Nguoi sua</th></tr>
+          <tr><th>Sản phẩm</th><th>Giá nhập cũ&rarr;mới</th><th>Giá bán cũ&rarr;mới</th><th>Ngày</th><th class="hide-on-small">Người sửa</th></tr>
         </thead>
         <tbody id="report-ph-tbody">
-          <tr><td colspan="5" class="center grey-text">Chon bo loc va nhan Xem</td></tr>
+          <tr><td colspan="5" class="center grey-text">Chọn bộ lọc và nhấn Xem</td></tr>
         </tbody>
       </table>
     </div>
@@ -70,10 +70,10 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr><th>Danh muc</th><th>So mat hang</th><th>Tong ton kho</th><th>Tong gia tri</th></tr>
+          <tr><th>Danh mục</th><th>Số mặt hàng</th><th>Tổng tồn kho</th><th>Tổng giá trị</th></tr>
         </thead>
         <tbody id="report-inv-summary-tbody">
-          <tr><td colspan="4" class="center grey-text">Dang tai...</td></tr>
+          <tr><td colspan="4" class="center grey-text">Đang tải...</td></tr>
         </tbody>
       </table>
     </div>
@@ -94,7 +94,7 @@ var Reports = {
     api.call('apiGetLowStockReport').then(function(data) {
       var tbody = document.getElementById('report-low-stock-tbody');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Khong co san pham sap het</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Không có sản phẩm sắp hết</td></tr>';
         return;
       }
       tbody.innerHTML = data.map(function(r) {
@@ -107,7 +107,7 @@ var Reports = {
         '</tr>';
       }).join('');
     }).catch(function(e) {
-      showToast('Loi tai bao cao: ' + e.message, 'red');
+      showToast('Lỗi tải báo cáo: ' + e.message, 'red');
     });
   },
 
@@ -120,7 +120,7 @@ var Reports = {
     api.call('apiGetPriceHistoryReport', productId, start, end).then(function(data) {
       var tbody = document.getElementById('report-ph-tbody');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Khong co du lieu</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Không có dữ liệu</td></tr>';
         return;
       }
       tbody.innerHTML = data.map(function(r) {
@@ -133,7 +133,7 @@ var Reports = {
         '</tr>';
       }).join('');
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   },
 
@@ -141,7 +141,7 @@ var Reports = {
     api.call('apiGetInventorySummaryReport').then(function(data) {
       var tbody = document.getElementById('report-inv-summary-tbody');
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Khong co du lieu</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Không có dữ liệu</td></tr>';
         return;
       }
       tbody.innerHTML = data.map(function(r) {
@@ -153,14 +153,14 @@ var Reports = {
         '</tr>';
       }).join('');
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   },
 
   populateProductFilter: function() {
     var select = document.getElementById('ph-product-filter');
     if (!select) return;
-    select.innerHTML = '<option value="">Tat ca san pham</option>';
+    select.innerHTML = '<option value="">Tất cả sản phẩm</option>';
     state.products.forEach(function(p) {
       select.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>';
     });

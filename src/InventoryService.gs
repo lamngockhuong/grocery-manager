@@ -47,10 +47,10 @@ var InventoryService = (function() {
   function updateQuantity(productId, newQuantity) {
     Auth.requireAdmin();
     newQuantity = Number(newQuantity);
-    if (isNaN(newQuantity) || newQuantity < 0) throw new Error('So luong phai >= 0');
+    if (isNaN(newQuantity) || newQuantity < 0) throw new Error('Số lượng phải >= 0');
 
     var record = _findInventoryRecord(productId);
-    if (!record) throw new Error('Khong tim thay ton kho cho san pham');
+    if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
 
     SheetHelper.update(SHEETS.INVENTORY, record.id, {
       quantity: newQuantity,
@@ -63,13 +63,13 @@ var InventoryService = (function() {
   function restock(productId, addQuantity) {
     Auth.requireAdmin();
     addQuantity = Number(addQuantity);
-    if (isNaN(addQuantity) || addQuantity <= 0) throw new Error('So luong nhap them phai > 0');
+    if (isNaN(addQuantity) || addQuantity <= 0) throw new Error('Số lượng nhập thêm phải > 0');
 
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
       var record = _findInventoryRecord(productId);
-      if (!record) throw new Error('Khong tim thay ton kho cho san pham');
+      if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
 
       var currentQty = Number(record.quantity) || 0;
       SheetHelper.update(SHEETS.INVENTORY, record.id, {
@@ -87,10 +87,10 @@ var InventoryService = (function() {
   function setMinStock(productId, minStock) {
     Auth.requireAdmin();
     minStock = Number(minStock);
-    if (isNaN(minStock) || minStock < 0) throw new Error('Muc toi thieu phai >= 0');
+    if (isNaN(minStock) || minStock < 0) throw new Error('Mức tối thiểu phải >= 0');
 
     var record = _findInventoryRecord(productId);
-    if (!record) throw new Error('Khong tim thay ton kho cho san pham');
+    if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
 
     SheetHelper.update(SHEETS.INVENTORY, record.id, {
       min_stock: minStock,

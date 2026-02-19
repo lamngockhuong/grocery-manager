@@ -1,25 +1,25 @@
 <div class="container">
-  <h5>Quan Ly San Pham</h5>
+  <h5>Quản Lý Sản Phẩm</h5>
 
   <!-- Search + Filter bar -->
   <div class="row search-wrapper">
     <div class="col s12 m5">
       <div class="input-field">
         <i class="material-icons prefix">search</i>
-        <input id="product-search" type="text" placeholder="Tim san pham...">
+        <input id="product-search" type="text" placeholder="Tìm sản phẩm...">
       </div>
     </div>
     <div class="col s12 m4">
       <div class="input-field">
         <select id="category-filter" onchange="Products.render()">
-          <option value="">Tat ca danh muc</option>
+          <option value="">Tất cả danh mục</option>
         </select>
-        <label>Danh muc</label>
+        <label>Danh mục</label>
       </div>
     </div>
     <div class="col s12 m3 admin-only" style="padding-top:20px">
       <button class="btn blue waves-effect" onclick="Products.showAddModal()">
-        <i class="material-icons left">add</i>Them
+        <i class="material-icons left">add</i>Thêm
       </button>
     </div>
   </div>
@@ -29,12 +29,12 @@
     <table class="striped responsive-table">
       <thead>
         <tr>
-          <th>Ten san pham</th>
-          <th>Danh muc</th>
-          <th>Don vi</th>
-          <th>Gia nhap</th>
-          <th>Gia ban</th>
-          <th class="admin-only">Thao tac</th>
+          <th>Tên sản phẩm</th>
+          <th>Danh mục</th>
+          <th>Đơn vị</th>
+          <th>Giá nhập</th>
+          <th>Giá bán</th>
+          <th class="admin-only">Thao tác</th>
         </tr>
       </thead>
       <tbody id="products-tbody"></tbody>
@@ -44,63 +44,63 @@
   <!-- Add/Edit Product Modal -->
   <div id="product-modal" class="modal">
     <div class="modal-content">
-      <h5 id="product-modal-title">Them san pham</h5>
+      <h5 id="product-modal-title">Thêm sản phẩm</h5>
       <form id="product-form" onsubmit="return false;">
         <input type="hidden" id="product-id">
         <div class="input-field">
           <input id="product-name" type="text" required>
-          <label for="product-name">Ten san pham</label>
+          <label for="product-name">Tên sản phẩm</label>
         </div>
         <div class="input-field">
           <select id="product-category"></select>
-          <label>Danh muc</label>
+          <label>Danh mục</label>
         </div>
         <div class="input-field">
           <input id="product-unit" type="text" required>
-          <label for="product-unit">Don vi (kg, chai, goi...)</label>
+          <label for="product-unit">Đơn vị (kg, chai, gói...)</label>
         </div>
         <div class="input-field">
           <input id="product-barcode" type="text">
-          <label for="product-barcode">Ma vach</label>
+          <label for="product-barcode">Mã vạch</label>
         </div>
         <div class="row">
           <div class="input-field col s6">
             <input id="product-buy-price" type="number" min="0" step="100">
-            <label for="product-buy-price">Gia nhap</label>
+            <label for="product-buy-price">Giá nhập</label>
           </div>
           <div class="input-field col s6">
             <input id="product-sell-price" type="number" min="0" step="100">
-            <label for="product-sell-price">Gia ban</label>
+            <label for="product-sell-price">Giá bán</label>
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <a class="modal-close btn-flat">Huy</a>
-      <button class="btn blue waves-effect" onclick="Products.save()">Luu</button>
+      <a class="modal-close btn-flat">Huỷ</a>
+      <button class="btn blue waves-effect" onclick="Products.save()">Lưu</button>
     </div>
   </div>
 
   <!-- Price Edit Modal -->
   <div id="price-modal" class="modal">
     <div class="modal-content">
-      <h5>Cap nhat gia</h5>
+      <h5>Cập nhật giá</h5>
       <input type="hidden" id="price-product-id">
       <p id="price-product-name" class="flow-text"></p>
       <div class="row">
         <div class="input-field col s6">
           <input id="price-buy" type="number" min="0" step="100">
-          <label for="price-buy">Gia nhap</label>
+          <label for="price-buy">Giá nhập</label>
         </div>
         <div class="input-field col s6">
           <input id="price-sell" type="number" min="0" step="100">
-          <label for="price-sell">Gia ban</label>
+          <label for="price-sell">Giá bán</label>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <a class="modal-close btn-flat">Huy</a>
-      <button class="btn blue waves-effect" onclick="Products.savePrice()">Luu gia</button>
+      <a class="modal-close btn-flat">Huỷ</a>
+      <button class="btn blue waves-effect" onclick="Products.savePrice()">Lưu giá</button>
     </div>
   </div>
 </div>
@@ -113,7 +113,7 @@ var Products = {
     this.populateCategoryFilter();
 
     if (products.length === 0) {
-      showEmptyState('products-tbody', 'Chua co san pham nao');
+      showEmptyState('products-tbody', 'Chưa có sản phẩm nào');
       return;
     }
 
@@ -154,7 +154,7 @@ var Products = {
       if (!select) return;
       var current = select.value;
       var isFilter = select.id === 'category-filter';
-      select.innerHTML = isFilter ? '<option value="">Tat ca danh muc</option>' : '<option value="">Chon danh muc</option>';
+      select.innerHTML = isFilter ? '<option value="">Tất cả danh mục</option>' : '<option value="">Chọn danh mục</option>';
       flat.forEach(function(cat) {
         var prefix = cat.parent_id ? '  -- ' : '';
         select.innerHTML += '<option value="' + cat.id + '"' + (current === cat.id ? ' selected' : '') + '>' + prefix + escapeHtml(cat.name) + '</option>';
@@ -166,7 +166,7 @@ var Products = {
   showAddModal: function() {
     document.getElementById('product-id').value = '';
     document.getElementById('product-form').reset();
-    document.getElementById('product-modal-title').textContent = 'Them san pham';
+    document.getElementById('product-modal-title').textContent = 'Thêm sản phẩm';
     this.populateCategoryFilter();
     M.updateTextFields();
     M.Modal.getInstance(document.getElementById('product-modal')).open();
@@ -181,7 +181,7 @@ var Products = {
     document.getElementById('product-barcode').value = p.barcode || '';
     document.getElementById('product-buy-price').value = p.buy_price || 0;
     document.getElementById('product-sell-price').value = p.sell_price || 0;
-    document.getElementById('product-modal-title').textContent = 'Sua san pham';
+    document.getElementById('product-modal-title').textContent = 'Sửa sản phẩm';
     this.populateCategoryFilter();
     document.getElementById('product-category').value = p.category_id || '';
     M.FormSelect.init(document.getElementById('product-category'));
@@ -196,7 +196,7 @@ var Products = {
       { field: 'product-buy-price', check: function(v) { return !isNaN(v) && Number(v) >= 0; } },
       { field: 'product-sell-price', check: function(v) { return !isNaN(v) && Number(v) >= 0; } }
     ];
-    if (!validateForm(rules)) { showToast('Vui long kiem tra lai thong tin', 'orange'); return; }
+    if (!validateForm(rules)) { showToast('Vui lòng kiểm tra lại thông tin', 'orange'); return; }
 
     var id = document.getElementById('product-id').value;
     var data = {
@@ -211,26 +211,26 @@ var Products = {
     var promise = id ? api.call('apiUpdateProduct', id, data) : api.call('apiCreateProduct', data);
     promise.then(function() {
       M.Modal.getInstance(document.getElementById('product-modal')).close();
-      showToast(id ? 'Da cap nhat san pham' : 'Da them san pham', 'green');
+      showToast(id ? 'Đã cập nhật sản phẩm' : 'Đã thêm sản phẩm', 'green');
       return api.call('apiGetProducts');
     }).then(function(products) {
       state.products = products;
       Products.render();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   },
 
   remove: function(id) {
-    if (!confirm('Ban co chac muon xoa san pham nay?')) return;
+    if (!confirm('Bạn có chắc muốn xoá sản phẩm này?')) return;
     api.call('apiDeleteProduct', id).then(function() {
-      showToast('Da xoa san pham', 'green');
+      showToast('Đã xoá sản phẩm', 'green');
       return api.call('apiGetProducts');
     }).then(function(products) {
       state.products = products;
       Products.render();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   },
 
@@ -250,17 +250,17 @@ var Products = {
     var productId = document.getElementById('price-product-id').value;
     var buyPrice = Number(document.getElementById('price-buy').value) || 0;
     var sellPrice = Number(document.getElementById('price-sell').value) || 0;
-    if (buyPrice < 0 || sellPrice < 0) { showToast('Gia phai >= 0', 'orange'); return; }
+    if (buyPrice < 0 || sellPrice < 0) { showToast('Giá phải >= 0', 'orange'); return; }
 
     api.call('apiUpdatePrice', productId, buyPrice, sellPrice).then(function() {
       M.Modal.getInstance(document.getElementById('price-modal')).close();
-      showToast('Da cap nhat gia', 'green');
+      showToast('Đã cập nhật giá', 'green');
       return api.call('apiGetProducts');
     }).then(function(products) {
       state.products = products;
       Products.render();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   }
 };

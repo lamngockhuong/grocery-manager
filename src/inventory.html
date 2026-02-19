@@ -1,18 +1,18 @@
 <div class="container">
-  <h5>Quan Ly Ton Kho</h5>
+  <h5>Quản Lý Tồn Kho</h5>
 
   <!-- Summary cards -->
   <div class="row">
     <div class="col s6 m3">
       <div class="card-panel center-align stat-card">
         <h4 id="inv-total">0</h4>
-        <p>Tong mat hang</p>
+        <p>Tổng mặt hàng</p>
       </div>
     </div>
     <div class="col s6 m3">
       <div class="card-panel red lighten-4 center-align stat-card">
         <h4 id="inv-low">0</h4>
-        <p>Sap het hang</p>
+        <p>Sắp hết hàng</p>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@
   <!-- Filter -->
   <label>
     <input type="checkbox" id="low-stock-filter" onchange="Inventory.render()">
-    <span>Chi hien sap het hang</span>
+    <span>Chỉ hiện sắp hết hàng</span>
   </label>
 
   <!-- Inventory table -->
@@ -28,11 +28,11 @@
     <table class="striped responsive-table">
       <thead>
         <tr>
-          <th>San pham</th>
-          <th>Ton kho</th>
-          <th>Toi thieu</th>
-          <th>Nhap hang cuoi</th>
-          <th class="admin-only">Thao tac</th>
+          <th>Sản phẩm</th>
+          <th>Tồn kho</th>
+          <th>Tối thiểu</th>
+          <th>Nhập hàng cuối</th>
+          <th class="admin-only">Thao tác</th>
         </tr>
       </thead>
       <tbody id="inventory-tbody"></tbody>
@@ -42,34 +42,34 @@
   <!-- Restock Modal -->
   <div id="restock-modal" class="modal">
     <div class="modal-content">
-      <h5>Nhap them hang</h5>
+      <h5>Nhập thêm hàng</h5>
       <input type="hidden" id="restock-product-id">
       <p id="restock-product-name" class="flow-text"></p>
       <div class="input-field">
         <input id="restock-quantity" type="number" min="1">
-        <label for="restock-quantity">So luong nhap them</label>
+        <label for="restock-quantity">Số lượng nhập thêm</label>
       </div>
     </div>
     <div class="modal-footer">
-      <a class="modal-close btn-flat">Huy</a>
-      <button class="btn blue waves-effect" onclick="Inventory.doRestock()">Nhap hang</button>
+      <a class="modal-close btn-flat">Huỷ</a>
+      <button class="btn blue waves-effect" onclick="Inventory.doRestock()">Nhập hàng</button>
     </div>
   </div>
 
   <!-- Min Stock Modal -->
   <div id="minstock-modal" class="modal">
     <div class="modal-content">
-      <h5>Dat muc toi thieu</h5>
+      <h5>Đặt mức tối thiểu</h5>
       <input type="hidden" id="minstock-product-id">
       <p id="minstock-product-name" class="flow-text"></p>
       <div class="input-field">
         <input id="minstock-value" type="number" min="0">
-        <label for="minstock-value">Muc ton kho toi thieu</label>
+        <label for="minstock-value">Mức tồn kho tối thiểu</label>
       </div>
     </div>
     <div class="modal-footer">
-      <a class="modal-close btn-flat">Huy</a>
-      <button class="btn blue waves-effect" onclick="Inventory.saveMinStock()">Luu</button>
+      <a class="modal-close btn-flat">Huỷ</a>
+      <button class="btn blue waves-effect" onclick="Inventory.saveMinStock()">Lưu</button>
     </div>
   </div>
 </div>
@@ -87,7 +87,7 @@ var Inventory = {
         self.loaded = true;
         self.render();
       }).catch(function(e) {
-        showToast('Loi tai ton kho: ' + e.message, 'red');
+        showToast('Lỗi tải tồn kho: ' + e.message, 'red');
       });
     } else {
       this.render();
@@ -106,7 +106,7 @@ var Inventory = {
       state.inventory.filter(function(i) { return i.quantity < i.min_stock; }).length;
 
     if (items.length === 0) {
-      showEmptyState('inventory-tbody', 'Khong co du lieu ton kho');
+      showEmptyState('inventory-tbody', 'Không có dữ liệu tồn kho');
       return;
     }
 
@@ -119,8 +119,8 @@ var Inventory = {
         '<td>' + i.min_stock + '</td>' +
         '<td>' + formatDate(i.last_restock) + '</td>' +
         '<td class="admin-only">' +
-          '<a onclick="Inventory.showRestock(\'' + i.product_id + '\')" class="btn-small blue waves-effect">Nhap hang</a> ' +
-          '<a onclick="Inventory.showMinStock(\'' + i.product_id + '\')" class="btn-small grey waves-effect">Dat min</a>' +
+          '<a onclick="Inventory.showRestock(\'' + i.product_id + '\')" class="btn-small blue waves-effect">Nhập hàng</a> ' +
+          '<a onclick="Inventory.showMinStock(\'' + i.product_id + '\')" class="btn-small grey waves-effect">Đặt min</a>' +
         '</td>' +
       '</tr>';
     }).join('');
@@ -140,15 +140,15 @@ var Inventory = {
   doRestock: function() {
     var productId = document.getElementById('restock-product-id').value;
     var qty = Number(document.getElementById('restock-quantity').value);
-    if (!qty || qty <= 0) { showToast('So luong phai > 0', 'orange'); return; }
+    if (!qty || qty <= 0) { showToast('Số lượng phải > 0', 'orange'); return; }
 
     api.call('apiRestock', productId, qty).then(function() {
       M.Modal.getInstance(document.getElementById('restock-modal')).close();
-      showToast('Da nhap hang thanh cong', 'green');
+      showToast('Đã nhập hàng thành công', 'green');
       Inventory.loaded = false;
       Inventory.init();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   },
 
@@ -165,15 +165,15 @@ var Inventory = {
   saveMinStock: function() {
     var productId = document.getElementById('minstock-product-id').value;
     var min = Number(document.getElementById('minstock-value').value);
-    if (isNaN(min) || min < 0) { showToast('Muc toi thieu phai >= 0', 'orange'); return; }
+    if (isNaN(min) || min < 0) { showToast('Mức tối thiểu phải >= 0', 'orange'); return; }
 
     api.call('apiSetMinStock', productId, min).then(function() {
       M.Modal.getInstance(document.getElementById('minstock-modal')).close();
-      showToast('Da luu muc toi thieu', 'green');
+      showToast('Đã lưu mức tối thiểu', 'green');
       Inventory.loaded = false;
       Inventory.init();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   }
 };

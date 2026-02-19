@@ -1,7 +1,7 @@
 <div class="container">
-  <h5>Quan Ly Danh Muc</h5>
+  <h5>Quản Lý Danh Mục</h5>
   <button class="btn blue waves-effect admin-only" onclick="Categories.showAddModal()" style="margin-bottom:20px">
-    <i class="material-icons left">add</i>Them danh muc
+    <i class="material-icons left">add</i>Thêm danh mục
   </button>
 
   <!-- Category list -->
@@ -10,24 +10,24 @@
   <!-- Add/Edit Modal -->
   <div id="category-modal" class="modal">
     <div class="modal-content">
-      <h5 id="category-modal-title">Them danh muc</h5>
+      <h5 id="category-modal-title">Thêm danh mục</h5>
       <form id="category-form" onsubmit="return false;">
         <input type="hidden" id="category-id">
         <div class="input-field">
           <input id="category-name" type="text" required>
-          <label for="category-name">Ten danh muc</label>
+          <label for="category-name">Tên danh mục</label>
         </div>
         <div class="input-field">
           <select id="category-parent">
-            <option value="">Khong co (top-level)</option>
+            <option value="">Không có (top-level)</option>
           </select>
-          <label>Danh muc cha</label>
+          <label>Danh mục cha</label>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <a class="modal-close btn-flat">Huy</a>
-      <button class="btn blue waves-effect" onclick="Categories.save()">Luu</button>
+      <a class="modal-close btn-flat">Huỷ</a>
+      <button class="btn blue waves-effect" onclick="Categories.save()">Lưu</button>
     </div>
   </div>
 </div>
@@ -37,7 +37,7 @@ var Categories = {
   render: function() {
     var list = document.getElementById('categories-list');
     if (!state.categories || state.categories.length === 0) {
-      list.innerHTML = '<li class="collection-item empty-state"><i class="material-icons">inbox</i><p>Chua co danh muc nao</p></li>';
+      list.innerHTML = '<li class="collection-item empty-state"><i class="material-icons">inbox</i><p>Chưa có danh mục nào</p></li>';
       return;
     }
 
@@ -64,7 +64,7 @@ var Categories = {
 
   _populateParentSelect: function(excludeId) {
     var select = document.getElementById('category-parent');
-    select.innerHTML = '<option value="">Khong co (top-level)</option>';
+    select.innerHTML = '<option value="">Không có (top-level)</option>';
     state.categories.forEach(function(cat) {
       if (cat.id !== excludeId) {
         select.innerHTML += '<option value="' + cat.id + '">' + escapeHtml(cat.name) + '</option>';
@@ -76,7 +76,7 @@ var Categories = {
   showAddModal: function() {
     document.getElementById('category-id').value = '';
     document.getElementById('category-form').reset();
-    document.getElementById('category-modal-title').textContent = 'Them danh muc';
+    document.getElementById('category-modal-title').textContent = 'Thêm danh mục';
     this._populateParentSelect();
     M.updateTextFields();
     M.Modal.getInstance(document.getElementById('category-modal')).open();
@@ -88,7 +88,7 @@ var Categories = {
     if (!cat) return;
     document.getElementById('category-id').value = cat.id;
     document.getElementById('category-name').value = cat.name;
-    document.getElementById('category-modal-title').textContent = 'Sua danh muc';
+    document.getElementById('category-modal-title').textContent = 'Sửa danh mục';
     this._populateParentSelect(cat.id);
     document.getElementById('category-parent').value = cat.parent_id || '';
     M.FormSelect.init(document.getElementById('category-parent'));
@@ -98,7 +98,7 @@ var Categories = {
 
   save: function() {
     var name = document.getElementById('category-name').value.trim();
-    if (!name) { showToast('Ten danh muc khong duoc de trong', 'orange'); return; }
+    if (!name) { showToast('Tên danh mục không được để trống', 'orange'); return; }
 
     var id = document.getElementById('category-id').value;
     var data = {
@@ -109,26 +109,26 @@ var Categories = {
     var promise = id ? api.call('apiUpdateCategory', id, data) : api.call('apiCreateCategory', data);
     promise.then(function() {
       M.Modal.getInstance(document.getElementById('category-modal')).close();
-      showToast(id ? 'Da cap nhat danh muc' : 'Da them danh muc', 'green');
+      showToast(id ? 'Đã cập nhật danh mục' : 'Đã thêm danh mục', 'green');
       return api.call('apiGetCategories');
     }).then(function(categories) {
       state.categories = categories;
       Categories.render();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   },
 
   remove: function(id) {
-    if (!confirm('Ban co chac muon xoa danh muc nay?')) return;
+    if (!confirm('Bạn có chắc muốn xoá danh mục này?')) return;
     api.call('apiDeleteCategory', id).then(function() {
-      showToast('Da xoa danh muc', 'green');
+      showToast('Đã xoá danh mục', 'green');
       return api.call('apiGetCategories');
     }).then(function(categories) {
       state.categories = categories;
       Categories.render();
     }).catch(function(e) {
-      showToast('Loi: ' + e.message, 'red');
+      showToast('Lỗi: ' + e.message, 'red');
     });
   }
 };

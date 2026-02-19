@@ -15,198 +15,74 @@ Grocery Manager is deployed as a Google Apps Script Web App. This guide covers i
 - Google Account (Gmail or Google Workspace)
 - Access to Google Drive
 - Chrome/Firefox/Safari browser (modern)
-- Node.js 14+ (optional, if using clasp CLI)
+- Node.js 14+
+- pnpm
 
-## Deployment Methods
+## Quick Start (clasp CLI)
 
-Choose one method:
-
-1. **GAS Web Editor (Easiest)** - Drag-and-drop in browser, no CLI
-2. **clasp CLI (Recommended)** - Version control friendly, scriptable
-
-## Method 1: Google Apps Script Web Editor (Easiest)
-
-### Step 1: Create Google Apps Script Project
-
-1. Go to [script.google.com](https://script.google.com)
-2. Click **New Project**
-3. Project name: "Grocery Manager" (or any name)
-4. Click **Create**
-
-You'll see the Apps Script editor with a blank `Code.gs` file.
-
-### Step 2: Copy Source Files
-
-1. Download all files from `src/` directory
-2. In GAS editor, delete the default `Code.gs`
-3. For each file in `src/`:
-   - If `.gs` file: Click **+ (New file)** → **Create script file** → Name: filename → Paste content
-   - If `.html` file: Click **+ (New file)** → **Create HTML file** → Name: filename → Paste content
-   - For `appsscript.json`: Click **Project Settings** → Enable **Show "appsscript.json" manifest file** → Replace content
-
-**Result:** All 19 files uploaded to GAS project
-
-### Step 3: Update Config
-
-1. Open `Config.gs`
-2. Set `SPREADSHEET_ID`:
-   - Option A: Leave blank (will use active sheet when running setupSheets)
-   - Option B: Use specific Spreadsheet ID:
-
-     ```javascript
-     var SPREADSHEET_ID = "your-spreadsheet-id-here";
-     ```
-
-### Step 4: Create Google Sheet
-
-1. Go to [sheets.google.com](https://sheets.google.com)
-2. Click **New spreadsheet**
-3. Name: "Grocery Manager Data" (or any name)
-4. (Optional) If using specific Spreadsheet ID, copy it from URL:
-
-   ```bash
-   https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit
-   ```
-
-5. Back in GAS editor, update `Config.gs` with this ID
-
-### Step 5: Run Setup
-
-1. In GAS editor, select function `setupSheets` from dropdown
-2. Click **Run** (play icon)
-3. Authorize: Click **Review permissions** → Select account → **Allow**
-4. Watch the console for "Setup complete: 6 sheets created."
-
-**Result:** 6 sheets created with headers:
-
-- Products, Prices, Inventory, PriceHistory, Categories, Users
-- Frozen header rows (blue, bold, white text)
-- Current user added as admin to Users sheet
-
-### Step 6: Deploy Web App
-
-1. Click **Deploy** > **New Deployment**
-2. Select type: **Web app**
-3. Settings:
-   - **Execute as:** "Your Google Account" (or Service Account if Workspace)
-   - **Who has access:** "Anyone" / "Your organization" / "Specific people" (choose based on privacy)
-4. Click **Deploy**
-5. Copy the deployment URL (looks like: `https://script.google.com/macros/d/{DEPLOYMENT_ID}/userweb`)
-
-### Step 7: Share & Access
-
-1. Open deployment URL in browser
-2. Authorize: Click **Review permissions** → Select account → **Allow**
-3. Dashboard loads! You're done.
-
-**To share with others:**
-
-- Copy deployment URL
-- Send to other Google account users
-- They open URL and login with their Google account
-- They appear in Users sheet (can set role to viewer via sheet edit)
-
-### Updating the App
-
-After making code changes:
-
-1. In GAS editor, make changes to source files
-2. Click **Deploy** → **New deployment** (same as step 6)
-3. Old deployment URL is invalidated
-4. Share new deployment URL with users
-
-**Alternative:** Click **Deploy** → **Manage deployments** → Click existing deployment > Redeploy (keeps same URL)
-
----
-
-## Method 2: Using clasp CLI (Version Control Friendly)
-
-### Prerequisites
+### Step 1: Install Dependencies
 
 ```bash
-npm install -g @google/clasp
+pnpm install
 ```
 
-### Step 1: Setup clasp
+### Step 2: Login to Google
 
 ```bash
-# Authenticate with Google
-clasp login
-
-# Create new GAS project in current directory
-clasp create --type webapp --title "Grocery Manager"
-
-# This creates:
-# - .clasp.json (config file, add to .gitignore)
-# - appsscript.json (manifest)
+pnpm exec clasp login
 ```
 
-### Step 2: Copy Source Files
+### Step 3: Create GAS Project (first time only)
 
 ```bash
-# Copy all source files into current directory
-cp -r src/* .
-
-# Now directory has:
-# .clasp.json
-# appsscript.json (from your src/ or GAS-generated)
-# Code.gs
-# SheetHelper.gs
-# ... (all .gs and .html files)
+pnpm exec clasp create --title "Grocery Manager" --type standalone --rootDir src
 ```
 
-### Step 3: Update Config.gs
+This creates `.clasp.json` (already in `.gitignore`).
+
+### Step 4: Push & Run Setup
 
 ```bash
-# Edit Config.gs and set SPREADSHEET_ID:
-# Option A: Leave blank
-# Option B: Use specific ID (create sheet first, copy ID)
+pnpm push       # push code to GAS
+pnpm open       # open GAS editor in browser
 ```
 
-### Step 4: Push to GAS
+In GAS editor: Select `setupSheets()` → Run → Authorize
+
+**Result:** Tự động tạo spreadsheet mới + lưu ID vào Script Properties + tạo 6 sheets + thêm admin user.
+
+**Nếu muốn dùng spreadsheet có sẵn:** Chạy `setupSpreadsheetId('your-spreadsheet-id')` trong GAS editor trước khi chạy `setupSheets()`. Hoặc vào Project Settings → Script Properties → thêm key `SPREADSHEET_ID`.
+
+### Step 6: Deploy
 
 ```bash
-clasp push
-```
-
-This uploads all files to Google Apps Script project.
-
-### Step 5: Create Google Sheet & Run Setup
-
-```bash
-# Open GAS editor in browser to run setupSheets
-clasp open
-
-# In editor: Select setupSheets() → Run
-# Authorize and wait for completion
-```
-
-### Step 6: Deploy Web App
-
-```bash
-# Create new deployment
-clasp deploy
-
-# Output:
-# Created new deployment: https://script.google.com/macros/d/{DEPLOYMENT_ID}/userweb
+pnpm deploy     # push + create timestamped deployment
 ```
 
 ### Step 7: Access App
 
-Open deployment URL in browser. Done!
+```bash
+pnpm open:webapp    # open deployed web app in browser
+```
 
-### Updating with clasp
+### Available Scripts
+
+| Script             | Description                      |
+| ------------------ | -------------------------------- |
+| `pnpm push`        | Push code to GAS                 |
+| `pnpm push:watch`  | Auto-push on file changes        |
+| `pnpm deploy`      | Push + create timestamped deploy |
+| `pnpm open`        | Open GAS editor in browser       |
+| `pnpm open:webapp` | Open deployed web app            |
+| `pnpm logs`        | View execution logs              |
+| `pnpm status`      | Check file sync status           |
+
+### Updating the App
 
 ```bash
-# Make code changes
-# Push changes
-clasp push
-
-# Create new deployment
-clasp deploy
-
-# OR: Redeploy existing deployment (keep URL)
-clasp deploy --update {DEPLOYMENT_ID}
+# Make code changes in src/
+pnpm deploy                                    # new deployment (new URL)
+pnpm exec clasp deploy --update {DEPLOY_ID}    # update existing (keep URL)
 ```
 
 ---

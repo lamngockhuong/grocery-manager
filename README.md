@@ -1,15 +1,15 @@
-# Grocery Manager - Quan Ly Gia San Pham
+# Grocery Manager - Quản Lý Giá Sản Phẩm
 
-Website quan ly gia san pham cho tap hoa (500-2000 SKU), full-stack tren Google Apps Script + Google Sheets.
+Website quản lý giá sản phẩm cho tạp hoá (500-2000 SKU), full-stack trên Google Apps Script + Google Sheets.
 
 ## Features
 
-- **Product Management**: CRUD san pham, tim kiem, loc theo danh muc
-- **Price Management**: Cap nhat gia nhap/ban, tu dong ghi lich su gia
-- **Category Management**: Danh muc cha-con (2 cap)
-- **Inventory**: Quan ly ton kho, canh bao sap het hang, nhap hang
-- **Reports**: Dashboard tong quan, bao cao sap het hang, lich su gia, tong hop ton kho
-- **Auth**: Phan quyen admin/viewer theo email
+- **Product Management**: CRUD sản phẩm, tìm kiếm, lọc theo danh mục
+- **Price Management**: Cập nhật giá nhập/bán, tự động ghi lịch sử giá
+- **Category Management**: Danh mục cha-con (2 cấp)
+- **Inventory**: Quản lý tồn kho, cảnh báo sắp hết hàng, nhập hàng
+- **Reports**: Dashboard tổng quan, báo cáo sắp hết hàng, lịch sử giá, tổng hợp tồn kho
+- **Auth**: Phân quyền admin/viewer theo email
 
 ## Architecture
 
@@ -47,34 +47,46 @@ Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Shee
 
 ## Setup
 
-### 1. Create Google Apps Script Project
+### Prerequisites
 
-1. Go to [script.google.com](https://script.google.com)
-2. Create new project
-3. Copy all files from `src/` into the project
+- Node.js 14+
+- pnpm
 
-### 2. Run Setup
-
-1. In GAS editor, run `setupSheets()` function
-2. This creates 6 sheets with headers and adds you as admin
-
-### 3. Deploy
-
-1. Deploy > New deployment
-2. Type: Web app
-3. Execute as: **User accessing the web app**
-4. Who has access: Choose your preference
-5. Click Deploy
-
-### Using clasp (optional)
+### 1. Install Dependencies
 
 ```bash
-npm install -g @google/clasp
-clasp login
-clasp create --type webapp --title "Grocery Manager"
-clasp push
-clasp deploy
+pnpm install
 ```
+
+### 2. Login & Create GAS Project
+
+```bash
+pnpm exec clasp login
+pnpm exec clasp create --title "Grocery Manager" --type standalone --rootDir src
+```
+
+### 3. Run Setup
+
+1. `pnpm open` to open GAS editor
+2. Run `setupSheets()` function — creates 6 sheets with headers + adds you as admin
+
+### 4. Deploy
+
+```bash
+pnpm deploy    # push code + create new deployment
+```
+
+### Available Scripts
+
+| Script | Description |
+|---|---|
+| `pnpm push` | Push code to GAS |
+| `pnpm push:watch` | Auto-push on file changes |
+| `pnpm deploy` | Push + create timestamped deployment |
+| `pnpm open` | Open GAS editor in browser |
+| `pnpm open:webapp` | Open deployed web app |
+| `pnpm logs` | View execution logs |
+| `pnpm status` | Check file sync status |
 
 ## Database (6 Sheets)
 

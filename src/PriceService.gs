@@ -43,15 +43,15 @@ var PriceService = (function() {
     // Validate
     newBuyPrice = Number(newBuyPrice);
     newSellPrice = Number(newSellPrice);
-    if (isNaN(newBuyPrice) || newBuyPrice < 0) throw new Error('Gia nhap phai >= 0');
-    if (isNaN(newSellPrice) || newSellPrice < 0) throw new Error('Gia ban phai >= 0');
+    if (isNaN(newBuyPrice) || newBuyPrice < 0) throw new Error('Giá nhập phải >= 0');
+    if (isNaN(newSellPrice) || newSellPrice < 0) throw new Error('Giá bán phải >= 0');
 
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
       // Get current price (fresh read under lock)
       var current = getPrice(productId);
-      if (!current) throw new Error('Khong tim thay gia cho san pham ' + productId);
+      if (!current) throw new Error('Không tìm thấy giá cho sản phẩm ' + productId);
 
       var oldBuy = Number(current.buy_price) || 0;
       var oldSell = Number(current.sell_price) || 0;

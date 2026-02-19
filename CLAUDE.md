@@ -29,25 +29,25 @@ Browser SPA (Materialize CSS)
 
 ## Database (Google Sheets)
 
-6 sheets: Products, Prices, Inventory, PriceHistory, Users, Categories. Column definitions in `Config.gs` COLUMNS object. All IDs are UUID-based (prefix + `Utilities.getUuid()`).
+6 sheets: Products, Prices, Inventory, PriceHistory, Users, Categories. Column definitions in `Config.gs` COLUMNS object. All IDs are UUID-based (prefix + `Utilities.getUuid()`). `SPREADSHEET_ID` stored in Script Properties via `PropertiesService.getScriptProperties()`.
 
 ## Development
 
-**No local build/test/lint** — this is a GAS project. Development happens either:
-
-1. Directly in the GAS editor at script.google.com
-2. Via `clasp` CLI: `clasp push` to sync, `clasp deploy` to publish
+**No local build/test/lint** — this is a GAS project. Uses `clasp` CLI (local dev dependency) via pnpm.
 
 ```bash
-# Optional: clasp workflow
-npm install -g @google/clasp
-clasp login
-clasp push          # push src/ to GAS
-clasp deploy        # deploy as web app
-clasp open          # open in browser
+pnpm install                # install dependencies
+pnpm exec clasp login       # first-time: authenticate with Google
+pnpm push                   # push src/ to GAS
+pnpm deploy                 # push + create new deployment
+pnpm open                   # open GAS editor in browser
+pnpm open:webapp            # open deployed web app
+pnpm push:watch             # auto-push on file changes
+pnpm logs                   # view execution logs
+pnpm status                 # check file sync status
 ```
 
-**First-time setup:** Run `setupSheets()` in GAS editor to create all 6 sheets with headers.
+**First-time setup:** Run `setupSheets()` in GAS editor (`pnpm open`) to create all 6 sheets with headers.
 
 ## File Dependencies
 

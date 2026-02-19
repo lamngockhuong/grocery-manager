@@ -177,8 +177,8 @@ document.addEventListener('DOMContentLoaded', function() {
     router.init();
     if (contentEl) contentEl.innerHTML = '';
   }).catch(function(e) {
-    showToast('Loi tai du lieu: ' + e.message, 'red');
-    if (contentEl) contentEl.innerHTML = '<p class="center red-text">Khong the tai du lieu. Vui long thu lai.</p>';
+    showToast('Lỗi tải dữ liệu: ' + e.message, 'red');
+    if (contentEl) contentEl.innerHTML = '<p class="center red-text">Không thể tải dữ liệu. Vui lòng thử lại.</p>';
   });
 });
 </script>

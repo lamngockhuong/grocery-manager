@@ -23,17 +23,17 @@ var ProductService = (function() {
     Auth.requireAdmin();
 
     // Validate
-    if (!data.name || !data.name.trim()) throw new Error('Ten san pham khong duoc de trong');
-    if (!data.unit || !data.unit.trim()) throw new Error('Don vi khong duoc de trong');
+    if (!data.name || !data.name.trim()) throw new Error('Tên sản phẩm không được để trống');
+    if (!data.unit || !data.unit.trim()) throw new Error('Đơn vị không được để trống');
 
     var buyPrice = Number(data.buy_price) || 0;
     var sellPrice = Number(data.sell_price) || 0;
-    if (buyPrice < 0) throw new Error('Gia nhap phai >= 0');
-    if (sellPrice < 0) throw new Error('Gia ban phai >= 0');
+    if (buyPrice < 0) throw new Error('Giá nhập phải >= 0');
+    if (sellPrice < 0) throw new Error('Giá bán phải >= 0');
 
     if (data.category_id) {
       var cat = CategoryService.getCategoryById(data.category_id);
-      if (!cat) throw new Error('Danh muc khong ton tai');
+      if (!cat) throw new Error('Danh mục không tồn tại');
     }
 
     // Check duplicate name
@@ -41,7 +41,7 @@ var ProductService = (function() {
     var dup = existing.some(function(p) {
       return p.name.toLowerCase() === data.name.trim().toLowerCase() && p.status === 'active';
     });
-    if (dup) throw new Error('San pham "' + data.name + '" da ton tai');
+    if (dup) throw new Error('Sản phẩm "' + data.name + '" đã tồn tại');
 
     var record = {
       name: data.name.trim(),
@@ -72,11 +72,11 @@ var ProductService = (function() {
   function updateProduct(id, data) {
     Auth.requireAdmin();
     var existing = getProductById(id);
-    if (!existing) throw new Error('San pham khong ton tai');
+    if (!existing) throw new Error('Sản phẩm không tồn tại');
 
     var updateData = { updated_at: new Date().toISOString() };
     if (data.name !== undefined) {
-      if (!data.name.trim()) throw new Error('Ten san pham khong duoc de trong');
+      if (!data.name.trim()) throw new Error('Tên sản phẩm không được để trống');
       updateData.name = data.name.trim();
     }
     if (data.category_id !== undefined) updateData.category_id = data.category_id;

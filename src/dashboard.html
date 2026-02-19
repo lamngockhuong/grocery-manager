@@ -6,19 +6,19 @@
     <div class="col s6 m4">
       <div class="card-panel blue white-text center-align stat-card">
         <h4 id="stat-total-products">-</h4>
-        <p>San pham</p>
+        <p>Sản phẩm</p>
       </div>
     </div>
     <div class="col s6 m4">
       <div class="card-panel green white-text center-align stat-card">
         <h4 id="stat-total-value">-</h4>
-        <p>Gia tri ton kho</p>
+        <p>Giá trị tồn kho</p>
       </div>
     </div>
     <div class="col s6 m4">
       <div class="card-panel orange white-text center-align stat-card">
         <h4 id="stat-low-stock">-</h4>
-        <p>Sap het hang</p>
+        <p>Sắp hết hàng</p>
       </div>
     </div>
   </div>
@@ -26,7 +26,7 @@
   <!-- Low stock warning -->
   <div class="card" id="low-stock-card" style="display:none">
     <div class="card-content">
-      <span class="card-title red-text"><i class="material-icons">warning</i> Canh bao sap het hang</span>
+      <span class="card-title red-text"><i class="material-icons">warning</i> Cảnh báo sắp hết hàng</span>
       <ul id="low-stock-list" class="collection"></ul>
     </div>
   </div>
@@ -34,14 +34,14 @@
   <!-- Recent price changes -->
   <div class="card">
     <div class="card-content">
-      <span class="card-title">Thay doi gia gan day</span>
+      <span class="card-title">Thay đổi giá gần đây</span>
       <div class="table-wrapper">
         <table class="striped">
           <thead>
-            <tr><th>San pham</th><th>Gia nhap</th><th>Gia ban</th><th class="hide-on-small">Thoi gian</th></tr>
+            <tr><th>Sản phẩm</th><th>Giá nhập</th><th>Giá bán</th><th class="hide-on-small">Thời gian</th></tr>
           </thead>
           <tbody id="recent-changes-tbody">
-            <tr><td colspan="4" class="center grey-text">Dang tai...</td></tr>
+            <tr><td colspan="4" class="center grey-text">Đang tải...</td></tr>
           </tbody>
         </table>
       </div>
@@ -72,7 +72,7 @@ var Dashboard = {
       // Recent changes
       var tbody = document.getElementById('recent-changes-tbody');
       if (!stats.recentChanges || stats.recentChanges.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Chua co thay doi gia nao</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Chưa có thay đổi giá nào</td></tr>';
       } else {
         tbody.innerHTML = stats.recentChanges.map(function(c) {
           return '<tr>' +
@@ -84,7 +84,7 @@ var Dashboard = {
         }).join('');
       }
     }).catch(function(e) {
-      showToast('Loi tai dashboard: ' + e.message, 'red');
+      showToast('Lỗi tải dashboard: ' + e.message, 'red');
     });
   }
 };
