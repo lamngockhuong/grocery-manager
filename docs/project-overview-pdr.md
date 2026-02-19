@@ -90,10 +90,13 @@ Tertiary: Store accountants/business analysts
 
 - Upload product images to Google Drive
 - Support multiple input methods: file upload, camera capture, URL paste
-- Client-side compression to reduce file size
+- Client-side compression to reduce file size (max 800px, JPEG 0.7)
 - Image preview in product list and detail modals
 - Admin-only image upload/delete operations
 - Automatic cleanup of old images when replaced
+- Filename derived from product name slug (e.g. "Nước mắm Nam Ngư" → `nuoc-mam-nam-ngu.jpg`)
+- Admin-triggered orphan image cleanup (`apiCleanupOrphanImages`) — trashes Drive files not referenced by any product
+- Drive URL format: `https://drive.google.com/thumbnail?id=FILE_ID&sz=w800`
 
 ### 7. Role-Based Access Control
 
@@ -159,6 +162,8 @@ Tertiary: Store accountants/business analysts
 | F08 | Inventory summary reports    | Complete | v1     |
 | F09 | Role-based access            | Complete | v1     |
 | F10 | Multi-user access            | Complete | v1     |
+| F11 | Product image management     | Complete | v1.1   |
+| F12 | Orphan image cleanup (admin) | Complete | v1.1   |
 
 ### Non-Functional PDRs
 

@@ -82,7 +82,8 @@ app.js.html (Core)
 └── Utils
     ├── formatCurrency(value) → "100.000 ₫"
     ├── escapeHtml(text) → Prevent XSS
-    └── validateForm(selector) → Client-side validation
+    ├── validateForm(selector) → Client-side validation
+    └── toSlug(str) → Vietnamese name to kebab-case filename slug
 
 UI Pages (Materialize CSS)
 ├── products.html
@@ -120,7 +121,7 @@ Code.gs (API Gateway)
 ├── doGet(e) → Returns SPA shell (index.html)
 ├── include(filename) → Server-side includes for HTML
 ├── setupSheets() → One-time initialization
-└── API Wrappers (22 functions)
+└── API Wrappers (23 functions)
     ├── Auth: apiGetAuthInfo()
     ├── Products: apiGetProducts, apiCreateProduct, apiUpdateProduct,
     │            apiDeleteProduct, apiSearchProducts
@@ -129,7 +130,8 @@ Code.gs (API Gateway)
     │              apiUpdateCategory, apiDeleteCategory
     ├── Inventory: apiGetInventory, apiUpdateQuantity, apiRestock,
     │             apiSetMinStock, apiGetLowStock
-    ├── Images: apiUploadProductImage, apiDeleteProductImage
+    ├── Images: apiUploadProductImage, apiDeleteProductImage,
+    │           apiCleanupOrphanImages (admin-only)
     └── Reports: apiGetDashboardStats, apiGetLowStockReport,
                apiGetPriceHistoryReport, apiGetInventorySummaryReport
 
@@ -177,9 +179,11 @@ Service Layer (IIFE Modules)
 │   ├── getLowStockReport() → All low stock items with details
 │   ├── getPriceHistoryReport(productId, start, end) → Timeline
 │   └── getInventorySummaryReport() → Inventory value by category
-└── ImageService.gs (60 LOC) - Product Images
+└── ImageService.gs (91 LOC) - Product Images
     ├── uploadImage(base64Data, fileName, mimeType) → Google Drive storage
-    └── deleteImage(imageUrl) → Move to trash
+    │   └── Returns thumbnail URL: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
+    ├── deleteImage(imageUrl) → Move to trash
+    └── cleanupOrphanImages() → Trash unreferenced Drive files (admin-triggered, user-scoped)
 
 Utility Layer
 ├── SheetHelper.gs (159 LOC) - Generic CRUD

@@ -42,7 +42,7 @@ src/
 - `doGet()`: SPA entry point, returns index.html
 - `include(filename)`: Server-side include helper for HtmlService
 - `setupSheets()`: One-time setup, creates 6 sheets + headers + admin user
-- 20 `api*` wrapper functions: Exposed to frontend via google.script.run
+- 21 `api*` wrapper functions: Exposed to frontend via google.script.run
 
 **Key Pattern:**
 
@@ -137,20 +137,25 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - `getPriceHistoryReport(productId, start, end)` - Price changes timeline
 - `getInventorySummaryReport()` - Inventory value by category
 
-#### ImageService.gs (60 LOC)
+#### ImageService.gs (91 LOC)
 
 **Methods:**
 
 - `uploadImage(base64Data, fileName, mimeType)` - Upload compressed image to Google Drive
   - Validates file size (max 2MB per DRIVE.MAX_FILE_SIZE)
-  - Returns Google Drive URL: `https://drive.google.com/uc?id={fileId}&export=view`
+  - Returns Google Drive thumbnail URL: `https://drive.google.com/thumbnail?id={fileId}&sz=w800`
   - Folder: DRIVE.FOLDER_NAME (auto-created if missing)
   - File is publicly viewable (ANYONE_WITH_LINK access)
 - `deleteImage(imageUrl)` - Move old image to trash
   - Safely handles non-Drive URLs (no-op)
-  - Extracts fileId from Drive URL formats
+  - Extracts fileId from both `uc?id=` and `/d/` URL formats
+- `cleanupOrphanImages()` - Admin-triggered orphan cleanup
+  - Scans current user's Drive folder (DRIVE.FOLDER_NAME)
+  - Compares file IDs against active `image_url` values in Products sheet
+  - Trashes unreferenced files; returns `{ deleted, total }`
+  - Scoped to current user's Drive due to USER_ACCESSING execution mode
 
-**Dependencies:** Config.gs (DRIVE constants)
+**Dependencies:** Config.gs (DRIVE constants), SheetHelper.gs
 
 ### Layer 3: Utilities
 
@@ -265,6 +270,7 @@ app.router.on("inventory", showInventoryPage);
 - `validateForm(formSelector)` - Client-side validation
 - `sortTable(tableData, column, direction)` - Client-side table sorting (ASC/DESC/none)
 - `paginate(data, page, perPage)` - Client-side pagination (25 items/page)
+- `toSlug(str)` - Convert Vietnamese product name to URL-safe filename slug (e.g. "Nước mắm Nam Ngư" → `nuoc-mam-nam-ngu`)
 
 ### Pages (UI Components)
 
@@ -408,18 +414,18 @@ dashboard.html: update stats cards + warning list
 
 ### Products Sheet
 
-| Column      | Type    | Notes                                                  |
-| ----------- | ------- | ------------------------------------------------------ |
-| id          | string  | P{uuid}, auto-generated                                |
-| name        | string  | Unique (case-insensitive, active only)                 |
-| category_id | string  | FK to Categories.id, optional                          |
-| unit        | string  | 'kg', 'liter', 'piece', etc.                           |
-| barcode     | string  | Optional, may be empty                                 |
-| description | string  | Optional notes                                         |
-| image_url   | string  | Google Drive URL format (`https://drive.google.com/...`) |
-| status      | string  | 'active' or 'inactive' (soft delete)                   |
-| created_at  | ISO8601 | Immutable                                              |
-| updated_at  | ISO8601 | Updated on any change                                  |
+| Column      | Type    | Notes                                                                                |
+| ----------- | ------- | ------------------------------------------------------------------------------------ |
+| id          | string  | P{uuid}, auto-generated                                                              |
+| name        | string  | Unique (case-insensitive, active only)                                               |
+| category_id | string  | FK to Categories.id, optional                                                        |
+| unit        | string  | 'kg', 'liter', 'piece', etc.                                                         |
+| barcode     | string  | Optional, may be empty                                                               |
+| description | string  | Optional notes                                                                       |
+| image_url   | string  | Google Drive thumbnail URL (`https://drive.google.com/thumbnail?id=FILE_ID&sz=w800`) |
+| status      | string  | 'active' or 'inactive' (soft delete)                                                 |
+| created_at  | ISO8601 | Immutable                                                                            |
+| updated_at  | ISO8601 | Updated on any change                                                                |
 
 ### Prices Sheet
 
