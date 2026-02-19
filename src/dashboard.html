@@ -72,10 +72,14 @@ var Dashboard = {
         tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Chưa có thay đổi giá nào</td></tr>';
       } else {
         tbody.innerHTML = stats.recentChanges.map(function(c) {
+          var buyChanged = Number(c.old_buy) !== Number(c.new_buy);
+          var sellChanged = Number(c.old_sell) !== Number(c.new_sell);
+          var newBuyHtml = buyChanged ? '<strong>' + formatCurrency(c.new_buy) + '</strong>' : formatCurrency(c.new_buy);
+          var newSellHtml = sellChanged ? '<strong>' + formatCurrency(c.new_sell) + '</strong>' : formatCurrency(c.new_sell);
           return '<tr>' +
             '<td>' + escapeHtml(c.product_name || c.product_id) + '</td>' +
-            '<td>' + formatCurrency(c.old_buy) + ' &rarr; ' + formatCurrency(c.new_buy) + '</td>' +
-            '<td>' + formatCurrency(c.old_sell) + ' &rarr; ' + formatCurrency(c.new_sell) + '</td>' +
+            '<td>' + formatCurrency(c.old_buy) + ' &rarr; ' + newBuyHtml + '</td>' +
+            '<td>' + formatCurrency(c.old_sell) + ' &rarr; ' + newSellHtml + '</td>' +
             '<td class="hide-on-small">' + formatDate(c.changed_at) + '</td>' +
           '</tr>';
         }).join('');

@@ -124,10 +124,14 @@ var Reports = {
         return;
       }
       tbody.innerHTML = data.map(function(r) {
+        var buyChanged = Number(r.old_buy) !== Number(r.new_buy);
+        var sellChanged = Number(r.old_sell) !== Number(r.new_sell);
+        var newBuyHtml = buyChanged ? '<strong>' + formatCurrency(r.new_buy) + '</strong>' : formatCurrency(r.new_buy);
+        var newSellHtml = sellChanged ? '<strong>' + formatCurrency(r.new_sell) + '</strong>' : formatCurrency(r.new_sell);
         return '<tr>' +
           '<td>' + escapeHtml(r.product_name) + '</td>' +
-          '<td>' + formatCurrency(r.old_buy) + ' &rarr; ' + formatCurrency(r.new_buy) + '</td>' +
-          '<td>' + formatCurrency(r.old_sell) + ' &rarr; ' + formatCurrency(r.new_sell) + '</td>' +
+          '<td>' + formatCurrency(r.old_buy) + ' &rarr; ' + newBuyHtml + '</td>' +
+          '<td>' + formatCurrency(r.old_sell) + ' &rarr; ' + newSellHtml + '</td>' +
           '<td>' + formatDate(r.changed_at) + '</td>' +
           '<td class="hide-on-small">' + escapeHtml(r.changed_by) + '</td>' +
         '</tr>';

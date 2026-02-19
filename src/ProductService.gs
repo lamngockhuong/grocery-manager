@@ -85,6 +85,21 @@ var ProductService = (function() {
     if (data.description !== undefined) updateData.description = data.description.trim();
 
     var result = SheetHelper.update(SHEETS.PRODUCTS, id, updateData);
+
+    // Update prices if provided
+    if (data.buy_price !== undefined || data.sell_price !== undefined) {
+      var currentPrice = PriceService.getPrice(id);
+      var newBuy = data.buy_price !== undefined ? Number(data.buy_price) : (currentPrice ? Number(currentPrice.buy_price) : 0);
+      var newSell = data.sell_price !== undefined ? Number(data.sell_price) : (currentPrice ? Number(currentPrice.sell_price) : 0);
+      if (newBuy < 0) throw new Error('Giá nhập phải >= 0');
+      if (newSell < 0) throw new Error('Giá bán phải >= 0');
+      if (currentPrice) {
+        PriceService.updatePrice(id, newBuy, newSell);
+      } else {
+        PriceService.createPrice(id, newBuy, newSell);
+      }
+    }
+
     CacheHelper.remove(CACHE_KEY);
     CacheHelper.remove(CACHE_KEY_WITH_PRICES);
     return result;
