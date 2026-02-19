@@ -1,0 +1,170 @@
+<div class="container">
+  <h5>Bao Cao</h5>
+
+  <!-- Tab navigation -->
+  <div class="row">
+    <div class="col s12">
+      <ul class="tabs" id="report-tabs">
+        <li class="tab col s4"><a href="#report-low-stock" class="active">Sap het hang</a></li>
+        <li class="tab col s4"><a href="#report-price-history">Lich su gia</a></li>
+        <li class="tab col s4"><a href="#report-inventory-summary">Tong hop ton kho</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Tab 1: Low Stock -->
+  <div id="report-low-stock">
+    <div class="table-wrapper">
+      <table class="striped">
+        <thead>
+          <tr><th>San pham</th><th>Danh muc</th><th>Ton kho</th><th>Toi thieu</th><th>Thieu</th></tr>
+        </thead>
+        <tbody id="report-low-stock-tbody">
+          <tr><td colspan="5" class="center grey-text">Dang tai...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 2: Price History -->
+  <div id="report-price-history">
+    <div class="row" style="margin-top:10px">
+      <div class="col s12 m4">
+        <div class="input-field">
+          <select id="ph-product-filter"><option value="">Tat ca san pham</option></select>
+          <label>San pham</label>
+        </div>
+      </div>
+      <div class="col s6 m3">
+        <div class="input-field">
+          <input type="date" id="ph-start-date">
+          <label for="ph-start-date">Tu ngay</label>
+        </div>
+      </div>
+      <div class="col s6 m3">
+        <div class="input-field">
+          <input type="date" id="ph-end-date">
+          <label for="ph-end-date">Den ngay</label>
+        </div>
+      </div>
+      <div class="col s12 m2" style="padding-top:20px">
+        <button class="btn blue waves-effect" onclick="Reports.loadPriceHistory()">
+          <i class="material-icons left">search</i>Xem
+        </button>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table class="striped">
+        <thead>
+          <tr><th>San pham</th><th>Gia nhap cu&rarr;moi</th><th>Gia ban cu&rarr;moi</th><th>Ngay</th><th class="hide-on-small">Nguoi sua</th></tr>
+        </thead>
+        <tbody id="report-ph-tbody">
+          <tr><td colspan="5" class="center grey-text">Chon bo loc va nhan Xem</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Inventory Summary -->
+  <div id="report-inventory-summary">
+    <div class="table-wrapper">
+      <table class="striped">
+        <thead>
+          <tr><th>Danh muc</th><th>So mat hang</th><th>Tong ton kho</th><th>Tong gia tri</th></tr>
+        </thead>
+        <tbody id="report-inv-summary-tbody">
+          <tr><td colspan="4" class="center grey-text">Dang tai...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+var Reports = {
+  render: function() {
+    var tabsEl = document.getElementById('report-tabs');
+    if (tabsEl) M.Tabs.init(tabsEl);
+    this.loadLowStock();
+    this.loadInventorySummary();
+    this.populateProductFilter();
+  },
+
+  loadLowStock: function() {
+    api.call('apiGetLowStockReport').then(function(data) {
+      var tbody = document.getElementById('report-low-stock-tbody');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Khong co san pham sap het</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(function(r) {
+        return '<tr class="red lighten-5">' +
+          '<td>' + escapeHtml(r.product_name) + '</td>' +
+          '<td>' + escapeHtml(r.category) + '</td>' +
+          '<td>' + r.quantity + '</td>' +
+          '<td>' + r.min_stock + '</td>' +
+          '<td><strong>' + r.deficit + '</strong></td>' +
+        '</tr>';
+      }).join('');
+    }).catch(function(e) {
+      showToast('Loi tai bao cao: ' + e.message, 'red');
+    });
+  },
+
+  loadPriceHistory: function() {
+    var productId = document.getElementById('ph-product-filter').value;
+    var start = document.getElementById('ph-start-date').value;
+    var end = document.getElementById('ph-end-date').value;
+
+    showLoading('report-ph-tbody');
+    api.call('apiGetPriceHistoryReport', productId, start, end).then(function(data) {
+      var tbody = document.getElementById('report-ph-tbody');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Khong co du lieu</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(function(r) {
+        return '<tr>' +
+          '<td>' + escapeHtml(r.product_name) + '</td>' +
+          '<td>' + formatCurrency(r.old_buy) + ' &rarr; ' + formatCurrency(r.new_buy) + '</td>' +
+          '<td>' + formatCurrency(r.old_sell) + ' &rarr; ' + formatCurrency(r.new_sell) + '</td>' +
+          '<td>' + formatDate(r.changed_at) + '</td>' +
+          '<td class="hide-on-small">' + escapeHtml(r.changed_by) + '</td>' +
+        '</tr>';
+      }).join('');
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  },
+
+  loadInventorySummary: function() {
+    api.call('apiGetInventorySummaryReport').then(function(data) {
+      var tbody = document.getElementById('report-inv-summary-tbody');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Khong co du lieu</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(function(r) {
+        return '<tr>' +
+          '<td>' + escapeHtml(r.category_name) + '</td>' +
+          '<td>' + r.product_count + '</td>' +
+          '<td>' + r.total_quantity + '</td>' +
+          '<td>' + formatCurrency(r.total_value) + '</td>' +
+        '</tr>';
+      }).join('');
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  },
+
+  populateProductFilter: function() {
+    var select = document.getElementById('ph-product-filter');
+    if (!select) return;
+    select.innerHTML = '<option value="">Tat ca san pham</option>';
+    state.products.forEach(function(p) {
+      select.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>';
+    });
+    M.FormSelect.init(select);
+  }
+};
+</script>

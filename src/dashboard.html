@@ -1,0 +1,91 @@
+<div class="container">
+  <h5>Dashboard</h5>
+
+  <!-- Stats cards -->
+  <div class="row">
+    <div class="col s6 m4">
+      <div class="card-panel blue white-text center-align stat-card">
+        <h4 id="stat-total-products">-</h4>
+        <p>San pham</p>
+      </div>
+    </div>
+    <div class="col s6 m4">
+      <div class="card-panel green white-text center-align stat-card">
+        <h4 id="stat-total-value">-</h4>
+        <p>Gia tri ton kho</p>
+      </div>
+    </div>
+    <div class="col s6 m4">
+      <div class="card-panel orange white-text center-align stat-card">
+        <h4 id="stat-low-stock">-</h4>
+        <p>Sap het hang</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Low stock warning -->
+  <div class="card" id="low-stock-card" style="display:none">
+    <div class="card-content">
+      <span class="card-title red-text"><i class="material-icons">warning</i> Canh bao sap het hang</span>
+      <ul id="low-stock-list" class="collection"></ul>
+    </div>
+  </div>
+
+  <!-- Recent price changes -->
+  <div class="card">
+    <div class="card-content">
+      <span class="card-title">Thay doi gia gan day</span>
+      <div class="table-wrapper">
+        <table class="striped">
+          <thead>
+            <tr><th>San pham</th><th>Gia nhap</th><th>Gia ban</th><th class="hide-on-small">Thoi gian</th></tr>
+          </thead>
+          <tbody id="recent-changes-tbody">
+            <tr><td colspan="4" class="center grey-text">Dang tai...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var Dashboard = {
+  render: function() {
+    api.call('apiGetDashboardStats').then(function(stats) {
+      document.getElementById('stat-total-products').textContent = stats.totalProducts || 0;
+      document.getElementById('stat-total-value').textContent = formatCurrency(stats.totalValue);
+      document.getElementById('stat-low-stock').textContent = stats.lowStockCount || 0;
+
+      // Low stock warnings
+      if (stats.lowStockCount > 0) {
+        document.getElementById('low-stock-card').style.display = 'block';
+        document.getElementById('low-stock-list').innerHTML = stats.lowStockProducts
+          .map(function(p) {
+            return '<li class="collection-item"><span class="red-text">' +
+              escapeHtml(p.product_name) + '</span>: con ' + p.quantity + '/' + p.min_stock + '</li>';
+          }).join('');
+      } else {
+        document.getElementById('low-stock-card').style.display = 'none';
+      }
+
+      // Recent changes
+      var tbody = document.getElementById('recent-changes-tbody');
+      if (!stats.recentChanges || stats.recentChanges.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Chua co thay doi gia nao</td></tr>';
+      } else {
+        tbody.innerHTML = stats.recentChanges.map(function(c) {
+          return '<tr>' +
+            '<td>' + escapeHtml(c.product_name || c.product_id) + '</td>' +
+            '<td>' + formatCurrency(c.old_buy) + ' &rarr; ' + formatCurrency(c.new_buy) + '</td>' +
+            '<td>' + formatCurrency(c.old_sell) + ' &rarr; ' + formatCurrency(c.new_sell) + '</td>' +
+            '<td class="hide-on-small">' + formatDate(c.changed_at) + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+    }).catch(function(e) {
+      showToast('Loi tai dashboard: ' + e.message, 'red');
+    });
+  }
+};
+</script>

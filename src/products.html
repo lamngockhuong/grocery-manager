@@ -1,0 +1,277 @@
+<div class="container">
+  <h5>Quan Ly San Pham</h5>
+
+  <!-- Search + Filter bar -->
+  <div class="row search-wrapper">
+    <div class="col s12 m5">
+      <div class="input-field">
+        <i class="material-icons prefix">search</i>
+        <input id="product-search" type="text" placeholder="Tim san pham...">
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="input-field">
+        <select id="category-filter" onchange="Products.render()">
+          <option value="">Tat ca danh muc</option>
+        </select>
+        <label>Danh muc</label>
+      </div>
+    </div>
+    <div class="col s12 m3 admin-only" style="padding-top:20px">
+      <button class="btn blue waves-effect" onclick="Products.showAddModal()">
+        <i class="material-icons left">add</i>Them
+      </button>
+    </div>
+  </div>
+
+  <!-- Products table -->
+  <div class="table-wrapper">
+    <table class="striped responsive-table">
+      <thead>
+        <tr>
+          <th>Ten san pham</th>
+          <th>Danh muc</th>
+          <th>Don vi</th>
+          <th>Gia nhap</th>
+          <th>Gia ban</th>
+          <th class="admin-only">Thao tac</th>
+        </tr>
+      </thead>
+      <tbody id="products-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Add/Edit Product Modal -->
+  <div id="product-modal" class="modal">
+    <div class="modal-content">
+      <h5 id="product-modal-title">Them san pham</h5>
+      <form id="product-form" onsubmit="return false;">
+        <input type="hidden" id="product-id">
+        <div class="input-field">
+          <input id="product-name" type="text" required>
+          <label for="product-name">Ten san pham</label>
+        </div>
+        <div class="input-field">
+          <select id="product-category"></select>
+          <label>Danh muc</label>
+        </div>
+        <div class="input-field">
+          <input id="product-unit" type="text" required>
+          <label for="product-unit">Don vi (kg, chai, goi...)</label>
+        </div>
+        <div class="input-field">
+          <input id="product-barcode" type="text">
+          <label for="product-barcode">Ma vach</label>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input id="product-buy-price" type="number" min="0" step="100">
+            <label for="product-buy-price">Gia nhap</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="product-sell-price" type="number" min="0" step="100">
+            <label for="product-sell-price">Gia ban</label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close btn-flat">Huy</a>
+      <button class="btn blue waves-effect" onclick="Products.save()">Luu</button>
+    </div>
+  </div>
+
+  <!-- Price Edit Modal -->
+  <div id="price-modal" class="modal">
+    <div class="modal-content">
+      <h5>Cap nhat gia</h5>
+      <input type="hidden" id="price-product-id">
+      <p id="price-product-name" class="flow-text"></p>
+      <div class="row">
+        <div class="input-field col s6">
+          <input id="price-buy" type="number" min="0" step="100">
+          <label for="price-buy">Gia nhap</label>
+        </div>
+        <div class="input-field col s6">
+          <input id="price-sell" type="number" min="0" step="100">
+          <label for="price-sell">Gia ban</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close btn-flat">Huy</a>
+      <button class="btn blue waves-effect" onclick="Products.savePrice()">Luu gia</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var Products = {
+  render: function() {
+    var tbody = document.getElementById('products-tbody');
+    var products = this.getFilteredProducts();
+    this.populateCategoryFilter();
+
+    if (products.length === 0) {
+      showEmptyState('products-tbody', 'Chua co san pham nao');
+      return;
+    }
+
+    tbody.innerHTML = products.map(function(p) {
+      return '<tr>' +
+        '<td>' + escapeHtml(p.name) + '</td>' +
+        '<td>' + escapeHtml(getCategoryName(p.category_id)) + '</td>' +
+        '<td>' + escapeHtml(p.unit) + '</td>' +
+        '<td class="price-cell" onclick="Products.editPrice(\'' + p.id + '\')">' + formatCurrency(p.buy_price) + '</td>' +
+        '<td class="price-cell" onclick="Products.editPrice(\'' + p.id + '\')">' + formatCurrency(p.sell_price) + '</td>' +
+        '<td class="admin-only">' +
+          '<a onclick="Products.edit(\'' + p.id + '\')" class="btn-small blue waves-effect"><i class="material-icons">edit</i></a> ' +
+          '<a onclick="Products.remove(\'' + p.id + '\')" class="btn-small red waves-effect"><i class="material-icons">delete</i></a>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+    updateAdminUI();
+  },
+
+  getFilteredProducts: function() {
+    var products = state.products.filter(function(p) { return p.status === 'active'; });
+    var keyword = (document.getElementById('product-search') || {}).value;
+    var catId = (document.getElementById('category-filter') || {}).value;
+    if (keyword) {
+      var kw = keyword.toLowerCase();
+      products = products.filter(function(p) { return p.name.toLowerCase().indexOf(kw) !== -1; });
+    }
+    if (catId) {
+      products = products.filter(function(p) { return p.category_id === catId; });
+    }
+    return products;
+  },
+
+  populateCategoryFilter: function() {
+    var selects = [document.getElementById('category-filter'), document.getElementById('product-category')];
+    var flat = flattenCategories(state.categories);
+    selects.forEach(function(select) {
+      if (!select) return;
+      var current = select.value;
+      var isFilter = select.id === 'category-filter';
+      select.innerHTML = isFilter ? '<option value="">Tat ca danh muc</option>' : '<option value="">Chon danh muc</option>';
+      flat.forEach(function(cat) {
+        var prefix = cat.parent_id ? '  -- ' : '';
+        select.innerHTML += '<option value="' + cat.id + '"' + (current === cat.id ? ' selected' : '') + '>' + prefix + escapeHtml(cat.name) + '</option>';
+      });
+      M.FormSelect.init(select);
+    });
+  },
+
+  showAddModal: function() {
+    document.getElementById('product-id').value = '';
+    document.getElementById('product-form').reset();
+    document.getElementById('product-modal-title').textContent = 'Them san pham';
+    this.populateCategoryFilter();
+    M.updateTextFields();
+    M.Modal.getInstance(document.getElementById('product-modal')).open();
+  },
+
+  edit: function(id) {
+    var p = state.products.find(function(pr) { return pr.id === id; });
+    if (!p) return;
+    document.getElementById('product-id').value = p.id;
+    document.getElementById('product-name').value = p.name;
+    document.getElementById('product-unit').value = p.unit;
+    document.getElementById('product-barcode').value = p.barcode || '';
+    document.getElementById('product-buy-price').value = p.buy_price || 0;
+    document.getElementById('product-sell-price').value = p.sell_price || 0;
+    document.getElementById('product-modal-title').textContent = 'Sua san pham';
+    this.populateCategoryFilter();
+    document.getElementById('product-category').value = p.category_id || '';
+    M.FormSelect.init(document.getElementById('product-category'));
+    M.updateTextFields();
+    M.Modal.getInstance(document.getElementById('product-modal')).open();
+  },
+
+  save: function() {
+    var rules = [
+      { field: 'product-name', check: function(v) { return v.trim().length > 0; } },
+      { field: 'product-unit', check: function(v) { return v.trim().length > 0; } },
+      { field: 'product-buy-price', check: function(v) { return !isNaN(v) && Number(v) >= 0; } },
+      { field: 'product-sell-price', check: function(v) { return !isNaN(v) && Number(v) >= 0; } }
+    ];
+    if (!validateForm(rules)) { showToast('Vui long kiem tra lai thong tin', 'orange'); return; }
+
+    var id = document.getElementById('product-id').value;
+    var data = {
+      name: document.getElementById('product-name').value,
+      category_id: document.getElementById('product-category').value,
+      unit: document.getElementById('product-unit').value,
+      barcode: document.getElementById('product-barcode').value,
+      buy_price: Number(document.getElementById('product-buy-price').value) || 0,
+      sell_price: Number(document.getElementById('product-sell-price').value) || 0
+    };
+
+    var promise = id ? api.call('apiUpdateProduct', id, data) : api.call('apiCreateProduct', data);
+    promise.then(function() {
+      M.Modal.getInstance(document.getElementById('product-modal')).close();
+      showToast(id ? 'Da cap nhat san pham' : 'Da them san pham', 'green');
+      return api.call('apiGetProducts');
+    }).then(function(products) {
+      state.products = products;
+      Products.render();
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  },
+
+  remove: function(id) {
+    if (!confirm('Ban co chac muon xoa san pham nay?')) return;
+    api.call('apiDeleteProduct', id).then(function() {
+      showToast('Da xoa san pham', 'green');
+      return api.call('apiGetProducts');
+    }).then(function(products) {
+      state.products = products;
+      Products.render();
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  },
+
+  editPrice: function(id) {
+    if (!state.isAdmin) return;
+    var p = state.products.find(function(pr) { return pr.id === id; });
+    if (!p) return;
+    document.getElementById('price-product-id').value = p.id;
+    document.getElementById('price-product-name').textContent = p.name;
+    document.getElementById('price-buy').value = p.buy_price || 0;
+    document.getElementById('price-sell').value = p.sell_price || 0;
+    M.updateTextFields();
+    M.Modal.getInstance(document.getElementById('price-modal')).open();
+  },
+
+  savePrice: function() {
+    var productId = document.getElementById('price-product-id').value;
+    var buyPrice = Number(document.getElementById('price-buy').value) || 0;
+    var sellPrice = Number(document.getElementById('price-sell').value) || 0;
+    if (buyPrice < 0 || sellPrice < 0) { showToast('Gia phai >= 0', 'orange'); return; }
+
+    api.call('apiUpdatePrice', productId, buyPrice, sellPrice).then(function() {
+      M.Modal.getInstance(document.getElementById('price-modal')).close();
+      showToast('Da cap nhat gia', 'green');
+      return api.call('apiGetProducts');
+    }).then(function(products) {
+      state.products = products;
+      Products.render();
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  }
+};
+
+// Search event
+var searchInput = document.getElementById('product-search');
+if (searchInput) {
+  var searchTimeout;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { Products.render(); }, 300);
+  });
+}
+</script>

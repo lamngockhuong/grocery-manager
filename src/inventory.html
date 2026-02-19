@@ -1,0 +1,180 @@
+<div class="container">
+  <h5>Quan Ly Ton Kho</h5>
+
+  <!-- Summary cards -->
+  <div class="row">
+    <div class="col s6 m3">
+      <div class="card-panel center-align stat-card">
+        <h4 id="inv-total">0</h4>
+        <p>Tong mat hang</p>
+      </div>
+    </div>
+    <div class="col s6 m3">
+      <div class="card-panel red lighten-4 center-align stat-card">
+        <h4 id="inv-low">0</h4>
+        <p>Sap het hang</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <label>
+    <input type="checkbox" id="low-stock-filter" onchange="Inventory.render()">
+    <span>Chi hien sap het hang</span>
+  </label>
+
+  <!-- Inventory table -->
+  <div class="table-wrapper">
+    <table class="striped responsive-table">
+      <thead>
+        <tr>
+          <th>San pham</th>
+          <th>Ton kho</th>
+          <th>Toi thieu</th>
+          <th>Nhap hang cuoi</th>
+          <th class="admin-only">Thao tac</th>
+        </tr>
+      </thead>
+      <tbody id="inventory-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Restock Modal -->
+  <div id="restock-modal" class="modal">
+    <div class="modal-content">
+      <h5>Nhap them hang</h5>
+      <input type="hidden" id="restock-product-id">
+      <p id="restock-product-name" class="flow-text"></p>
+      <div class="input-field">
+        <input id="restock-quantity" type="number" min="1">
+        <label for="restock-quantity">So luong nhap them</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close btn-flat">Huy</a>
+      <button class="btn blue waves-effect" onclick="Inventory.doRestock()">Nhap hang</button>
+    </div>
+  </div>
+
+  <!-- Min Stock Modal -->
+  <div id="minstock-modal" class="modal">
+    <div class="modal-content">
+      <h5>Dat muc toi thieu</h5>
+      <input type="hidden" id="minstock-product-id">
+      <p id="minstock-product-name" class="flow-text"></p>
+      <div class="input-field">
+        <input id="minstock-value" type="number" min="0">
+        <label for="minstock-value">Muc ton kho toi thieu</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close btn-flat">Huy</a>
+      <button class="btn blue waves-effect" onclick="Inventory.saveMinStock()">Luu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var Inventory = {
+  loaded: false,
+
+  init: function() {
+    var self = this;
+    if (!this.loaded) {
+      showLoading('inventory-tbody');
+      api.call('apiGetInventory').then(function(data) {
+        state.inventory = data || [];
+        self.loaded = true;
+        self.render();
+      }).catch(function(e) {
+        showToast('Loi tai ton kho: ' + e.message, 'red');
+      });
+    } else {
+      this.render();
+    }
+  },
+
+  render: function() {
+    var items = state.inventory;
+    var lowFilter = document.getElementById('low-stock-filter');
+    if (lowFilter && lowFilter.checked) {
+      items = items.filter(function(i) { return i.quantity < i.min_stock; });
+    }
+
+    document.getElementById('inv-total').textContent = state.inventory.length;
+    document.getElementById('inv-low').textContent =
+      state.inventory.filter(function(i) { return i.quantity < i.min_stock; }).length;
+
+    if (items.length === 0) {
+      showEmptyState('inventory-tbody', 'Khong co du lieu ton kho');
+      return;
+    }
+
+    var tbody = document.getElementById('inventory-tbody');
+    tbody.innerHTML = items.map(function(i) {
+      var isLow = i.quantity < i.min_stock;
+      return '<tr class="' + (isLow ? 'red lighten-5' : '') + '">' +
+        '<td>' + escapeHtml(i.product_name) + '</td>' +
+        '<td>' + i.quantity + (isLow ? ' <i class="material-icons tiny red-text">warning</i>' : '') + '</td>' +
+        '<td>' + i.min_stock + '</td>' +
+        '<td>' + formatDate(i.last_restock) + '</td>' +
+        '<td class="admin-only">' +
+          '<a onclick="Inventory.showRestock(\'' + i.product_id + '\')" class="btn-small blue waves-effect">Nhap hang</a> ' +
+          '<a onclick="Inventory.showMinStock(\'' + i.product_id + '\')" class="btn-small grey waves-effect">Dat min</a>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+    updateAdminUI();
+  },
+
+  showRestock: function(productId) {
+    var item = state.inventory.find(function(i) { return i.product_id === productId; });
+    if (!item) return;
+    document.getElementById('restock-product-id').value = productId;
+    document.getElementById('restock-product-name').textContent = item.product_name;
+    document.getElementById('restock-quantity').value = '';
+    M.updateTextFields();
+    M.Modal.getInstance(document.getElementById('restock-modal')).open();
+  },
+
+  doRestock: function() {
+    var productId = document.getElementById('restock-product-id').value;
+    var qty = Number(document.getElementById('restock-quantity').value);
+    if (!qty || qty <= 0) { showToast('So luong phai > 0', 'orange'); return; }
+
+    api.call('apiRestock', productId, qty).then(function() {
+      M.Modal.getInstance(document.getElementById('restock-modal')).close();
+      showToast('Da nhap hang thanh cong', 'green');
+      Inventory.loaded = false;
+      Inventory.init();
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  },
+
+  showMinStock: function(productId) {
+    var item = state.inventory.find(function(i) { return i.product_id === productId; });
+    if (!item) return;
+    document.getElementById('minstock-product-id').value = productId;
+    document.getElementById('minstock-product-name').textContent = item.product_name;
+    document.getElementById('minstock-value').value = item.min_stock;
+    M.updateTextFields();
+    M.Modal.getInstance(document.getElementById('minstock-modal')).open();
+  },
+
+  saveMinStock: function() {
+    var productId = document.getElementById('minstock-product-id').value;
+    var min = Number(document.getElementById('minstock-value').value);
+    if (isNaN(min) || min < 0) { showToast('Muc toi thieu phai >= 0', 'orange'); return; }
+
+    api.call('apiSetMinStock', productId, min).then(function() {
+      M.Modal.getInstance(document.getElementById('minstock-modal')).close();
+      showToast('Da luu muc toi thieu', 'green');
+      Inventory.loaded = false;
+      Inventory.init();
+    }).catch(function(e) {
+      showToast('Loi: ' + e.message, 'red');
+    });
+  }
+};
+</script>

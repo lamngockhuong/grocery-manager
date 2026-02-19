@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <?!= include('styles.css') ?>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="blue darken-2">
+    <div class="nav-wrapper container">
+      <a href="#dashboard" class="brand-logo">Quan Ly Gia</a>
+      <a href="#" data-target="sidenav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="#dashboard"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+        <li><a href="#products"><i class="material-icons left">store</i>San pham</a></li>
+        <li><a href="#categories"><i class="material-icons left">category</i>Danh muc</a></li>
+        <li><a href="#inventory"><i class="material-icons left">inventory</i>Ton kho</a></li>
+        <li><a href="#reports"><i class="material-icons left">assessment</i>Bao cao</a></li>
+      </ul>
+      <span id="user-info" class="right hide-on-med-and-down"></span>
+    </div>
+  </nav>
+
+  <!-- Sidenav (mobile) -->
+  <ul id="sidenav" class="sidenav">
+    <li><div class="user-view"><span id="sidenav-user" class="white-text name"></span></div></li>
+    <li><a href="#dashboard"><i class="material-icons">dashboard</i>Dashboard</a></li>
+    <li><a href="#products"><i class="material-icons">store</i>San pham</a></li>
+    <li><a href="#categories"><i class="material-icons">category</i>Danh muc</a></li>
+    <li><a href="#inventory"><i class="material-icons">inventory</i>Ton kho</a></li>
+    <li><a href="#reports"><i class="material-icons">assessment</i>Bao cao</a></li>
+  </ul>
+
+  <!-- Loading placeholder -->
+  <div id="main-content"></div>
+
+  <!-- Page sections -->
+  <div id="page-dashboard" class="page-section">
+    <?!= include('dashboard') ?>
+  </div>
+  <div id="page-products" class="page-section">
+    <?!= include('products') ?>
+  </div>
+  <div id="page-categories" class="page-section">
+    <?!= include('categories') ?>
+  </div>
+  <div id="page-inventory" class="page-section">
+    <?!= include('inventory') ?>
+  </div>
+  <div id="page-reports" class="page-section">
+    <?!= include('reports') ?>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <?!= include('app.js') ?>
+</body>
+</html>
