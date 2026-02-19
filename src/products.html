@@ -132,6 +132,19 @@
     </div>
   </div>
 
+  <!-- Product Detail Modal -->
+  <div id="product-detail-modal" class="modal">
+    <div class="modal-content">
+      <h5 id="detail-product-name"></h5>
+      <table class="striped">
+        <tbody id="detail-product-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close btn-flat">Đóng</a>
+    </div>
+  </div>
+
   <!-- Price Edit Modal -->
   <div id="price-modal" class="modal">
     <div class="modal-content">
@@ -344,9 +357,11 @@
         .map(function (p) {
           return (
             "<tr>" +
-            "<td>" +
+            '<td><a class="product-name-link" onclick="Products.showDetail(\'' +
+            p.id +
+            "')\">" +
             escapeHtml(p.name) +
-            "</td>" +
+            "</a></td>" +
             '<td class="hide-on-small">' +
             escapeHtml(getCategoryName(p.category_id)) +
             "</td>" +
@@ -573,6 +588,30 @@
         .catch(function (e) {
           showToast("Lỗi: " + e.message, "red");
         });
+    },
+
+    showDetail: function (id) {
+      var p = state.products.find(function (pr) {
+        return pr.id === id;
+      });
+      if (!p) return;
+      document.getElementById("detail-product-name").textContent = p.name;
+      var rows = [
+        ["Danh mục", escapeHtml(getCategoryName(p.category_id)) || "—"],
+        ["Đơn vị", escapeHtml(p.unit)],
+        ["Mã vạch", escapeHtml(p.barcode || "") || "—"],
+        ["Giá nhập", formatCurrency(p.buy_price)],
+        ["Giá bán", formatCurrency(p.sell_price)],
+        ["Mô tả", escapeHtml(p.description || "") || "—"],
+      ];
+      document.getElementById("detail-product-body").innerHTML = rows
+        .map(function (r) {
+          return "<tr><td><strong>" + r[0] + "</strong></td><td>" + r[1] + "</td></tr>";
+        })
+        .join("");
+      M.Modal.getInstance(
+        document.getElementById("product-detail-modal"),
+      ).open();
     },
 
     editPrice: function (id) {

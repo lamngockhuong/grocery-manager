@@ -17,6 +17,13 @@
   .admin-only {
     /* shown/hidden by JS */
   }
+  .product-name-link {
+    color: #1565c0;
+    cursor: pointer;
+  }
+  .product-name-link:hover {
+    text-decoration: underline;
+  }
   .price-cell {
     cursor: pointer;
     border-radius: 4px;
@@ -168,6 +175,14 @@
     font-size: 0.9rem;
     min-width: 90px;
     text-align: center;
+  }
+
+  /* Modal centering — override Materialize inline styles */
+  .modal {
+    max-width: 600px;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
   }
 
   @media (max-width: 600px) {
