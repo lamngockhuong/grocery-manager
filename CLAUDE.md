@@ -39,7 +39,7 @@ Browser SPA (Materialize CSS)
 pnpm install                # install dependencies
 pnpm exec clasp login       # first-time: authenticate with Google
 pnpm push                   # push src/ to GAS
-pnpm deploy                 # push + create new deployment
+pnpm run deploy                 # push + create new deployment
 pnpm open                   # open GAS editor in browser
 pnpm open:webapp            # open deployed web app
 pnpm push:watch             # auto-push on file changes
@@ -63,6 +63,35 @@ InventoryService.gs← depends on SheetHelper, Auth, CacheHelper
 ReportService.gs   ← depends on all Services
 Code.gs            ← depends on all modules (API layer + setup)
 ```
+
+## Deploy & Access Control
+
+**Deployment settings** (`appsscript.json`):
+
+- `executeAs: "USER_ACCESSING"` — runs under visitor's permissions, `getActiveUser()` returns their email
+- `access: "ANYONE"` — any Google account with the link can open it, app-level auth controls actual access
+
+**Grant access to a new user (4 steps):**
+
+1. Add email to **Users sheet** in Google Sheets (columns: email, name, role, createdAt)
+2. **Share the spreadsheet** with that email (Editor) — required because `USER_ACCESSING` needs sheet read/write permissions
+3. Send the **deployment URL** (`/exec`) to the user — get URL: `pnpm exec clasp deployments`
+4. User visits URL → picks account → clicks "Advanced" → "Go to app" → "Allow" (one-time only)
+
+**Roles:** `admin` = full CRUD | `viewer` = read-only
+
+**Deploy commands:**
+
+```bash
+pnpm push && pnpm run deploy   # push code + create new deployment
+pnpm exec clasp deployments    # list deployments + URLs
+```
+
+**Notes:**
+
+- Each `pnpm run deploy` creates a new version URL; old URLs keep their old config
+- Users not in the Users sheet see an "Access denied" page
+- OAuth popup appears once per user, subsequent visits go straight to the app
 
 ## GAS Constraints
 

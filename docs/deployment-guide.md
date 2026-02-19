@@ -56,7 +56,7 @@ In GAS editor: Select `setupSheets()` → Run → Authorize
 ### Step 6: Deploy
 
 ```bash
-pnpm deploy     # push + create timestamped deployment
+pnpm run deploy     # push + create timestamped deployment
 ```
 
 ### Step 7: Access App
@@ -71,7 +71,7 @@ pnpm open:webapp    # open deployed web app in browser
 | ------------------ | -------------------------------- |
 | `pnpm push`        | Push code to GAS                 |
 | `pnpm push:watch`  | Auto-push on file changes        |
-| `pnpm deploy`      | Push + create timestamped deploy |
+| `pnpm run deploy`  | Push + create timestamped deploy |
 | `pnpm open`        | Open GAS editor in browser       |
 | `pnpm open:webapp` | Open deployed web app            |
 | `pnpm logs`        | View execution logs              |
@@ -81,7 +81,7 @@ pnpm open:webapp    # open deployed web app in browser
 
 ```bash
 # Make code changes in src/
-pnpm deploy                                    # new deployment (new URL)
+pnpm run deploy                                    # new deployment (new URL)
 pnpm exec clasp deploy --update {DEPLOY_ID}    # update existing (keep URL)
 ```
 

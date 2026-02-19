@@ -73,20 +73,20 @@ pnpm exec clasp create --title "Grocery Manager" --type standalone --rootDir src
 ### 4. Deploy
 
 ```bash
-pnpm deploy    # push code + create new deployment
+pnpm run deploy    # push code + create new deployment
 ```
 
 ### Available Scripts
 
-| Script | Description |
-|---|---|
-| `pnpm push` | Push code to GAS |
-| `pnpm push:watch` | Auto-push on file changes |
-| `pnpm deploy` | Push + create timestamped deployment |
-| `pnpm open` | Open GAS editor in browser |
-| `pnpm open:webapp` | Open deployed web app |
-| `pnpm logs` | View execution logs |
-| `pnpm status` | Check file sync status |
+| Script             | Description                          |
+| ------------------ | ------------------------------------ |
+| `pnpm push`        | Push code to GAS                     |
+| `pnpm push:watch`  | Auto-push on file changes            |
+| `pnpm run deploy`  | Push + create timestamped deployment |
+| `pnpm open`        | Open GAS editor in browser           |
+| `pnpm open:webapp` | Open deployed web app                |
+| `pnpm logs`        | View execution logs                  |
+| `pnpm status`      | Check file sync status               |
 
 ## Database (6 Sheets)
 
