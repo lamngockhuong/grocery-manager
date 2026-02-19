@@ -69,7 +69,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - `createProduct(data)` - Validates duplicate names, auto-creates price & inventory
 - `updateProduct(id, data)` - Partial updates, delegates price changes to PriceService
 - `deleteProduct(id)` - Soft delete (status='inactive')
-- `searchProducts(keyword)` - Case-insensitive keyword search
+- `searchProducts(keyword)` - Case-insensitive search by name, barcode, description
 - `filterByCategory(categoryId)` - Filter by parent category
 - `getProductsWithPrices()` - JOIN products + prices (cached)
 - `bulkUpdateStatus(ids, status)` - Batch status update
@@ -95,7 +95,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 **Key Features:**
 
 - Atomic updates via LockService (prevents concurrent conflicts)
-- Auto-logs all changes to PriceHistory sheet
+- Auto-logs changes to PriceHistory sheet (skips if price unchanged)
 - Tracks who changed (Session.getActiveUser().getEmail())
 - Tracks when changed (new Date().toISOString())
 
@@ -249,10 +249,11 @@ app.router.on("inventory", showInventoryPage);
 #### products.html (592 LOC)
 
 - Table: id, name, category, unit, barcode, buy_price, sell_price
-- Search bar (client-side filter)
+- Search bar (client-side filter by name, barcode, description)
 - Filter by category dropdown
 - Column sorting (ASC/DESC/none toggle)
 - Pagination (25 items/page)
+- Product Detail modal (click product name — shows all fields + Google price search)
 - Add Product modal
 - Edit Product modal
 - Price Edit modal (separate action)
@@ -301,7 +302,7 @@ app.router.on("inventory", showInventoryPage);
 - Override Materialize defaults
 - Custom color scheme (blue primary, orange accent)
 - Responsive table styles
-- Modal customization
+- Modal customization (centered via translateX(-50%) override)
 - Sort indicator styles (arrow icons on sortable columns)
 - Pagination controls styling
 - @media queries for mobile (<768px)
