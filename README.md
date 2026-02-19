@@ -13,7 +13,7 @@ Website quan ly gia san pham cho tap hoa (500-2000 SKU), full-stack tren Google 
 
 ## Architecture
 
-```
+```bash
 Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Sheets (6 sheets)
 ```
 
