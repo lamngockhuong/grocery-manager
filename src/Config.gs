@@ -33,6 +33,7 @@ var COLUMNS = {
     "unit",
     "barcode",
     "description",
+    "image_url",
     "status",
     "created_at",
     "updated_at",
@@ -73,6 +74,13 @@ var CACHE_TTL = 600; // 10 minutes in seconds
 var ROLES = {
   ADMIN: "admin",
   VIEWER: "viewer",
+};
+
+var DRIVE = {
+  FOLDER_NAME:
+    PropertiesService.getScriptProperties().getProperty("DRIVE_FOLDER_NAME") ||
+    "grocery-product-images",
+  MAX_FILE_SIZE: 2 * 1024 * 1024, // 2MB
 };
 
 var ID_PREFIXES = {

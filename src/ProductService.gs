@@ -53,6 +53,7 @@ var ProductService = (function () {
       unit: data.unit.trim(),
       barcode: (data.barcode || "").trim(),
       description: (data.description || "").trim(),
+      image_url: data.image_url || "",
       status: "active",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -90,6 +91,7 @@ var ProductService = (function () {
     if (data.barcode !== undefined) updateData.barcode = data.barcode.trim();
     if (data.description !== undefined)
       updateData.description = data.description.trim();
+    if (data.image_url !== undefined) updateData.image_url = data.image_url;
 
     var result = SheetHelper.update(SHEETS.PRODUCTS, id, updateData);
 
@@ -144,8 +146,12 @@ var ProductService = (function () {
       if (p.status !== "active") return false;
       return (
         p.name.toLowerCase().indexOf(kw) !== -1 ||
-        String(p.barcode || "").toLowerCase().indexOf(kw) !== -1 ||
-        String(p.description || "").toLowerCase().indexOf(kw) !== -1
+        String(p.barcode || "")
+          .toLowerCase()
+          .indexOf(kw) !== -1 ||
+        String(p.description || "")
+          .toLowerCase()
+          .indexOf(kw) !== -1
       );
     });
   }
@@ -179,6 +185,7 @@ var ProductService = (function () {
         unit: p.unit,
         barcode: String(p.barcode || ""),
         description: p.description,
+        image_url: p.image_url || "",
         status: p.status,
         buy_price: Number(price.buy_price) || 0,
         sell_price: Number(price.sell_price) || 0,
@@ -189,6 +196,15 @@ var ProductService = (function () {
 
     CacheHelper.set(CACHE_KEY_WITH_PRICES, result);
     return result;
+  }
+
+  function updateImageUrl(productId, imageUrl) {
+    SheetHelper.update(SHEETS.PRODUCTS, productId, {
+      image_url: imageUrl,
+      updated_at: new Date().toISOString(),
+    });
+    CacheHelper.remove(CACHE_KEY);
+    CacheHelper.remove(CACHE_KEY_WITH_PRICES);
   }
 
   function bulkUpdateStatus(ids, status) {
@@ -213,6 +229,7 @@ var ProductService = (function () {
     searchProducts: searchProducts,
     filterByCategory: filterByCategory,
     getProductsWithPrices: getProductsWithPrices,
+    updateImageUrl: updateImageUrl,
     bulkUpdateStatus: bulkUpdateStatus,
   };
 })();

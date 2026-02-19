@@ -187,6 +187,41 @@ function apiSearchProducts(keyword) {
   }
 }
 
+// Product Images
+function apiUploadProductImage(productId, base64Data, fileName, mimeType) {
+  try {
+    Auth.requireAdmin();
+    var product = ProductService.getProductById(productId);
+    if (!product) throw new Error("Sản phẩm không tồn tại");
+
+    var imageUrl = ImageService.uploadImage(base64Data, fileName, mimeType);
+    // Delete old image only after successful upload
+    if (product.image_url) {
+      ImageService.deleteImage(product.image_url);
+    }
+    ProductService.updateImageUrl(productId, imageUrl);
+    return { success: true, data: { image_url: imageUrl } };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+function apiDeleteProductImage(productId) {
+  try {
+    Auth.requireAdmin();
+    var product = ProductService.getProductById(productId);
+    if (!product) throw new Error("Sản phẩm không tồn tại");
+
+    if (product.image_url) {
+      ImageService.deleteImage(product.image_url);
+    }
+    ProductService.updateImageUrl(productId, "");
+    return { success: true, data: { image_url: "" } };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 // Prices
 function apiUpdatePrice(productId, buyPrice, sellPrice) {
   try {
