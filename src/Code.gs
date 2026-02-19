@@ -17,11 +17,35 @@ function doGet(e) {
       '<p>' + err.message + '</p></div></body></html>'
     ).setTitle('Không có quyền truy cập');
   }
-  return HtmlService.createTemplateFromFile('index')
-    .evaluate()
+  var template = HtmlService.createTemplateFromFile('index');
+  var initialData = null;
+  try {
+    initialData = getInitialData();
+  } catch (e) {
+    Logger.log('getInitialData failed, falling back to RPC: ' + e.message);
+  }
+  template.initialDataJson = JSON.stringify(initialData)
+    .replace(/<\/script>/gi, '<\\/script>');
+  return template.evaluate()
     .setTitle('Quản Lý Giá Sản Phẩm')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
+}
+
+/**
+ * Bundle all initial page data to embed server-side, eliminating first-load RPCs.
+ */
+function getInitialData() {
+  var user = Auth.getAuthInfo();
+  var products = ProductService.getProductsWithPrices();
+  var categories = CategoryService.getCategoryTree();
+  var dashboardStats = ReportService.getDashboardStats();
+  return {
+    user: user,
+    products: products,
+    categories: categories,
+    dashboardStats: dashboardStats
+  };
 }
 
 function include(filename) {

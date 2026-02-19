@@ -51,13 +51,11 @@
 
 <script>
 var Dashboard = {
-  render: function() {
-    api.call('apiGetDashboardStats').then(function(stats) {
+  renderStats: function(stats) {
       document.getElementById('stat-total-products').textContent = stats.totalProducts || 0;
       document.getElementById('stat-total-value').textContent = formatCurrency(stats.totalValue);
       document.getElementById('stat-low-stock').textContent = stats.lowStockCount || 0;
 
-      // Low stock warnings
       if (stats.lowStockCount > 0) {
         document.getElementById('low-stock-card').style.display = 'block';
         document.getElementById('low-stock-list').innerHTML = stats.lowStockProducts
@@ -69,7 +67,6 @@ var Dashboard = {
         document.getElementById('low-stock-card').style.display = 'none';
       }
 
-      // Recent changes
       var tbody = document.getElementById('recent-changes-tbody');
       if (!stats.recentChanges || stats.recentChanges.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Chưa có thay đổi giá nào</td></tr>';
@@ -83,6 +80,18 @@ var Dashboard = {
           '</tr>';
         }).join('');
       }
+  },
+
+  render: function() {
+    if (state.dashboardStats) {
+      var stats = state.dashboardStats;
+      state.dashboardStats = null; // Clear so subsequent visits fetch fresh data via RPC
+      this.renderStats(stats);
+      return;
+    }
+    var self = this;
+    api.call('apiGetDashboardStats').then(function(stats) {
+      self.renderStats(stats);
     }).catch(function(e) {
       showToast('Lỗi tải dashboard: ' + e.message, 'red');
     });

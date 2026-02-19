@@ -27,9 +27,18 @@
     categories: [],
     inventory: [],
     isAdmin: false,
+    dashboardStats: null,
 
     init: function () {
       var self = this;
+      if (typeof INITIAL_DATA !== "undefined" && INITIAL_DATA) {
+        self.user = INITIAL_DATA.user;
+        self.isAdmin = INITIAL_DATA.user.role === "admin";
+        self.products = INITIAL_DATA.products || [];
+        self.categories = INITIAL_DATA.categories || [];
+        self.dashboardStats = INITIAL_DATA.dashboardStats || null;
+        return Promise.resolve();
+      }
       return api
         .call("apiGetAuthInfo")
         .then(function (user) {
