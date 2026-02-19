@@ -7,7 +7,12 @@ var Auth = (function() {
   function getCurrentUser() {
     var email = Session.getActiveUser().getEmail();
     if (!email) {
-      throw new Error('Không thể xác định người dùng. Vui lòng kiểm tra cài đặt deploy.');
+      throw new Error(
+        'Không thể xác định người dùng. Vui lòng đảm bảo: ' +
+        '(1) Bạn đã đăng nhập Google, ' +
+        '(2) Bạn đã cấp quyền cho ứng dụng khi được hỏi, ' +
+        '(3) Sử dụng đúng URL deployment mới nhất (/exec).'
+      );
     }
     return email;
   }

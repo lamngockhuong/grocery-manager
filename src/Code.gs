@@ -3,6 +3,20 @@
  */
 
 function doGet(e) {
+  try {
+    Auth.checkAccess();
+  } catch (err) {
+    return HtmlService.createHtmlOutput(
+      '<html><head><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;' +
+      'min-height:100vh;margin:0;background:#f5f5f5;color:#333}' +
+      '.card{background:#fff;padding:40px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);' +
+      'text-align:center;max-width:400px}h2{color:#d32f2f;margin-bottom:16px}' +
+      'p{color:#666;line-height:1.5}</style></head>' +
+      '<body><div class="card"><h2>Không có quyền truy cập</h2>' +
+      '<p>' + err.message + '</p></div></body></html>'
+    ).setTitle('Không có quyền truy cập');
+  }
   return HtmlService.createTemplateFromFile('index')
     .evaluate()
     .setTitle('Quản Lý Giá Sản Phẩm')

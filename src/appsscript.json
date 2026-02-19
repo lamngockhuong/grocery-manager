@@ -2,7 +2,7 @@
   "timeZone": "Asia/Saigon",
   "dependencies": {},
   "webapp": {
-    "access": "MYSELF",
+    "access": "ANYONE",
     "executeAs": "USER_ACCESSING"
   },
   "exceptionLogging": "STACKDRIVER",
