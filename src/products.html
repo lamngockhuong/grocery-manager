@@ -90,6 +90,10 @@
             >
           </a>
         </div>
+        <div class="input-field">
+          <textarea id="product-description" class="materialize-textarea"></textarea>
+          <label for="product-description">Mô tả</label>
+        </div>
         <div class="row">
           <div class="input-field col s6">
             <input id="product-buy-price" type="number" min="0" step="100" />
@@ -104,7 +108,7 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button class="btn blue waves-effect" onclick="Products.save()">
+      <button id="btn-save-product" class="btn blue waves-effect" onclick="Products.save()">
         Lưu
       </button>
     </div>
@@ -129,7 +133,7 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button class="btn blue waves-effect" onclick="Products.savePrice()">
+      <button id="btn-save-price" class="btn blue waves-effect" onclick="Products.savePrice()">
         Lưu giá
       </button>
     </div>
@@ -250,7 +254,7 @@
     function scanToSearch() {
       start(function (code) {
         var product = state.products.find(function (p) {
-          return p.barcode === code && p.status === "active";
+          return String(p.barcode || "") === code && p.status === "active";
         });
 
         if (product) {
@@ -407,8 +411,10 @@
       document.getElementById("product-name").value = p.name;
       document.getElementById("product-unit").value = p.unit;
       document.getElementById("product-barcode").value = p.barcode || "";
+      document.getElementById("product-description").value = p.description || "";
       document.getElementById("product-buy-price").value = p.buy_price || 0;
       document.getElementById("product-sell-price").value = p.sell_price || 0;
+      M.textareaAutoResize(document.getElementById("product-description"));
       document.getElementById("product-modal-title").textContent =
         "Sửa sản phẩm";
       this.populateCategoryFilter();
@@ -456,27 +462,37 @@
         category_id: document.getElementById("product-category").value,
         unit: document.getElementById("product-unit").value,
         barcode: document.getElementById("product-barcode").value,
+        description: document.getElementById("product-description").value,
         buy_price:
           Number(document.getElementById("product-buy-price").value) || 0,
         sell_price:
           Number(document.getElementById("product-sell-price").value) || 0,
       };
 
+      setBtnLoading("btn-save-product", true);
       var promise = id
         ? api.call("apiUpdateProduct", id, data)
         : api.call("apiCreateProduct", data);
       promise
-        .then(function () {
+        .then(function (result) {
           M.Modal.getInstance(document.getElementById("product-modal")).close();
           showToast(id ? "Đã cập nhật sản phẩm" : "Đã thêm sản phẩm", "green");
-          return api.call("apiGetProducts");
-        })
-        .then(function (products) {
-          state.products = products;
+          if (id) {
+            // Update local state directly
+            var idx = state.products.findIndex(function (p) { return p.id === id; });
+            if (idx !== -1) Object.assign(state.products[idx], data);
+          } else {
+            // New product — merge returned data with form data
+            var newProduct = Object.assign({}, result, data, { status: "active" });
+            state.products.unshift(newProduct);
+          }
           Products.render();
         })
         .catch(function (e) {
           showToast("Lỗi: " + e.message, "red");
+        })
+        .then(function () {
+          setBtnLoading("btn-save-product", false);
         });
     },
 
@@ -486,10 +502,7 @@
         .call("apiDeleteProduct", id)
         .then(function () {
           showToast("Đã xoá sản phẩm", "green");
-          return api.call("apiGetProducts");
-        })
-        .then(function (products) {
-          state.products = products;
+          state.products = state.products.filter(function (p) { return p.id !== id; });
           Products.render();
         })
         .catch(function (e) {
@@ -520,19 +533,24 @@
         return;
       }
 
+      setBtnLoading("btn-save-price", true);
       api
         .call("apiUpdatePrice", productId, buyPrice, sellPrice)
         .then(function () {
           M.Modal.getInstance(document.getElementById("price-modal")).close();
           showToast("Đã cập nhật giá", "green");
-          return api.call("apiGetProducts");
-        })
-        .then(function (products) {
-          state.products = products;
+          var p = state.products.find(function (pr) { return pr.id === productId; });
+          if (p) {
+            p.buy_price = buyPrice;
+            p.sell_price = sellPrice;
+          }
           Products.render();
         })
         .catch(function (e) {
           showToast("Lỗi: " + e.message, "red");
+        })
+        .then(function () {
+          setBtnLoading("btn-save-price", false);
         });
     },
   };

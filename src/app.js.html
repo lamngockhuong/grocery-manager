@@ -1,191 +1,232 @@
 <script>
-// === API Wrapper (handles standardized {success, data, error} response) ===
-var api = {
-  call: function(fnName) {
-    var args = Array.prototype.slice.call(arguments, 1);
-    return new Promise(function(resolve, reject) {
-      var runner = google.script.run
-        .withSuccessHandler(function(result) {
-          if (result && result.success === false) {
-            reject(new Error(result.error || 'Co loi xay ra'));
-          } else {
-            resolve(result && result.data !== undefined ? result.data : result);
-          }
+  // === API Wrapper (handles standardized {success, data, error} response) ===
+  var api = {
+    call: function (fnName) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      return new Promise(function (resolve, reject) {
+        var runner = google.script.run
+          .withSuccessHandler(function (result) {
+            if (result && result.success === false) {
+              reject(new Error(result.error || "Có lỗi xảy ra"));
+            } else {
+              resolve(
+                result && result.data !== undefined ? result.data : result,
+              );
+            }
+          })
+          .withFailureHandler(reject);
+        runner[fnName].apply(runner, args);
+      });
+    },
+  };
+
+  // === State Manager ===
+  var state = {
+    user: null,
+    products: [],
+    categories: [],
+    inventory: [],
+    isAdmin: false,
+
+    init: function () {
+      var self = this;
+      return api
+        .call("apiGetAuthInfo")
+        .then(function (user) {
+          self.user = user;
+          self.isAdmin = user.role === "admin";
+          return Promise.all([
+            api.call("apiGetProducts"),
+            api.call("apiGetCategories"),
+          ]);
         })
-        .withFailureHandler(reject);
-      runner[fnName].apply(runner, args);
-    });
-  }
-};
+        .then(function (results) {
+          self.products = results[0] || [];
+          self.categories = results[1] || [];
+        });
+    },
+  };
 
-// === State Manager ===
-var state = {
-  user: null,
-  products: [],
-  categories: [],
-  inventory: [],
-  isAdmin: false,
+  // === Router ===
+  var router = {
+    routes: ["dashboard", "products", "categories", "inventory", "reports"],
+    current: "dashboard",
 
-  init: function() {
-    var self = this;
-    return api.call('apiGetAuthInfo').then(function(user) {
-      self.user = user;
-      self.isAdmin = user.role === 'admin';
-      return Promise.all([
-        api.call('apiGetProducts'),
-        api.call('apiGetCategories')
-      ]);
-    }).then(function(results) {
-      self.products = results[0] || [];
-      self.categories = results[1] || [];
-    });
-  }
-};
+    init: function () {
+      var self = this;
+      window.addEventListener("hashchange", function () {
+        self.navigate();
+      });
+      this.navigate();
+    },
 
-// === Router ===
-var router = {
-  routes: ['dashboard', 'products', 'categories', 'inventory', 'reports'],
-  current: 'dashboard',
+    navigate: function () {
+      var hash = location.hash.replace("#", "") || "dashboard";
+      if (this.routes.indexOf(hash) === -1) return;
 
-  init: function() {
-    var self = this;
-    window.addEventListener('hashchange', function() { self.navigate(); });
-    this.navigate();
-  },
+      // Hide all, show target
+      var sections = document.querySelectorAll(".page-section");
+      for (var i = 0; i < sections.length; i++)
+        sections[i].style.display = "none";
+      var target = document.getElementById("page-" + hash);
+      if (target) target.style.display = "block";
 
-  navigate: function() {
-    var hash = location.hash.replace('#', '') || 'dashboard';
-    if (this.routes.indexOf(hash) === -1) return;
-
-    // Hide all, show target
-    var sections = document.querySelectorAll('.page-section');
-    for (var i = 0; i < sections.length; i++) sections[i].style.display = 'none';
-    var target = document.getElementById('page-' + hash);
-    if (target) target.style.display = 'block';
-
-    // Update nav active
-    var navLinks = document.querySelectorAll('nav a, .sidenav a');
-    for (var j = 0; j < navLinks.length; j++) {
-      var li = navLinks[j].parentElement;
-      if (li && li.tagName === 'LI') {
-        li.classList.remove('active');
-        if (navLinks[j].getAttribute('href') === '#' + hash) li.classList.add('active');
+      // Update nav active
+      var navLinks = document.querySelectorAll("nav a, .sidenav a");
+      for (var j = 0; j < navLinks.length; j++) {
+        var li = navLinks[j].parentElement;
+        if (li && li.tagName === "LI") {
+          li.classList.remove("active");
+          if (navLinks[j].getAttribute("href") === "#" + hash)
+            li.classList.add("active");
+        }
       }
-    }
 
-    // Close sidenav on mobile navigation
-    var sidenavEl = document.getElementById('sidenav');
-    var sidenavInstance = M.Sidenav.getInstance(sidenavEl);
-    if (sidenavInstance) sidenavInstance.close();
+      // Close sidenav on mobile navigation
+      var sidenavEl = document.getElementById("sidenav");
+      var sidenavInstance = M.Sidenav.getInstance(sidenavEl);
+      if (sidenavInstance) sidenavInstance.close();
 
-    this.current = hash;
-    this.onRouteChange(hash);
-  },
+      this.current = hash;
+      this.onRouteChange(hash);
+    },
 
-  onRouteChange: function(page) {
-    if (page === 'dashboard' && typeof Dashboard !== 'undefined') Dashboard.render();
-    if (page === 'products' && typeof Products !== 'undefined') Products.render();
-    if (page === 'categories' && typeof Categories !== 'undefined') Categories.render();
-    if (page === 'inventory' && typeof Inventory !== 'undefined') Inventory.init();
-    if (page === 'reports' && typeof Reports !== 'undefined') Reports.render();
+    onRouteChange: function (page) {
+      if (page === "dashboard" && typeof Dashboard !== "undefined")
+        Dashboard.render();
+      if (page === "products" && typeof Products !== "undefined")
+        Products.render();
+      if (page === "categories" && typeof Categories !== "undefined")
+        Categories.render();
+      if (page === "inventory" && typeof Inventory !== "undefined")
+        Inventory.init();
+      if (page === "reports" && typeof Reports !== "undefined")
+        Reports.render();
+    },
+  };
+
+  // === Utils ===
+  function showLoading(containerId) {
+    var el = document.getElementById(containerId);
+    if (el)
+      el.innerHTML =
+        '<div class="loading-overlay"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div></div></div></div>';
   }
-};
 
-// === Utils ===
-function showLoading(containerId) {
-  var el = document.getElementById(containerId);
-  if (el) el.innerHTML = '<div class="loading-overlay"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div></div></div></div>';
-}
+  function hideLoading(containerId) {
+    var el = document.getElementById(containerId);
+    if (el && el.querySelector(".loading-overlay")) el.innerHTML = "";
+  }
 
-function hideLoading(containerId) {
-  var el = document.getElementById(containerId);
-  if (el && el.querySelector('.loading-overlay')) el.innerHTML = '';
-}
+  function showEmptyState(containerId, message) {
+    var el = document.getElementById(containerId);
+    if (el)
+      el.innerHTML =
+        '<tr><td colspan="10" class="empty-state"><i class="material-icons large">inbox</i><p>' +
+        message +
+        "</p></td></tr>";
+  }
 
-function showEmptyState(containerId, message) {
-  var el = document.getElementById(containerId);
-  if (el) el.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="material-icons large">inbox</i><p>' + message + '</p></td></tr>';
-}
+  function showToast(message, classes) {
+    M.toast({ html: message, classes: classes || "" });
+  }
 
-function showToast(message, classes) {
-  M.toast({ html: message, classes: classes || '' });
-}
-
-function formatCurrency(num) {
-  num = Number(num) || 0;
-  return num.toLocaleString('vi-VN') + 'd';
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString('vi-VN');
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  var div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-function validateForm(rules) {
-  var valid = true;
-  rules.forEach(function(rule) {
-    var el = document.getElementById(rule.field);
-    if (!el) return;
-    if (!rule.check(el.value)) {
-      el.classList.add('invalid');
-      valid = false;
+  function setBtnLoading(btnId, loading) {
+    var btn = document.getElementById(btnId);
+    if (!btn) return;
+    if (loading) {
+      btn.dataset.origText = btn.textContent;
+      btn.innerHTML =
+        '<i class="tiny material-icons left spin">refresh</i>Đang lưu...';
+      btn.disabled = true;
     } else {
-      el.classList.remove('invalid');
+      btn.textContent = btn.dataset.origText || "Lưu";
+      btn.disabled = false;
     }
-  });
-  return valid;
-}
-
-function updateAdminUI() {
-  var els = document.querySelectorAll('.admin-only');
-  for (var i = 0; i < els.length; i++) {
-    els[i].style.display = state.isAdmin ? '' : 'none';
   }
-}
 
-// === Flat category helpers ===
-function flattenCategories(tree) {
-  var flat = [];
-  (tree || []).forEach(function(cat) {
-    flat.push(cat);
-    if (cat.children) {
-      cat.children.forEach(function(child) { flat.push(child); });
+  function formatCurrency(num) {
+    num = Number(num) || 0;
+    return num.toLocaleString("vi-VN") + "d";
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("vi-VN");
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function validateForm(rules) {
+    var valid = true;
+    rules.forEach(function (rule) {
+      var el = document.getElementById(rule.field);
+      if (!el) return;
+      if (!rule.check(el.value)) {
+        el.classList.add("invalid");
+        valid = false;
+      } else {
+        el.classList.remove("invalid");
+      }
+    });
+    return valid;
+  }
+
+  function updateAdminUI() {
+    var els = document.querySelectorAll(".admin-only");
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.display = state.isAdmin ? "" : "none";
     }
-  });
-  return flat;
-}
-
-function getCategoryName(catId) {
-  var flat = flattenCategories(state.categories);
-  for (var i = 0; i < flat.length; i++) {
-    if (flat[i].id === catId) return flat[i].name;
   }
-  return '';
-}
 
-// === Init ===
-document.addEventListener('DOMContentLoaded', function() {
-  M.AutoInit();
-  var contentEl = document.getElementById('main-content');
-  if (contentEl) showLoading('main-content');
+  // === Flat category helpers ===
+  function flattenCategories(tree) {
+    var flat = [];
+    (tree || []).forEach(function (cat) {
+      flat.push(cat);
+      if (cat.children) {
+        cat.children.forEach(function (child) {
+          flat.push(child);
+        });
+      }
+    });
+    return flat;
+  }
 
-  state.init().then(function() {
-    var displayName = state.user.name || state.user.email;
-    document.getElementById('user-info').textContent = displayName;
-    document.getElementById('sidenav-user').textContent = displayName;
-    updateAdminUI();
-    router.init();
-    if (contentEl) contentEl.innerHTML = '';
-  }).catch(function(e) {
-    showToast('Lỗi tải dữ liệu: ' + e.message, 'red');
-    if (contentEl) contentEl.innerHTML = '<p class="center red-text">Không thể tải dữ liệu. Vui lòng thử lại.</p>';
+  function getCategoryName(catId) {
+    var flat = flattenCategories(state.categories);
+    for (var i = 0; i < flat.length; i++) {
+      if (flat[i].id === catId) return flat[i].name;
+    }
+    return "";
+  }
+
+  // === Init ===
+  document.addEventListener("DOMContentLoaded", function () {
+    M.AutoInit();
+    var contentEl = document.getElementById("main-content");
+    if (contentEl) showLoading("main-content");
+
+    state
+      .init()
+      .then(function () {
+        var displayName = state.user.name || state.user.email;
+        document.getElementById("user-info").textContent = displayName;
+        document.getElementById("sidenav-user").textContent = displayName;
+        updateAdminUI();
+        router.init();
+        if (contentEl) contentEl.innerHTML = "";
+      })
+      .catch(function (e) {
+        showToast("Lỗi tải dữ liệu: " + e.message, "red");
+        if (contentEl)
+          contentEl.innerHTML =
+            '<p class="center red-text">Không thể tải dữ liệu. Vui lòng thử lại.</p>';
+      });
   });
-});
 </script>

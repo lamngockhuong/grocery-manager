@@ -114,7 +114,6 @@ function apiGetProducts() {
 
 function apiCreateProduct(data) {
   try {
-    Auth.checkAccess();
     return { success: true, data: ProductService.createProduct(data) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -123,7 +122,6 @@ function apiCreateProduct(data) {
 
 function apiUpdateProduct(id, data) {
   try {
-    Auth.checkAccess();
     return { success: true, data: ProductService.updateProduct(id, data) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -132,7 +130,6 @@ function apiUpdateProduct(id, data) {
 
 function apiDeleteProduct(id) {
   try {
-    Auth.checkAccess();
     return { success: true, data: ProductService.deleteProduct(id) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -151,7 +148,6 @@ function apiSearchProducts(keyword) {
 // Prices
 function apiUpdatePrice(productId, buyPrice, sellPrice) {
   try {
-    Auth.checkAccess();
     return { success: true, data: PriceService.updatePrice(productId, buyPrice, sellPrice) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -179,7 +175,6 @@ function apiGetCategories() {
 
 function apiCreateCategory(data) {
   try {
-    Auth.checkAccess();
     return { success: true, data: CategoryService.createCategory(data) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -188,7 +183,6 @@ function apiCreateCategory(data) {
 
 function apiUpdateCategory(id, data) {
   try {
-    Auth.checkAccess();
     return { success: true, data: CategoryService.updateCategory(id, data) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -197,7 +191,6 @@ function apiUpdateCategory(id, data) {
 
 function apiDeleteCategory(id) {
   try {
-    Auth.checkAccess();
     return { success: true, data: CategoryService.deleteCategory(id) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -216,7 +209,6 @@ function apiGetInventory() {
 
 function apiUpdateQuantity(productId, qty) {
   try {
-    Auth.checkAccess();
     return { success: true, data: InventoryService.updateQuantity(productId, qty) };
   } catch (e) {
     return { success: false, error: e.message };
@@ -225,7 +217,6 @@ function apiUpdateQuantity(productId, qty) {
 
 function apiRestock(productId, addQty) {
   try {
-    Auth.checkAccess();
     return { success: true, data: InventoryService.restock(productId, addQty) };
   } catch (e) {
     return { success: false, error: e.message };

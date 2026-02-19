@@ -4,6 +4,13 @@
 
 var Auth = (function() {
 
+  var _usersCache = null;
+
+  function _getUsers() {
+    if (!_usersCache) _usersCache = SheetHelper.getAll(SHEETS.USERS);
+    return _usersCache;
+  }
+
   function getCurrentUser() {
     var email = Session.getActiveUser().getEmail();
     if (!email) {
@@ -18,7 +25,7 @@ var Auth = (function() {
   }
 
   function getUserRole(email) {
-    var users = SheetHelper.getAll(SHEETS.USERS);
+    var users = _getUsers();
     for (var i = 0; i < users.length; i++) {
       if (users[i].email === email) {
         return users[i].role;
@@ -28,7 +35,7 @@ var Auth = (function() {
   }
 
   function _findUser(email) {
-    var users = SheetHelper.getAll(SHEETS.USERS);
+    var users = _getUsers();
     for (var i = 0; i < users.length; i++) {
       if (users[i].email === email) {
         return users[i];

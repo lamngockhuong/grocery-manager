@@ -4,12 +4,13 @@
 
 var SheetHelper = (function() {
 
+  var _ssCache = null;
+
   function _getSpreadsheet() {
+    if (_ssCache) return _ssCache;
     var id = getSpreadsheetId();
-    if (id) {
-      return SpreadsheetApp.openById(id);
-    }
-    return SpreadsheetApp.getActiveSpreadsheet();
+    _ssCache = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+    return _ssCache;
   }
 
   function getSheet(sheetName) {

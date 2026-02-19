@@ -135,7 +135,7 @@ var ProductService = (function() {
         name: p.name,
         category_id: p.category_id,
         unit: p.unit,
-        barcode: p.barcode,
+        barcode: String(p.barcode || ''),
         description: p.description,
         status: p.status,
         buy_price: Number(price.buy_price) || 0,
