@@ -22,7 +22,7 @@ var ImageService = (function () {
     var match = url.match(/[?&]id=([^&]+)/);
     if (match) return match[1];
     // Handle: https://drive.google.com/file/d/FILE_ID/view
-    match = url.match(/\/d\/([^\/\?]+)/);
+    match = url.match(/\/d\/([^/?]+)/);
     return match ? match[1] : null;
   }
 

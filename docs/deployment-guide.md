@@ -124,7 +124,7 @@ If you want the app to use a specific spreadsheet:
 3. Update `Config.gs`:
 
    ```javascript
-   var SPREADSHEET_ID = "{SPREADSHEET_ID}";
+   var SPREADSHEET_ID = '{SPREADSHEET_ID}';
    ```
 
 4. Re-deploy
@@ -299,9 +299,9 @@ For now: Manual backup or use Google Sheets' version history:
 Add to any function you want to debug:
 
 ```javascript
-Logger.log("Starting operation: " + new Date().toISOString());
-Logger.log("Product count: " + products.length);
-Logger.log("Cache hit for: " + CACHE_KEY);
+Logger.log('Starting operation: ' + new Date().toISOString());
+Logger.log('Product count: ' + products.length);
+Logger.log('Cache hit for: ' + CACHE_KEY);
 ```
 
 Run function and check Execution log.

@@ -88,7 +88,6 @@ var ReportService = (function () {
   function getInventorySummaryReport() {
     var inventory = InventoryService.getInventory();
     var products = ProductService.getProductsWithPrices();
-    var categories = CategoryService.getCategoryTree();
 
     var productMap = {};
     products.forEach(function (p) {
@@ -114,7 +113,7 @@ var ReportService = (function () {
     });
 
     // Build flat category name map
-    var catNameMap = { uncategorized: "Chua phan loai" };
+    var catNameMap = { uncategorized: "Chưa phân loại" };
     var allCats = CategoryService.getCategories();
     allCats.forEach(function (c) {
       catNameMap[c.id] = c.name;

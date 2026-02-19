@@ -1,394 +1,405 @@
 <script>
-  // === API Wrapper (handles standardized {success, data, error} response) ===
-  var api = {
-    call: function (fnName) {
-      var args = Array.prototype.slice.call(arguments, 1);
-      return new Promise(function (resolve, reject) {
-        var runner = google.script.run
-          .withSuccessHandler(function (result) {
-            if (result && result.success === false) {
-              reject(new Error(result.error || "Có lỗi xảy ra"));
-            } else {
-              resolve(
-                result && result.data !== undefined ? result.data : result,
-              );
-            }
-          })
-          .withFailureHandler(reject);
-        runner[fnName].apply(runner, args);
-      });
-    },
-  };
-
-  // === State Manager ===
-  var state = {
-    user: null,
-    products: [],
-    categories: [],
-    inventory: [],
-    isAdmin: false,
-    dashboardStats: null,
-
-    init: function () {
-      var self = this;
-      if (typeof INITIAL_DATA !== "undefined" && INITIAL_DATA) {
-        self.user = INITIAL_DATA.user;
-        self.isAdmin = INITIAL_DATA.user.role === "admin";
-        self.products = INITIAL_DATA.products || [];
-        self.categories = INITIAL_DATA.categories || [];
-        self.dashboardStats = INITIAL_DATA.dashboardStats || null;
-        return Promise.resolve();
-      }
-      return api
-        .call("apiGetAuthInfo")
-        .then(function (user) {
-          self.user = user;
-          self.isAdmin = user.role === "admin";
-          return Promise.all([
-            api.call("apiGetProducts"),
-            api.call("apiGetCategories"),
-          ]);
+// === API Wrapper (handles standardized {success, data, error} response) ===
+var api = {
+  call: function(fnName) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function(resolve, reject) {
+      var runner = google.script.run
+        .withSuccessHandler(function(result) {
+          if (result && result.success === false) {
+            reject(new Error(result.error || 'Có lỗi xảy ra'));
+          } else {
+            resolve(
+              result && result.data !== undefined ? result.data : result
+            );
+          }
         })
-        .then(function (results) {
-          self.products = results[0] || [];
-          self.categories = results[1] || [];
-        });
-    },
-  };
+        .withFailureHandler(reject);
+      runner[fnName].apply(runner, args);
+    });
+  }
+};
 
-  // === Router ===
-  var router = {
-    routes: ["dashboard", "products", "categories", "inventory", "reports"],
-    current: "dashboard",
+// === State Manager ===
+var state = {
+  user: null,
+  products: [],
+  categories: [],
+  inventory: [],
+  isAdmin: false,
+  dashboardStats: null,
 
-    init: function () {
-      var self = this;
-      window.addEventListener("hashchange", function () {
-        self.navigate();
+  init: function() {
+    var self = this;
+    if (typeof INITIAL_DATA !== 'undefined' && INITIAL_DATA) {
+      self.user = INITIAL_DATA.user;
+      self.isAdmin = INITIAL_DATA.user.role === 'admin';
+      self.products = INITIAL_DATA.products || [];
+      self.categories = INITIAL_DATA.categories || [];
+      self.dashboardStats = INITIAL_DATA.dashboardStats || null;
+      return Promise.resolve();
+    }
+    return api
+      .call('apiGetAuthInfo')
+      .then(function(user) {
+        self.user = user;
+        self.isAdmin = user.role === 'admin';
+        return Promise.all([
+          api.call('apiGetProducts'),
+          api.call('apiGetCategories')
+        ]);
+      })
+      .then(function(results) {
+        self.products = results[0] || [];
+        self.categories = results[1] || [];
       });
-      this.navigate();
-    },
+  }
+};
 
-    navigate: function () {
-      var hash = location.hash.replace("#", "") || "dashboard";
-      if (this.routes.indexOf(hash) === -1) return;
+// === Router ===
+var router = {
+  routes: ['dashboard', 'products', 'categories', 'inventory', 'reports'],
+  current: 'dashboard',
 
-      // Hide all, show target
-      var sections = document.querySelectorAll(".page-section");
-      for (var i = 0; i < sections.length; i++)
-        sections[i].style.display = "none";
-      var target = document.getElementById("page-" + hash);
-      if (target) target.style.display = "block";
+  init: function() {
+    var self = this;
+    window.addEventListener('hashchange', function() {
+      self.navigate();
+    });
+    this.navigate();
+  },
 
-      // Update nav active
-      var navLinks = document.querySelectorAll("nav a, .sidenav a");
-      for (var j = 0; j < navLinks.length; j++) {
-        var li = navLinks[j].parentElement;
-        if (li && li.tagName === "LI") {
-          li.classList.remove("active");
-          if (navLinks[j].getAttribute("href") === "#" + hash)
-            li.classList.add("active");
+  navigate: function() {
+    var hash = location.hash.replace('#', '') || 'dashboard';
+    if (this.routes.indexOf(hash) === -1) return;
+
+    // Hide all, show target
+    var sections = document.querySelectorAll('.page-section');
+    for (var i = 0; i < sections.length; i++) {
+      sections[i].style.display = 'none';
+    }
+    var target = document.getElementById('page-' + hash);
+    if (target) target.style.display = 'block';
+
+    // Update nav active
+    var navLinks = document.querySelectorAll('nav a, .sidenav a');
+    for (var j = 0; j < navLinks.length; j++) {
+      var li = navLinks[j].parentElement;
+      if (li && li.tagName === 'LI') {
+        li.classList.remove('active');
+        if (navLinks[j].getAttribute('href') === '#' + hash) {
+          li.classList.add('active');
         }
       }
+    }
 
-      // Close sidenav on mobile navigation
-      var sidenavEl = document.getElementById("sidenav");
-      var sidenavInstance = M.Sidenav.getInstance(sidenavEl);
-      if (sidenavInstance) sidenavInstance.close();
+    // Close sidenav on mobile navigation
+    var sidenavEl = document.getElementById('sidenav');
+    var sidenavInstance = M.Sidenav.getInstance(sidenavEl);
+    if (sidenavInstance) sidenavInstance.close();
 
-      this.current = hash;
-      this.onRouteChange(hash);
-    },
+    this.current = hash;
+    this.onRouteChange(hash);
+  },
 
-    onRouteChange: function (page) {
-      if (page === "dashboard" && typeof Dashboard !== "undefined")
-        Dashboard.render();
-      if (page === "products" && typeof Products !== "undefined")
-        Products.render();
-      if (page === "categories" && typeof Categories !== "undefined")
-        Categories.render();
-      if (page === "inventory" && typeof Inventory !== "undefined")
-        Inventory.init();
-      if (page === "reports" && typeof Reports !== "undefined")
-        Reports.render();
-    },
-  };
-
-  // === Utils ===
-  function showLoading(containerId) {
-    var el = document.getElementById(containerId);
-    if (el)
-      el.innerHTML =
-        '<div class="loading-overlay"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div></div></div></div>';
+  onRouteChange: function(page) {
+    if (page === 'dashboard' && typeof Dashboard !== 'undefined') {
+      Dashboard.render();
+    }
+    if (page === 'products' && typeof Products !== 'undefined') {
+      Products.render();
+    }
+    if (page === 'categories' && typeof Categories !== 'undefined') {
+      Categories.render();
+    }
+    if (page === 'inventory' && typeof Inventory !== 'undefined') {
+      Inventory.init();
+    }
+    if (page === 'reports' && typeof Reports !== 'undefined') {
+      Reports.render();
+    }
   }
+};
 
-  function hideLoading(containerId) {
-    var el = document.getElementById(containerId);
-    if (el && el.querySelector(".loading-overlay")) el.innerHTML = "";
+// === Utils ===
+function showLoading(containerId) {
+  var el = document.getElementById(containerId);
+  if (el) {
+    el.innerHTML =
+      '<div class="loading-overlay"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div></div></div></div>';
   }
+}
 
-  function showEmptyState(containerId, message) {
-    var el = document.getElementById(containerId);
-    if (el)
-      el.innerHTML =
-        '<tr><td colspan="10" class="empty-state"><i class="material-icons large">inbox</i><p>' +
-        message +
-        "</p></td></tr>";
+function hideLoading(containerId) {
+  var el = document.getElementById(containerId);
+  if (el && el.querySelector('.loading-overlay')) el.innerHTML = '';
+}
+
+function showEmptyState(containerId, message) {
+  var el = document.getElementById(containerId);
+  if (el) {
+    el.innerHTML =
+      '<tr><td colspan="10" class="empty-state"><i class="material-icons large">inbox</i><p>'
+      + message
+      + '</p></td></tr>';
   }
+}
 
-  function showToast(message, classes) {
-    M.toast({ html: message, classes: classes || "" });
+function showToast(message, classes) {
+  M.toast({ html: message, classes: classes || '' });
+}
+
+function setBtnLoading(btnId, loading) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  if (loading) {
+    btn.dataset.origText = btn.textContent;
+    btn.innerHTML =
+      '<i class="tiny material-icons left spin">refresh</i>Đang lưu...';
+    btn.disabled = true;
+  } else {
+    btn.textContent = btn.dataset.origText || 'Lưu';
+    btn.disabled = false;
   }
+}
 
-  function setBtnLoading(btnId, loading) {
-    var btn = document.getElementById(btnId);
-    if (!btn) return;
-    if (loading) {
-      btn.dataset.origText = btn.textContent;
-      btn.innerHTML =
-        '<i class="tiny material-icons left spin">refresh</i>Đang lưu...';
-      btn.disabled = true;
+function formatCurrency(num) {
+  num = Number(num) || 0;
+  return num.toLocaleString('vi-VN') + '₫';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('vi-VN');
+}
+
+function toSlug(str) {
+  if (!str) return 'product';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function validateForm(rules) {
+  var valid = true;
+  rules.forEach(function(rule) {
+    var el = document.getElementById(rule.field);
+    if (!el) return;
+    if (!rule.check(el.value)) {
+      el.classList.add('invalid');
+      valid = false;
     } else {
-      btn.textContent = btn.dataset.origText || "Lưu";
-      btn.disabled = false;
+      el.classList.remove('invalid');
     }
-  }
-
-  function formatCurrency(num) {
-    num = Number(num) || 0;
-    return num.toLocaleString("vi-VN") + "₫";
-  }
-
-  function formatDate(dateStr) {
-    if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleDateString("vi-VN");
-  }
-
-  function toSlug(str) {
-    if (!str) return "product";
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/đ/g, "d")
-      .replace(/Đ/g, "D")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }
-
-  function escapeHtml(str) {
-    if (!str) return "";
-    var div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  function validateForm(rules) {
-    var valid = true;
-    rules.forEach(function (rule) {
-      var el = document.getElementById(rule.field);
-      if (!el) return;
-      if (!rule.check(el.value)) {
-        el.classList.add("invalid");
-        valid = false;
-      } else {
-        el.classList.remove("invalid");
-      }
-    });
-    return valid;
-  }
-
-  function updateAdminUI() {
-    var els = document.querySelectorAll(".admin-only");
-    for (var i = 0; i < els.length; i++) {
-      els[i].style.display = state.isAdmin ? "" : "none";
-    }
-  }
-
-  // === Flat category helpers ===
-  function flattenCategories(tree) {
-    var flat = [];
-    (tree || []).forEach(function (cat) {
-      flat.push(cat);
-      if (cat.children) {
-        cat.children.forEach(function (child) {
-          flat.push(child);
-        });
-      }
-    });
-    return flat;
-  }
-
-  function getCategoryName(catId) {
-    var flat = flattenCategories(state.categories);
-    for (var i = 0; i < flat.length; i++) {
-      if (flat[i].id === catId) return flat[i].name;
-    }
-    return "";
-  }
-
-  // === Table Sort Utility ===
-  var TableSort = {
-    _state: {}, // { tableId: { column: '', dir: 'asc'|'desc' } }
-
-    toggle: function (tableId, column, renderFn) {
-      var s = this._state[tableId];
-      if (!s || s.column !== column) {
-        this._state[tableId] = { column: column, dir: "asc" };
-      } else if (s.dir === "asc") {
-        s.dir = "desc";
-      } else {
-        delete this._state[tableId];
-      }
-      if (typeof Paginator !== "undefined") Paginator.reset(tableId);
-      if (renderFn) renderFn();
-    },
-
-    sort: function (tableId, data) {
-      var s = this._state[tableId];
-      if (!s) return data;
-      var col = s.column;
-      var dir = s.dir === "asc" ? 1 : -1;
-      return data.slice().sort(function (a, b) {
-        var va = a[col],
-          vb = b[col];
-        if (typeof va === "string") va = va.toLowerCase();
-        if (typeof vb === "string") vb = vb.toLowerCase();
-        if (va < vb) return -1 * dir;
-        if (va > vb) return 1 * dir;
-        return 0;
-      });
-    },
-
-    icon: function (tableId, column) {
-      var s = this._state[tableId];
-      if (!s || s.column !== column)
-        return '<i class="material-icons tiny sort-icon">unfold_more</i>';
-      return s.dir === "asc"
-        ? '<i class="material-icons tiny sort-icon active">arrow_upward</i>'
-        : '<i class="material-icons tiny sort-icon active">arrow_downward</i>';
-    },
-
-    th: function (tableId, column, label, renderFn, extraClass) {
-      return (
-        '<th class="sortable-th ' +
-        (extraClass || "") +
-        '" onclick="TableSort.toggle(\'' +
-        tableId +
-        "','" +
-        column +
-        "'," +
-        renderFn +
-        ')">' +
-        label +
-        " " +
-        this.icon(tableId, column) +
-        "</th>"
-      );
-    },
-  };
-
-  // === Paginator Utility ===
-  var Paginator = {
-    _state: {}, // { tableId: { page: 1, pageSize: 25 } }
-
-    _getState: function (tableId) {
-      if (!this._state[tableId])
-        this._state[tableId] = { page: 1, pageSize: 25 };
-      return this._state[tableId];
-    },
-
-    paginate: function (tableId, data) {
-      var s = this._getState(tableId);
-      var totalPages = Math.ceil(data.length / s.pageSize) || 1;
-      if (s.page > totalPages) s.page = totalPages;
-      var start = (s.page - 1) * s.pageSize;
-      return data.slice(start, start + s.pageSize);
-    },
-
-    reset: function (tableId) {
-      var s = this._getState(tableId);
-      s.page = 1;
-    },
-
-    renderControls: function (tableId, totalItems, containerId, renderFn) {
-      var el = document.getElementById(containerId);
-      if (!el) return;
-      var s = this._getState(tableId);
-      var totalPages = Math.ceil(totalItems / s.pageSize) || 1;
-      var start = (s.page - 1) * s.pageSize + 1;
-      var end = Math.min(s.page * s.pageSize, totalItems);
-      if (totalItems === 0) {
-        start = 0;
-        end = 0;
-      }
-
-      el.innerHTML =
-        '<span class="pagination-info">Hiển thị ' +
-        start +
-        "-" +
-        end +
-        " / " +
-        totalItems +
-        "</span>" +
-        '<div class="pagination-buttons">' +
-        '<button class="btn-small waves-effect' +
-        (s.page <= 1 ? " disabled" : "") +
-        '" onclick="Paginator.goTo(\'' +
-        tableId +
-        "'," +
-        (s.page - 1) +
-        "," +
-        renderFn +
-        ')">' +
-        '<i class="material-icons">chevron_left</i></button> ' +
-        '<span class="pagination-page">Trang ' +
-        s.page +
-        " / " +
-        totalPages +
-        "</span> " +
-        '<button class="btn-small waves-effect' +
-        (s.page >= totalPages ? " disabled" : "") +
-        '" onclick="Paginator.goTo(\'' +
-        tableId +
-        "'," +
-        (s.page + 1) +
-        "," +
-        renderFn +
-        ')">' +
-        '<i class="material-icons">chevron_right</i></button>' +
-        "</div>";
-    },
-
-    goTo: function (tableId, page, renderFn) {
-      var s = this._getState(tableId);
-      if (page < 1) return;
-      s.page = page;
-      if (renderFn) renderFn();
-    },
-  };
-
-  // === Init ===
-  document.addEventListener("DOMContentLoaded", function () {
-    M.AutoInit();
-    var contentEl = document.getElementById("main-content");
-    if (contentEl) showLoading("main-content");
-
-    state
-      .init()
-      .then(function () {
-        var displayName = state.user.name || state.user.email;
-        document.getElementById("user-info").textContent = displayName;
-        document.getElementById("sidenav-user").textContent = displayName;
-        updateAdminUI();
-        router.init();
-        if (contentEl) contentEl.innerHTML = "";
-      })
-      .catch(function (e) {
-        showToast("Lỗi tải dữ liệu: " + e.message, "red");
-        if (contentEl)
-          contentEl.innerHTML =
-            '<p class="center red-text">Không thể tải dữ liệu. Vui lòng thử lại.</p>';
-      });
   });
+  return valid;
+}
+
+function updateAdminUI() {
+  var els = document.querySelectorAll('.admin-only');
+  for (var i = 0; i < els.length; i++) {
+    els[i].style.display = state.isAdmin ? '' : 'none';
+  }
+}
+
+// === Flat category helpers ===
+function flattenCategories(tree) {
+  var flat = [];
+  (tree || []).forEach(function(cat) {
+    flat.push(cat);
+    if (cat.children) {
+      cat.children.forEach(function(child) {
+        flat.push(child);
+      });
+    }
+  });
+  return flat;
+}
+
+function getCategoryName(catId) {
+  var flat = flattenCategories(state.categories);
+  for (var i = 0; i < flat.length; i++) {
+    if (flat[i].id === catId) return flat[i].name;
+  }
+  return '';
+}
+
+// === Table Sort Utility ===
+var TableSort = {
+  _state: {}, // { tableId: { column: '', dir: 'asc'|'desc' } }
+
+  toggle: function(tableId, column, renderFn) {
+    var s = this._state[tableId];
+    if (!s || s.column !== column) {
+      this._state[tableId] = { column: column, dir: 'asc' };
+    } else if (s.dir === 'asc') {
+      s.dir = 'desc';
+    } else {
+      delete this._state[tableId];
+    }
+    if (typeof Paginator !== 'undefined') Paginator.reset(tableId);
+    if (renderFn) renderFn();
+  },
+
+  sort: function(tableId, data) {
+    var s = this._state[tableId];
+    if (!s) return data;
+    var col = s.column;
+    var dir = s.dir === 'asc' ? 1 : -1;
+    return data.slice().sort(function(a, b) {
+      var va = a[col],
+        vb = b[col];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
+    });
+  },
+
+  icon: function(tableId, column) {
+    var s = this._state[tableId];
+    if (!s || s.column !== column) {
+      return '<i class="material-icons tiny sort-icon">unfold_more</i>';
+    }
+    return s.dir === 'asc'
+      ? '<i class="material-icons tiny sort-icon active">arrow_upward</i>'
+      : '<i class="material-icons tiny sort-icon active">arrow_downward</i>';
+  },
+
+  th: function(tableId, column, label, renderFn, extraClass) {
+    return (
+      '<th class="sortable-th '
+      + (extraClass || '')
+      + '" onclick="TableSort.toggle(\''
+      + tableId
+      + "','"
+      + column
+      + "',"
+      + renderFn
+      + ')">'
+      + label
+      + ' '
+      + this.icon(tableId, column)
+      + '</th>'
+    );
+  }
+};
+
+// === Paginator Utility ===
+var Paginator = {
+  _state: {}, // { tableId: { page: 1, pageSize: 25 } }
+
+  _getState: function(tableId) {
+    if (!this._state[tableId]) {
+      this._state[tableId] = { page: 1, pageSize: 25 };
+    }
+    return this._state[tableId];
+  },
+
+  paginate: function(tableId, data) {
+    var s = this._getState(tableId);
+    var totalPages = Math.ceil(data.length / s.pageSize) || 1;
+    if (s.page > totalPages) s.page = totalPages;
+    var start = (s.page - 1) * s.pageSize;
+    return data.slice(start, start + s.pageSize);
+  },
+
+  reset: function(tableId) {
+    var s = this._getState(tableId);
+    s.page = 1;
+  },
+
+  renderControls: function(tableId, totalItems, containerId, renderFn) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    var s = this._getState(tableId);
+    var totalPages = Math.ceil(totalItems / s.pageSize) || 1;
+    var start = (s.page - 1) * s.pageSize + 1;
+    var end = Math.min(s.page * s.pageSize, totalItems);
+    if (totalItems === 0) {
+      start = 0;
+      end = 0;
+    }
+
+    el.innerHTML = '<span class="pagination-info">Hiển thị '
+      + start
+      + '-'
+      + end
+      + ' / '
+      + totalItems
+      + '</span>'
+      + '<div class="pagination-buttons">'
+      + '<button class="btn-small waves-effect'
+      + (s.page <= 1 ? ' disabled' : '')
+      + '" onclick="Paginator.goTo(\''
+      + tableId
+      + "',"
+      + (s.page - 1)
+      + ','
+      + renderFn
+      + ')">'
+      + '<i class="material-icons">chevron_left</i></button> '
+      + '<span class="pagination-page">Trang '
+      + s.page
+      + ' / '
+      + totalPages
+      + '</span> '
+      + '<button class="btn-small waves-effect'
+      + (s.page >= totalPages ? ' disabled' : '')
+      + '" onclick="Paginator.goTo(\''
+      + tableId
+      + "',"
+      + (s.page + 1)
+      + ','
+      + renderFn
+      + ')">'
+      + '<i class="material-icons">chevron_right</i></button>'
+      + '</div>';
+  },
+
+  goTo: function(tableId, page, renderFn) {
+    var s = this._getState(tableId);
+    if (page < 1) return;
+    s.page = page;
+    if (renderFn) renderFn();
+  }
+};
+
+// === Init ===
+document.addEventListener('DOMContentLoaded', function() {
+  M.AutoInit();
+  var contentEl = document.getElementById('main-content');
+  if (contentEl) showLoading('main-content');
+
+  state
+    .init()
+    .then(function() {
+      var displayName = state.user.name || state.user.email;
+      document.getElementById('user-info').textContent = displayName;
+      document.getElementById('sidenav-user').textContent = displayName;
+      updateAdminUI();
+      router.init();
+      if (contentEl) contentEl.innerHTML = '';
+    })
+    .catch(function(e) {
+      showToast('Lỗi tải dữ liệu: ' + e.message, 'red');
+      if (contentEl) {
+        contentEl.innerHTML =
+          '<p class="center red-text">Không thể tải dữ liệu. Vui lòng thử lại.</p>';
+      }
+    });
+});
 </script>

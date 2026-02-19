@@ -205,7 +205,7 @@ function apiGetProducts() {
     var result = ProductService.getProducts();
     return { success: true, data: result };
   } catch (e) {
-    Logger.log("apiGetProducts error: " + e.message);
+    Logger.log('apiGetProducts error: ' + e.message);
     return { success: false, error: e.message };
   }
 }
@@ -214,17 +214,17 @@ function apiGetProducts() {
 **Error Messages:** Use descriptive, actionable messages
 
 ```javascript
-throw new Error("Product name cannot be empty"); // Good
-throw new Error("Invalid input"); // Bad (too vague)
-throw new Error("Tên sản phẩm không được để trống"); // Good (Vietnamese)
+throw new Error('Product name cannot be empty'); // Good
+throw new Error('Invalid input'); // Bad (too vague)
+throw new Error('Tên sản phẩm không được để trống'); // Good (Vietnamese)
 ```
 
 **Vietnamese Error Messages:** Consider target audience (Vietnamese store owners)
 
 ```javascript
-"Tên sản phẩm không được để trống";
-"Danh mục không tồn tại";
-"Bạn không có quyền thực hiện thao tác này";
+'Tên sản phẩm không được để trống';
+'Danh mục không tồn tại';
+'Bạn không có quyền thực hiện thao tác này';
 ```
 
 ### Frontend Error Handling
@@ -232,13 +232,13 @@ throw new Error("Tên sản phẩm không được để trống"); // Good (Vie
 **Show user-friendly messages:**
 
 ```javascript
-api.call("apiGetProducts", []).then(function (result) {
+api.call('apiGetProducts', []).then(function(result) {
   if (result.success) {
     app.state.products = result.data;
     renderProductTable();
   } else {
-    M.toast({ html: "Lỗi: " + result.error });
-    Logger.log("Error: " + result.error);
+    M.toast({ html: 'Lỗi: ' + result.error });
+    Logger.log('Error: ' + result.error);
   }
 });
 ```
@@ -252,29 +252,31 @@ api.call("apiGetProducts", []).then(function (result) {
 ```javascript
 function createProduct(data) {
   // Type checking
-  if (typeof data !== "object") throw new Error("Invalid data");
+  if (typeof data !== 'object') throw new Error('Invalid data');
 
   // Required fields
-  if (!data.name || !data.name.trim())
-    throw new Error("Tên không được để trống");
-  if (!data.unit || !data.unit.trim())
-    throw new Error("Đơn vị không được để trống");
+  if (!data.name || !data.name.trim()) {
+    throw new Error('Tên không được để trống');
+  }
+  if (!data.unit || !data.unit.trim()) {
+    throw new Error('Đơn vị không được để trống');
+  }
 
   // Range checking
   var price = Number(data.buy_price);
-  if (isNaN(price) || price < 0) throw new Error("Giá phải >= 0");
+  if (isNaN(price) || price < 0) throw new Error('Giá phải >= 0');
 
   // Business logic
   if (data.category_id) {
     var cat = CategoryService.getCategoryById(data.category_id);
-    if (!cat) throw new Error("Danh mục không tồn tại");
+    if (!cat) throw new Error('Danh mục không tồn tại');
   }
 
   // Uniqueness
-  var existing = SheetHelper.query(SHEETS.PRODUCTS, function (p) {
+  var existing = SheetHelper.query(SHEETS.PRODUCTS, function(p) {
     return p.name.toLowerCase() === data.name.trim().toLowerCase();
   });
-  if (existing.length > 0) throw new Error("Sản phẩm đã tồn tại");
+  if (existing.length > 0) throw new Error('Sản phẩm đã tồn tại');
 }
 ```
 
@@ -336,8 +338,8 @@ var user = Auth.getAuthInfo(); // {email, role, name}
 **Load user info on page load:**
 
 ```javascript
-document.addEventListener("DOMContentLoaded", function () {
-  api.call("apiGetAuthInfo", []).then(function (result) {
+document.addEventListener('DOMContentLoaded', function() {
+  api.call('apiGetAuthInfo', []).then(function(result) {
     if (result.success) {
       app.state.currentUser = result.data;
       renderNavBar(); // Show user name/role
@@ -350,10 +352,10 @@ document.addEventListener("DOMContentLoaded", function () {
 **Conditional Button Rendering:**
 
 ```javascript
-if (app.state.currentUser.role === "admin") {
-  document.getElementById("add-product-btn").style.display = "block";
+if (app.state.currentUser.role === 'admin') {
+  document.getElementById('add-product-btn').style.display = 'block';
 } else {
-  document.getElementById("add-product-btn").style.display = "none";
+  document.getElementById('add-product-btn').style.display = 'none';
 }
 ```
 
@@ -364,11 +366,11 @@ if (app.state.currentUser.role === "admin") {
 **Cache read-heavy data:**
 
 ```javascript
-var cached = CacheHelper.get("products");
+var cached = CacheHelper.get('products');
 if (cached) return cached;
 
 var data = SheetHelper.getAll(SHEETS.PRODUCTS);
-CacheHelper.set("products", data, CACHE_TTL);
+CacheHelper.set('products', data, CACHE_TTL);
 return data;
 ```
 
@@ -376,8 +378,8 @@ return data;
 
 ```javascript
 SheetHelper.create(SHEETS.PRODUCTS, data);
-CacheHelper.remove("products"); // Invalidate
-CacheHelper.remove("products_with_prices");
+CacheHelper.remove('products'); // Invalidate
+CacheHelper.remove('products_with_prices');
 ```
 
 **Cache TTL:** 10 minutes (CACHE_TTL = 600)
@@ -396,7 +398,7 @@ function updatePrice(productId, buyPrice, sellPrice) {
       buy_price: buyPrice,
       sell_price: sellPrice,
       updated_at: new Date().toISOString(),
-      updated_by: Auth.getCurrentUser(),
+      updated_by: Auth.getCurrentUser()
     });
 
     SheetHelper.create(SHEETS.PRICE_HISTORY, {
@@ -406,7 +408,7 @@ function updatePrice(productId, buyPrice, sellPrice) {
       old_sell: existing.sell_price,
       new_sell: sellPrice,
       changed_at: new Date().toISOString(),
-      changed_by: Auth.getCurrentUser(),
+      changed_by: Auth.getCurrentUser()
     });
   } finally {
     LockService.releaseLock();
@@ -420,13 +422,13 @@ function updatePrice(productId, buyPrice, sellPrice) {
 
 ```javascript
 function bulkUpdateStatus(ids, status) {
-  ids.forEach(function (id) {
+  ids.forEach(function(id) {
     SheetHelper.update(SHEETS.PRODUCTS, id, {
       status: status,
-      updated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     });
   });
-  CacheHelper.remove("products");
+  CacheHelper.remove('products');
 }
 ```
 
@@ -441,12 +443,12 @@ function uploadImage(base64Data, fileName, mimeType) {
   // 1. Validate file size (max 2MB)
   var sizeBytes = Math.ceil((base64Data.length * 3) / 4);
   if (sizeBytes > DRIVE.MAX_FILE_SIZE) {
-    throw new Error("File quá lớn. Tối đa 2MB.");
+    throw new Error('File quá lớn. Tối đa 2MB.');
   }
 
   // 2. Decode base64 and create blob
   var decoded = Utilities.base64Decode(base64Data);
-  var blob = Utilities.newBlob(decoded, mimeType || "image/jpeg", fileName);
+  var blob = Utilities.newBlob(decoded, mimeType || 'image/jpeg', fileName);
 
   // 3. Get or create Drive folder
   var folder = _getOrCreateFolder();
@@ -456,7 +458,7 @@ function uploadImage(base64Data, fileName, mimeType) {
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
   // 5. Return shareable URL format
-  return "https://drive.google.com/uc?id=" + file.getId() + "&export=view";
+  return 'https://drive.google.com/uc?id=' + file.getId() + '&export=view';
 }
 ```
 
@@ -482,13 +484,13 @@ var ProductImage = {
     reader.onload = function(e) {
       var img = new Image();
       img.onload = function() {
-        var canvas = document.createElement("canvas");
+        var canvas = document.createElement('canvas');
         var scale = Math.min(1, 800 / Math.max(img.width, img.height));
         canvas.width = img.width * scale;
         canvas.height = img.height * scale;
-        var ctx = canvas.getContext("2d");
+        var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        var compressed = canvas.toDataURL("image/jpeg", 0.7);
+        var compressed = canvas.toDataURL('image/jpeg', 0.7);
         callback(compressed);
       };
       img.src = e.target.result;
@@ -530,9 +532,9 @@ ProductService.updateImageUrl(id, newImageUrl);
 **Use Logger for debugging (visible in GAS editor logs):**
 
 ```javascript
-Logger.log("Processing product: " + productId);
-Logger.log("Cache hit for: " + CACHE_KEY);
-Logger.log("SheetHelper.getAll error: " + e.message); // In catch blocks
+Logger.log('Processing product: ' + productId);
+Logger.log('Cache hit for: ' + CACHE_KEY);
+Logger.log('SheetHelper.getAll error: ' + e.message); // In catch blocks
 ```
 
 **Log format:** `ModuleName.functionName: message`
@@ -542,8 +544,8 @@ Logger.log("SheetHelper.getAll error: " + e.message); // In catch blocks
 **Use console.log for browser debugging:**
 
 ```javascript
-console.log("Product loaded:", app.state.products);
-console.log("API error:", result.error);
+console.log('Product loaded:', app.state.products);
+console.log('API error:', result.error);
 ```
 
 ## Comments & Documentation
@@ -574,7 +576,7 @@ function searchProducts(keyword) { ... }
 ```javascript
 // Soft delete: set status to inactive instead of removing row
 // Preserves referential integrity with price history
-SheetHelper.update(SHEETS.PRODUCTS, id, { status: "inactive" });
+SheetHelper.update(SHEETS.PRODUCTS, id, { status: 'inactive' });
 ```
 
 ### Frontend Comments
@@ -583,12 +585,12 @@ SheetHelper.update(SHEETS.PRODUCTS, id, { status: "inactive" });
 
 ```javascript
 app.pages.productPage = {
-  init: function () {
+  init: function() {
     // Load products from server
     this.loadProducts();
     // Bind form submit
     this.attachEventListeners();
-  },
+  }
 };
 ```
 
@@ -647,7 +649,7 @@ GAS doesn't support Jest/Mocha easily. Future phases should:
 
 ```javascript
 // BAD: API key in frontend
-var API_KEY = "sk-12345..."; // Never!
+var API_KEY = 'sk-12345...'; // Never!
 
 // GOOD: Use server-side API wrappers only
 function apiGetProtectedData() {
@@ -660,25 +662,25 @@ function apiGetProtectedData() {
 
 ```javascript
 // BAD: Direct HTML injection
-document.getElementById("product-name").innerHTML = product.name;
+document.getElementById('product-name').innerHTML = product.name;
 
 // GOOD: Use escapeHtml() or textContent
 function escapeHtml(text) {
   var map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
   };
-  return String(text).replace(/[&<>"']/g, function (s) {
+  return String(text).replace(/[&<>"']/g, function(s) {
     return map[s];
   });
 }
 
-document.getElementById("product-name").textContent = product.name;
+document.getElementById('product-name').textContent = product.name;
 // OR
-document.getElementById("product-name").innerHTML = escapeHtml(product.name);
+document.getElementById('product-name').innerHTML = escapeHtml(product.name);
 ```
 
 ### Authorization Enforcement

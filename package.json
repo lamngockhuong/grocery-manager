@@ -13,7 +13,12 @@
     "open": "clasp open-script",
     "open:webapp": "clasp open-web-app",
     "logs": "clasp tail-logs",
-    "status": "clasp show-file-status"
+    "status": "clasp show-file-status",
+    "format": "dprint fmt",
+    "format:check": "dprint check",
+    "lint": "eslint src/**/*.gs",
+    "lint:fix": "eslint --fix src/**/*.gs",
+    "check": "dprint check && eslint src/**/*.gs"
   },
   "repository": {
     "type": "git",
@@ -28,6 +33,10 @@
   },
   "homepage": "https://github.com/lamngockhuong/grocery-manager#readme",
   "devDependencies": {
-    "@google/clasp": "^3.2.0"
+    "@eslint/js": "^10.0.1",
+    "@google/clasp": "^3.2.0",
+    "dprint": "^0.51.1",
+    "eslint": "^10.0.0",
+    "globals": "^17.3.0"
   }
 }

@@ -117,184 +117,183 @@
 </div>
 
 <script>
-  var Reports = {
-    render: function () {
-      var tabsEl = document.getElementById("report-tabs");
-      if (tabsEl) M.Tabs.init(tabsEl);
-      this.loadLowStock();
-      this.loadInventorySummary();
-      this.populateProductFilter();
-    },
+var Reports = {
+  render: function() {
+    var tabsEl = document.getElementById('report-tabs');
+    if (tabsEl) M.Tabs.init(tabsEl);
+    this.loadLowStock();
+    this.loadInventorySummary();
+    this.populateProductFilter();
+  },
 
-    _lowStockData: [],
+  _lowStockData: [],
 
-    renderLowStockHeaders: function () {
-      var row = document.getElementById("report-lowstock-thead-row");
-      if (!row) return;
-      var fn = "Reports.renderLowStockTable.bind(Reports)";
-      row.innerHTML =
-        TableSort.th("lowstock", "product_name", "Sản phẩm", fn) +
-        TableSort.th("lowstock", "category", "Danh mục", fn, "hide-on-small") +
-        TableSort.th("lowstock", "quantity", "Tồn kho", fn) +
-        TableSort.th(
-          "lowstock",
-          "min_stock",
-          "Tối thiểu",
-          fn,
-          "hide-on-small",
-        ) +
-        TableSort.th("lowstock", "deficit", "Thiếu", fn);
-    },
+  renderLowStockHeaders: function() {
+    var row = document.getElementById('report-lowstock-thead-row');
+    if (!row) return;
+    var fn = 'Reports.renderLowStockTable.bind(Reports)';
+    row.innerHTML = TableSort.th('lowstock', 'product_name', 'Sản phẩm', fn)
+      + TableSort.th('lowstock', 'category', 'Danh mục', fn, 'hide-on-small')
+      + TableSort.th('lowstock', 'quantity', 'Tồn kho', fn)
+      + TableSort.th(
+        'lowstock',
+        'min_stock',
+        'Tối thiểu',
+        fn,
+        'hide-on-small'
+      )
+      + TableSort.th('lowstock', 'deficit', 'Thiếu', fn);
+  },
 
-    renderLowStockTable: function () {
-      this.renderLowStockHeaders();
-      var tbody = document.getElementById("report-low-stock-tbody");
-      var data = this._lowStockData;
-      if (!data || data.length === 0) {
-        tbody.innerHTML =
-          '<tr><td colspan="5" class="center grey-text">Không có sản phẩm sắp hết</td></tr>';
-        return;
-      }
-      data = TableSort.sort("lowstock", data);
-      tbody.innerHTML = data
-        .map(function (r) {
-          return (
-            '<tr class="red lighten-5">' +
-            "<td>" +
-            escapeHtml(r.product_name) +
-            "</td>" +
-            '<td class="hide-on-small">' +
-            escapeHtml(r.category) +
-            "</td>" +
-            "<td>" +
-            r.quantity +
-            "</td>" +
-            '<td class="hide-on-small">' +
-            r.min_stock +
-            "</td>" +
-            "<td><strong>" +
-            r.deficit +
-            "</strong></td>" +
-            "</tr>"
-          );
-        })
-        .join("");
-    },
+  renderLowStockTable: function() {
+    this.renderLowStockHeaders();
+    var tbody = document.getElementById('report-low-stock-tbody');
+    var data = this._lowStockData;
+    if (!data || data.length === 0) {
+      tbody.innerHTML =
+        '<tr><td colspan="5" class="center grey-text">Không có sản phẩm sắp hết</td></tr>';
+      return;
+    }
+    data = TableSort.sort('lowstock', data);
+    tbody.innerHTML = data
+      .map(function(r) {
+        return (
+          '<tr class="red lighten-5">'
+          + '<td>'
+          + escapeHtml(r.product_name)
+          + '</td>'
+          + '<td class="hide-on-small">'
+          + escapeHtml(r.category)
+          + '</td>'
+          + '<td>'
+          + r.quantity
+          + '</td>'
+          + '<td class="hide-on-small">'
+          + r.min_stock
+          + '</td>'
+          + '<td><strong>'
+          + r.deficit
+          + '</strong></td>'
+          + '</tr>'
+        );
+      })
+      .join('');
+  },
 
-    loadLowStock: function () {
-      var self = this;
-      api
-        .call("apiGetLowStockReport")
-        .then(function (data) {
-          self._lowStockData = data || [];
-          self.renderLowStockTable();
-        })
-        .catch(function (e) {
-          showToast("Lỗi tải báo cáo: " + e.message, "red");
-        });
-    },
-
-    loadPriceHistory: function () {
-      var productId = document.getElementById("ph-product-filter").value;
-      var start = document.getElementById("ph-start-date").value;
-      var end = document.getElementById("ph-end-date").value;
-
-      showLoading("report-ph-tbody");
-      api
-        .call("apiGetPriceHistoryReport", productId, start, end)
-        .then(function (data) {
-          var tbody = document.getElementById("report-ph-tbody");
-          if (!data || data.length === 0) {
-            tbody.innerHTML =
-              '<tr><td colspan="5" class="center grey-text">Không có dữ liệu</td></tr>';
-            return;
-          }
-          tbody.innerHTML = data
-            .map(function (r) {
-              var buyChanged = Number(r.old_buy) !== Number(r.new_buy);
-              var sellChanged = Number(r.old_sell) !== Number(r.new_sell);
-              var newBuyHtml = buyChanged
-                ? "<strong>" + formatCurrency(r.new_buy) + "</strong>"
-                : formatCurrency(r.new_buy);
-              var newSellHtml = sellChanged
-                ? "<strong>" + formatCurrency(r.new_sell) + "</strong>"
-                : formatCurrency(r.new_sell);
-              return (
-                "<tr>" +
-                "<td>" +
-                escapeHtml(r.product_name) +
-                "</td>" +
-                "<td>" +
-                formatCurrency(r.old_buy) +
-                " &rarr; " +
-                newBuyHtml +
-                "</td>" +
-                "<td>" +
-                formatCurrency(r.old_sell) +
-                " &rarr; " +
-                newSellHtml +
-                "</td>" +
-                "<td>" +
-                formatDate(r.changed_at) +
-                "</td>" +
-                '<td class="hide-on-small">' +
-                escapeHtml(r.changed_by) +
-                "</td>" +
-                "</tr>"
-              );
-            })
-            .join("");
-        })
-        .catch(function (e) {
-          showToast("Lỗi: " + e.message, "red");
-        });
-    },
-
-    loadInventorySummary: function () {
-      api
-        .call("apiGetInventorySummaryReport")
-        .then(function (data) {
-          var tbody = document.getElementById("report-inv-summary-tbody");
-          if (!data || data.length === 0) {
-            tbody.innerHTML =
-              '<tr><td colspan="4" class="center grey-text">Không có dữ liệu</td></tr>';
-            return;
-          }
-          tbody.innerHTML = data
-            .map(function (r) {
-              return (
-                "<tr>" +
-                "<td>" +
-                escapeHtml(r.category_name) +
-                "</td>" +
-                "<td>" +
-                r.product_count +
-                "</td>" +
-                "<td>" +
-                r.total_quantity +
-                "</td>" +
-                "<td>" +
-                formatCurrency(r.total_value) +
-                "</td>" +
-                "</tr>"
-              );
-            })
-            .join("");
-        })
-        .catch(function (e) {
-          showToast("Lỗi: " + e.message, "red");
-        });
-    },
-
-    populateProductFilter: function () {
-      var select = document.getElementById("ph-product-filter");
-      if (!select) return;
-      select.innerHTML = '<option value="">Tất cả sản phẩm</option>';
-      state.products.forEach(function (p) {
-        select.innerHTML +=
-          '<option value="' + p.id + '">' + escapeHtml(p.name) + "</option>";
+  loadLowStock: function() {
+    var self = this;
+    api
+      .call('apiGetLowStockReport')
+      .then(function(data) {
+        self._lowStockData = data || [];
+        self.renderLowStockTable();
+      })
+      .catch(function(e) {
+        showToast('Lỗi tải báo cáo: ' + e.message, 'red');
       });
-      M.FormSelect.init(select);
-    },
-  };
+  },
+
+  loadPriceHistory: function() {
+    var productId = document.getElementById('ph-product-filter').value;
+    var start = document.getElementById('ph-start-date').value;
+    var end = document.getElementById('ph-end-date').value;
+
+    showLoading('report-ph-tbody');
+    api
+      .call('apiGetPriceHistoryReport', productId, start, end)
+      .then(function(data) {
+        var tbody = document.getElementById('report-ph-tbody');
+        if (!data || data.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="center grey-text">Không có dữ liệu</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data
+          .map(function(r) {
+            var buyChanged = Number(r.old_buy) !== Number(r.new_buy);
+            var sellChanged = Number(r.old_sell) !== Number(r.new_sell);
+            var newBuyHtml = buyChanged
+              ? '<strong>' + formatCurrency(r.new_buy) + '</strong>'
+              : formatCurrency(r.new_buy);
+            var newSellHtml = sellChanged
+              ? '<strong>' + formatCurrency(r.new_sell) + '</strong>'
+              : formatCurrency(r.new_sell);
+            return (
+              '<tr>'
+              + '<td>'
+              + escapeHtml(r.product_name)
+              + '</td>'
+              + '<td>'
+              + formatCurrency(r.old_buy)
+              + ' &rarr; '
+              + newBuyHtml
+              + '</td>'
+              + '<td>'
+              + formatCurrency(r.old_sell)
+              + ' &rarr; '
+              + newSellHtml
+              + '</td>'
+              + '<td>'
+              + formatDate(r.changed_at)
+              + '</td>'
+              + '<td class="hide-on-small">'
+              + escapeHtml(r.changed_by)
+              + '</td>'
+              + '</tr>'
+            );
+          })
+          .join('');
+      })
+      .catch(function(e) {
+        showToast('Lỗi: ' + e.message, 'red');
+      });
+  },
+
+  loadInventorySummary: function() {
+    api
+      .call('apiGetInventorySummaryReport')
+      .then(function(data) {
+        var tbody = document.getElementById('report-inv-summary-tbody');
+        if (!data || data.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="4" class="center grey-text">Không có dữ liệu</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data
+          .map(function(r) {
+            return (
+              '<tr>'
+              + '<td>'
+              + escapeHtml(r.category_name)
+              + '</td>'
+              + '<td>'
+              + r.product_count
+              + '</td>'
+              + '<td>'
+              + r.total_quantity
+              + '</td>'
+              + '<td>'
+              + formatCurrency(r.total_value)
+              + '</td>'
+              + '</tr>'
+            );
+          })
+          .join('');
+      })
+      .catch(function(e) {
+        showToast('Lỗi: ' + e.message, 'red');
+      });
+  },
+
+  populateProductFilter: function() {
+    var select = document.getElementById('ph-product-filter');
+    if (!select) return;
+    select.innerHTML = '<option value="">Tất cả sản phẩm</option>';
+    state.products.forEach(function(p) {
+      select.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name)
+        + '</option>';
+    });
+    M.FormSelect.init(select);
+  }
+};
 </script>

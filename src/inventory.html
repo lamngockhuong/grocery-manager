@@ -22,10 +22,8 @@
     <input
       type="checkbox"
       id="low-stock-filter"
-      onchange="
-        Paginator.reset('inventory');
-        Inventory.render();
-      "
+      onchange="Paginator.reset('inventory');
+Inventory.render()"
     />
     <span>Chỉ hiện sắp hết hàng</span>
   </label>
@@ -103,202 +101,201 @@
 </div>
 
 <script>
-  var Inventory = {
-    loaded: false,
+var Inventory = {
+  loaded: false,
 
-    init: function () {
-      var self = this;
-      if (!this.loaded) {
-        showLoading("inventory-tbody");
-        api
-          .call("apiGetInventory")
-          .then(function (data) {
-            state.inventory = data || [];
-            self.loaded = true;
-            self.render();
-          })
-          .catch(function (e) {
-            showToast("Lỗi tải tồn kho: " + e.message, "red");
-          });
-      } else {
-        this.render();
-      }
-    },
-
-    renderHeaders: function () {
-      var row = document.getElementById("inventory-thead-row");
-      if (!row) return;
-      var fn = "Inventory.render.bind(Inventory)";
-      row.innerHTML =
-        TableSort.th("inventory", "product_name", "Sản phẩm", fn) +
-        TableSort.th("inventory", "quantity", "Tồn kho", fn) +
-        TableSort.th(
-          "inventory",
-          "min_stock",
-          "Tối thiểu",
-          fn,
-          "hide-on-small",
-        ) +
-        '<th class="hide-on-small">Nhập hàng cuối</th>' +
-        '<th class="admin-only">Thao tác</th>';
-    },
-
-    render: function () {
-      this.renderHeaders();
-      var items = state.inventory;
-      var lowFilter = document.getElementById("low-stock-filter");
-      if (lowFilter && lowFilter.checked) {
-        items = items.filter(function (i) {
-          return i.quantity < i.min_stock;
-        });
-      }
-
-      document.getElementById("inv-total").textContent = state.inventory.length;
-      document.getElementById("inv-low").textContent = state.inventory.filter(
-        function (i) {
-          return i.quantity < i.min_stock;
-        },
-      ).length;
-
-      if (items.length === 0) {
-        showEmptyState("inventory-tbody", "Không có dữ liệu tồn kho");
-        document.getElementById("inventory-pagination").innerHTML = "";
-        return;
-      }
-
-      // Sort then paginate
-      items = TableSort.sort("inventory", items);
-      var totalItems = items.length;
-      items = Paginator.paginate("inventory", items);
-      Paginator.renderControls(
-        "inventory",
-        totalItems,
-        "inventory-pagination",
-        Inventory.render.bind(Inventory),
-      );
-
-      var tbody = document.getElementById("inventory-tbody");
-      tbody.innerHTML = items
-        .map(function (i) {
-          var isLow = i.quantity < i.min_stock;
-          return (
-            '<tr class="' +
-            (isLow ? "red lighten-5" : "") +
-            '">' +
-            "<td>" +
-            escapeHtml(i.product_name) +
-            "</td>" +
-            "<td>" +
-            i.quantity +
-            (isLow
-              ? ' <i class="material-icons tiny red-text">warning</i>'
-              : "") +
-            "</td>" +
-            '<td class="hide-on-small">' +
-            i.min_stock +
-            "</td>" +
-            '<td class="hide-on-small" title="' +
-            escapeHtml(i.restock_note || "") +
-            '">' +
-            formatDate(i.last_restock) +
-            (i.restock_note
-              ? ' <i class="material-icons tiny grey-text">comment</i>'
-              : "") +
-            "</td>" +
-            '<td class="admin-only">' +
-            "<a onclick=\"Inventory.showRestock('" +
-            i.product_id +
-            '\')" class="btn-small blue waves-effect">Nhập</a> ' +
-            "<a onclick=\"Inventory.showMinStock('" +
-            i.product_id +
-            '\')" class="btn-small grey waves-effect">Min</a>' +
-            "</td>" +
-            "</tr>"
-          );
-        })
-        .join("");
-      updateAdminUI();
-    },
-
-    showRestock: function (productId) {
-      var item = state.inventory.find(function (i) {
-        return i.product_id === productId;
-      });
-      if (!item) return;
-      document.getElementById("restock-product-id").value = productId;
-      document.getElementById("restock-product-name").textContent =
-        item.product_name;
-      document.getElementById("restock-quantity").value = "";
-      document.getElementById("restock-note").value = "";
-      M.updateTextFields();
-      M.textareaAutoResize(document.getElementById("restock-note"));
-      M.Modal.getInstance(document.getElementById("restock-modal")).open();
-    },
-
-    doRestock: function () {
-      var productId = document.getElementById("restock-product-id").value;
-      var qty = Number(document.getElementById("restock-quantity").value);
-      var note = (document.getElementById("restock-note").value || "").trim();
-      if (!qty || qty <= 0) {
-        showToast("Số lượng phải > 0", "orange");
-        return;
-      }
-
-      setBtnLoading("btn-restock", true);
+  init: function() {
+    var self = this;
+    if (!this.loaded) {
+      showLoading('inventory-tbody');
       api
-        .call("apiRestock", productId, qty, note)
-        .then(function () {
-          M.Modal.getInstance(document.getElementById("restock-modal")).close();
-          showToast("Đã nhập hàng thành công", "green");
-          Inventory.loaded = false;
-          Inventory.init();
+        .call('apiGetInventory')
+        .then(function(data) {
+          state.inventory = data || [];
+          self.loaded = true;
+          self.render();
         })
-        .catch(function (e) {
-          showToast("Lỗi: " + e.message, "red");
-        })
-        .then(function () {
-          setBtnLoading("btn-restock", false);
+        .catch(function(e) {
+          showToast('Lỗi tải tồn kho: ' + e.message, 'red');
         });
-    },
+    } else {
+      this.render();
+    }
+  },
 
-    showMinStock: function (productId) {
-      var item = state.inventory.find(function (i) {
-        return i.product_id === productId;
+  renderHeaders: function() {
+    var row = document.getElementById('inventory-thead-row');
+    if (!row) return;
+    var fn = 'Inventory.render.bind(Inventory)';
+    row.innerHTML = TableSort.th('inventory', 'product_name', 'Sản phẩm', fn)
+      + TableSort.th('inventory', 'quantity', 'Tồn kho', fn)
+      + TableSort.th(
+        'inventory',
+        'min_stock',
+        'Tối thiểu',
+        fn,
+        'hide-on-small'
+      )
+      + '<th class="hide-on-small">Nhập hàng cuối</th>'
+      + '<th class="admin-only">Thao tác</th>';
+  },
+
+  render: function() {
+    this.renderHeaders();
+    var items = state.inventory;
+    var lowFilter = document.getElementById('low-stock-filter');
+    if (lowFilter && lowFilter.checked) {
+      items = items.filter(function(i) {
+        return i.quantity < i.min_stock;
       });
-      if (!item) return;
-      document.getElementById("minstock-product-id").value = productId;
-      document.getElementById("minstock-product-name").textContent =
-        item.product_name;
-      document.getElementById("minstock-value").value = item.min_stock;
-      M.updateTextFields();
-      M.Modal.getInstance(document.getElementById("minstock-modal")).open();
-    },
+    }
 
-    saveMinStock: function () {
-      var productId = document.getElementById("minstock-product-id").value;
-      var min = Number(document.getElementById("minstock-value").value);
-      if (isNaN(min) || min < 0) {
-        showToast("Mức tối thiểu phải >= 0", "orange");
-        return;
+    document.getElementById('inv-total').textContent = state.inventory.length;
+    document.getElementById('inv-low').textContent = state.inventory.filter(
+      function(i) {
+        return i.quantity < i.min_stock;
       }
+    ).length;
 
-      setBtnLoading("btn-minstock", true);
-      api
-        .call("apiSetMinStock", productId, min)
-        .then(function () {
-          M.Modal.getInstance(
-            document.getElementById("minstock-modal"),
-          ).close();
-          showToast("Đã lưu mức tối thiểu", "green");
-          Inventory.loaded = false;
-          Inventory.init();
-        })
-        .catch(function (e) {
-          showToast("Lỗi: " + e.message, "red");
-        })
-        .then(function () {
-          setBtnLoading("btn-minstock", false);
-        });
-    },
-  };
+    if (items.length === 0) {
+      showEmptyState('inventory-tbody', 'Không có dữ liệu tồn kho');
+      document.getElementById('inventory-pagination').innerHTML = '';
+      return;
+    }
+
+    // Sort then paginate
+    items = TableSort.sort('inventory', items);
+    var totalItems = items.length;
+    items = Paginator.paginate('inventory', items);
+    Paginator.renderControls(
+      'inventory',
+      totalItems,
+      'inventory-pagination',
+      Inventory.render.bind(Inventory)
+    );
+
+    var tbody = document.getElementById('inventory-tbody');
+    tbody.innerHTML = items
+      .map(function(i) {
+        var isLow = i.quantity < i.min_stock;
+        return (
+          '<tr class="'
+          + (isLow ? 'red lighten-5' : '')
+          + '">'
+          + '<td>'
+          + escapeHtml(i.product_name)
+          + '</td>'
+          + '<td>'
+          + i.quantity
+          + (isLow
+            ? ' <i class="material-icons tiny red-text">warning</i>'
+            : '')
+          + '</td>'
+          + '<td class="hide-on-small">'
+          + i.min_stock
+          + '</td>'
+          + '<td class="hide-on-small" title="'
+          + escapeHtml(i.restock_note || '')
+          + '">'
+          + formatDate(i.last_restock)
+          + (i.restock_note
+            ? ' <i class="material-icons tiny grey-text">comment</i>'
+            : '')
+          + '</td>'
+          + '<td class="admin-only">'
+          + '<a onclick="Inventory.showRestock(\''
+          + i.product_id
+          + '\')" class="btn-small blue waves-effect">Nhập</a> '
+          + '<a onclick="Inventory.showMinStock(\''
+          + i.product_id
+          + '\')" class="btn-small grey waves-effect">Min</a>'
+          + '</td>'
+          + '</tr>'
+        );
+      })
+      .join('');
+    updateAdminUI();
+  },
+
+  showRestock: function(productId) {
+    var item = state.inventory.find(function(i) {
+      return i.product_id === productId;
+    });
+    if (!item) return;
+    document.getElementById('restock-product-id').value = productId;
+    document.getElementById('restock-product-name').textContent =
+      item.product_name;
+    document.getElementById('restock-quantity').value = '';
+    document.getElementById('restock-note').value = '';
+    M.updateTextFields();
+    M.textareaAutoResize(document.getElementById('restock-note'));
+    M.Modal.getInstance(document.getElementById('restock-modal')).open();
+  },
+
+  doRestock: function() {
+    var productId = document.getElementById('restock-product-id').value;
+    var qty = Number(document.getElementById('restock-quantity').value);
+    var note = (document.getElementById('restock-note').value || '').trim();
+    if (!qty || qty <= 0) {
+      showToast('Số lượng phải > 0', 'orange');
+      return;
+    }
+
+    setBtnLoading('btn-restock', true);
+    api
+      .call('apiRestock', productId, qty, note)
+      .then(function() {
+        M.Modal.getInstance(document.getElementById('restock-modal')).close();
+        showToast('Đã nhập hàng thành công', 'green');
+        Inventory.loaded = false;
+        Inventory.init();
+      })
+      .catch(function(e) {
+        showToast('Lỗi: ' + e.message, 'red');
+      })
+      .then(function() {
+        setBtnLoading('btn-restock', false);
+      });
+  },
+
+  showMinStock: function(productId) {
+    var item = state.inventory.find(function(i) {
+      return i.product_id === productId;
+    });
+    if (!item) return;
+    document.getElementById('minstock-product-id').value = productId;
+    document.getElementById('minstock-product-name').textContent =
+      item.product_name;
+    document.getElementById('minstock-value').value = item.min_stock;
+    M.updateTextFields();
+    M.Modal.getInstance(document.getElementById('minstock-modal')).open();
+  },
+
+  saveMinStock: function() {
+    var productId = document.getElementById('minstock-product-id').value;
+    var min = Number(document.getElementById('minstock-value').value);
+    if (isNaN(min) || min < 0) {
+      showToast('Mức tối thiểu phải >= 0', 'orange');
+      return;
+    }
+
+    setBtnLoading('btn-minstock', true);
+    api
+      .call('apiSetMinStock', productId, min)
+      .then(function() {
+        M.Modal.getInstance(
+          document.getElementById('minstock-modal')
+        ).close();
+        showToast('Đã lưu mức tối thiểu', 'green');
+        Inventory.loaded = false;
+        Inventory.init();
+      })
+      .catch(function(e) {
+        showToast('Lỗi: ' + e.message, 'red');
+      })
+      .then(function() {
+        setBtnLoading('btn-minstock', false);
+      });
+  }
+};
 </script>
