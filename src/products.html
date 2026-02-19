@@ -6,10 +6,10 @@
     <div class="col s12 m5">
       <div class="input-field">
         <i class="material-icons prefix">search</i>
-        <input id="product-search" type="text" placeholder="Tìm sản phẩm...">
+        <input id="product-search" type="text" placeholder="Tìm sản phẩm..." />
       </div>
     </div>
-    <div class="col s12 m4">
+    <div class="col s12 m3">
       <div class="input-field">
         <select id="category-filter" onchange="Products.render()">
           <option value="">Tất cả danh mục</option>
@@ -17,7 +17,16 @@
         <label>Danh mục</label>
       </div>
     </div>
-    <div class="col s12 m3 admin-only" style="padding-top:20px">
+    <div class="col s6 m2" style="padding-top: 20px">
+      <button
+        class="btn blue-grey waves-effect"
+        onclick="BarcodeScanner.scanToSearch()"
+        title="Quét mã vạch tìm sản phẩm"
+      >
+        <i class="material-icons left">qr_code_scanner</i>Quét
+      </button>
+    </div>
+    <div class="col s6 m2 admin-only" style="padding-top: 20px">
       <button class="btn blue waves-effect" onclick="Products.showAddModal()">
         <i class="material-icons left">add</i>Thêm
       </button>
@@ -46,9 +55,9 @@
     <div class="modal-content">
       <h5 id="product-modal-title">Thêm sản phẩm</h5>
       <form id="product-form" onsubmit="return false;">
-        <input type="hidden" id="product-id">
+        <input type="hidden" id="product-id" />
         <div class="input-field">
-          <input id="product-name" type="text" required>
+          <input id="product-name" type="text" required />
           <label for="product-name">Tên sản phẩm</label>
         </div>
         <div class="input-field">
@@ -56,20 +65,37 @@
           <label>Danh mục</label>
         </div>
         <div class="input-field">
-          <input id="product-unit" type="text" required>
+          <input id="product-unit" type="text" required />
           <label for="product-unit">Đơn vị (kg, chai, gói...)</label>
         </div>
         <div class="input-field">
-          <input id="product-barcode" type="text">
+          <input id="product-barcode" type="text" />
           <label for="product-barcode">Mã vạch</label>
+          <a
+            class="scan-btn"
+            onclick="BarcodeScanner.scanToField('product-barcode')"
+            title="Quét mã vạch"
+          >
+            <i
+              class="material-icons"
+              style="
+                position: absolute;
+                right: 0;
+                top: 12px;
+                cursor: pointer;
+                color: #607d8b;
+              "
+              >qr_code_scanner</i
+            >
+          </a>
         </div>
         <div class="row">
           <div class="input-field col s6">
-            <input id="product-buy-price" type="number" min="0" step="100">
+            <input id="product-buy-price" type="number" min="0" step="100" />
             <label for="product-buy-price">Giá nhập</label>
           </div>
           <div class="input-field col s6">
-            <input id="product-sell-price" type="number" min="0" step="100">
+            <input id="product-sell-price" type="number" min="0" step="100" />
             <label for="product-sell-price">Giá bán</label>
           </div>
         </div>
@@ -77,7 +103,9 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button class="btn blue waves-effect" onclick="Products.save()">Lưu</button>
+      <button class="btn blue waves-effect" onclick="Products.save()">
+        Lưu
+      </button>
     </div>
   </div>
 
@@ -85,193 +113,438 @@
   <div id="price-modal" class="modal">
     <div class="modal-content">
       <h5>Cập nhật giá</h5>
-      <input type="hidden" id="price-product-id">
+      <input type="hidden" id="price-product-id" />
       <p id="price-product-name" class="flow-text"></p>
       <div class="row">
         <div class="input-field col s6">
-          <input id="price-buy" type="number" min="0" step="100">
+          <input id="price-buy" type="number" min="0" step="100" />
           <label for="price-buy">Giá nhập</label>
         </div>
         <div class="input-field col s6">
-          <input id="price-sell" type="number" min="0" step="100">
+          <input id="price-sell" type="number" min="0" step="100" />
           <label for="price-sell">Giá bán</label>
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button class="btn blue waves-effect" onclick="Products.savePrice()">Lưu giá</button>
+      <button class="btn blue waves-effect" onclick="Products.savePrice()">
+        Lưu giá
+      </button>
     </div>
   </div>
 </div>
 
+<!-- Barcode Scanner Overlay -->
+<div id="scanner-overlay" class="scanner-overlay" style="display: none">
+  <div class="scanner-header">
+    <h6 id="scanner-title">Quét mã vạch</h6>
+    <a onclick="BarcodeScanner.stop()" class="btn-flat white-text"
+      ><i class="material-icons">close</i></a
+    >
+  </div>
+  <div id="scanner-viewport" class="scanner-viewport">
+    <div class="scanner-guide"></div>
+  </div>
+  <div id="scanner-result" class="scanner-result" style="display: none"></div>
+</div>
+
 <script>
-var Products = {
-  render: function() {
-    var tbody = document.getElementById('products-tbody');
-    var products = this.getFilteredProducts();
-    this.populateCategoryFilter();
+  // === Barcode Scanner Module ===
+  var BarcodeScanner = (function () {
+    var _callback = null;
+    var _running = false;
 
-    if (products.length === 0) {
-      showEmptyState('products-tbody', 'Chưa có sản phẩm nào');
-      return;
+    function start(callback, title) {
+      if (_running) return;
+      if (typeof Quagga === "undefined") {
+        showToast("Thư viện quét mã vạch chưa tải xong, thử lại sau", "orange");
+        return;
+      }
+      _callback = callback;
+      document.getElementById("scanner-title").textContent =
+        title || "Quét mã vạch";
+      document.getElementById("scanner-result").style.display = "none";
+      document.getElementById("scanner-overlay").style.display = "flex";
+
+      Quagga.init(
+        {
+          inputStream: {
+            type: "LiveStream",
+            target: document.getElementById("scanner-viewport"),
+            constraints: {
+              facingMode: "environment",
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+          },
+          decoder: {
+            readers: [
+              "ean_reader",
+              "upc_reader",
+              "code_128_reader",
+              "code_39_reader",
+            ],
+          },
+          locate: true,
+          frequency: 10,
+        },
+        function (err) {
+          if (err) {
+            showToast("Không thể mở camera: " + err.message, "red");
+            document.getElementById("scanner-overlay").style.display = "none";
+            return;
+          }
+          _running = true;
+          Quagga.onDetected(onDetected);
+          Quagga.start();
+        },
+      );
     }
 
-    tbody.innerHTML = products.map(function(p) {
-      return '<tr>' +
-        '<td>' + escapeHtml(p.name) + '</td>' +
-        '<td>' + escapeHtml(getCategoryName(p.category_id)) + '</td>' +
-        '<td>' + escapeHtml(p.unit) + '</td>' +
-        '<td class="price-cell" onclick="Products.editPrice(\'' + p.id + '\')">' + formatCurrency(p.buy_price) + '</td>' +
-        '<td class="price-cell" onclick="Products.editPrice(\'' + p.id + '\')">' + formatCurrency(p.sell_price) + '</td>' +
-        '<td class="admin-only">' +
-          '<a onclick="Products.edit(\'' + p.id + '\')" class="btn-small blue waves-effect"><i class="material-icons">edit</i></a> ' +
-          '<a onclick="Products.remove(\'' + p.id + '\')" class="btn-small red waves-effect"><i class="material-icons">delete</i></a>' +
-        '</td>' +
-      '</tr>';
-    }).join('');
-    updateAdminUI();
-  },
+    function onDetected(result) {
+      if (!result || !result.codeResult || !result.codeResult.code) return;
+      var code = result.codeResult.code;
 
-  getFilteredProducts: function() {
-    var products = state.products.filter(function(p) { return p.status === 'active'; });
-    var keyword = (document.getElementById('product-search') || {}).value;
-    var catId = (document.getElementById('category-filter') || {}).value;
-    if (keyword) {
-      var kw = keyword.toLowerCase();
-      products = products.filter(function(p) { return p.name.toLowerCase().indexOf(kw) !== -1; });
+      // Validate barcode format
+      if (!/^[A-Za-z0-9\-\.]+$/.test(code)) return;
+
+      // Show result briefly
+      var resultEl = document.getElementById("scanner-result");
+      resultEl.textContent = "Mã vạch: " + code;
+      resultEl.style.display = "block";
+
+      // Stop scanner and defer callback to let overlay close before confirm()
+      stop();
+      if (_callback) {
+        setTimeout(function () {
+          _callback(code);
+        }, 150);
+      }
     }
-    if (catId) {
-      products = products.filter(function(p) { return p.category_id === catId; });
+
+    function stop() {
+      if (_running) {
+        Quagga.stop();
+        Quagga.offDetected(onDetected);
+        _running = false;
+      }
+      document.getElementById("scanner-overlay").style.display = "none";
     }
-    return products;
-  },
 
-  populateCategoryFilter: function() {
-    var selects = [document.getElementById('category-filter'), document.getElementById('product-category')];
-    var flat = flattenCategories(state.categories);
-    selects.forEach(function(select) {
-      if (!select) return;
-      var current = select.value;
-      var isFilter = select.id === 'category-filter';
-      select.innerHTML = isFilter ? '<option value="">Tất cả danh mục</option>' : '<option value="">Chọn danh mục</option>';
-      flat.forEach(function(cat) {
-        var prefix = cat.parent_id ? '  -- ' : '';
-        select.innerHTML += '<option value="' + cat.id + '"' + (current === cat.id ? ' selected' : '') + '>' + prefix + escapeHtml(cat.name) + '</option>';
-      });
-      M.FormSelect.init(select);
-    });
-  },
+    // Scan and fill a form field
+    function scanToField(fieldId) {
+      start(function (code) {
+        var el = document.getElementById(fieldId);
+        if (el) {
+          el.value = code;
+          el.focus();
+          M.updateTextFields();
+        }
+        showToast("Đã quét: " + escapeHtml(code), "green");
+      }, "Quét mã vạch cho sản phẩm");
+    }
 
-  showAddModal: function() {
-    document.getElementById('product-id').value = '';
-    document.getElementById('product-form').reset();
-    document.getElementById('product-modal-title').textContent = 'Thêm sản phẩm';
-    this.populateCategoryFilter();
-    M.updateTextFields();
-    M.Modal.getInstance(document.getElementById('product-modal')).open();
-  },
+    // Scan and search for product
+    function scanToSearch() {
+      start(function (code) {
+        var product = state.products.find(function (p) {
+          return p.barcode === code && p.status === "active";
+        });
 
-  edit: function(id) {
-    var p = state.products.find(function(pr) { return pr.id === id; });
-    if (!p) return;
-    document.getElementById('product-id').value = p.id;
-    document.getElementById('product-name').value = p.name;
-    document.getElementById('product-unit').value = p.unit;
-    document.getElementById('product-barcode').value = p.barcode || '';
-    document.getElementById('product-buy-price').value = p.buy_price || 0;
-    document.getElementById('product-sell-price').value = p.sell_price || 0;
-    document.getElementById('product-modal-title').textContent = 'Sửa sản phẩm';
-    this.populateCategoryFilter();
-    document.getElementById('product-category').value = p.category_id || '';
-    M.FormSelect.init(document.getElementById('product-category'));
-    M.updateTextFields();
-    M.Modal.getInstance(document.getElementById('product-modal')).open();
-  },
+        if (product) {
+          // Found: set search field and filter
+          var searchEl = document.getElementById("product-search");
+          if (searchEl) searchEl.value = product.name;
+          Products.render();
+          showToast("Tìm thấy: " + escapeHtml(product.name), "green");
+        } else {
+          // Not found: ask to add new
+          if (
+            state.isAdmin &&
+            confirm(
+              'Không tìm thấy sản phẩm với mã vạch "' +
+                code +
+                '". Thêm sản phẩm mới?',
+            )
+          ) {
+            Products.showAddModal();
+            document.getElementById("product-barcode").value = code;
+            M.updateTextFields();
+          } else if (!state.isAdmin) {
+            showToast(
+              "Không tìm thấy sản phẩm với mã vạch: " + escapeHtml(code),
+              "orange",
+            );
+          }
+        }
+      }, "Quét mã vạch tìm sản phẩm");
+    }
 
-  save: function() {
-    var rules = [
-      { field: 'product-name', check: function(v) { return v.trim().length > 0; } },
-      { field: 'product-unit', check: function(v) { return v.trim().length > 0; } },
-      { field: 'product-buy-price', check: function(v) { return !isNaN(v) && Number(v) >= 0; } },
-      { field: 'product-sell-price', check: function(v) { return !isNaN(v) && Number(v) >= 0; } }
-    ];
-    if (!validateForm(rules)) { showToast('Vui lòng kiểm tra lại thông tin', 'orange'); return; }
-
-    var id = document.getElementById('product-id').value;
-    var data = {
-      name: document.getElementById('product-name').value,
-      category_id: document.getElementById('product-category').value,
-      unit: document.getElementById('product-unit').value,
-      barcode: document.getElementById('product-barcode').value,
-      buy_price: Number(document.getElementById('product-buy-price').value) || 0,
-      sell_price: Number(document.getElementById('product-sell-price').value) || 0
+    return {
+      start: start,
+      stop: stop,
+      scanToField: scanToField,
+      scanToSearch: scanToSearch,
     };
+  })();
 
-    var promise = id ? api.call('apiUpdateProduct', id, data) : api.call('apiCreateProduct', data);
-    promise.then(function() {
-      M.Modal.getInstance(document.getElementById('product-modal')).close();
-      showToast(id ? 'Đã cập nhật sản phẩm' : 'Đã thêm sản phẩm', 'green');
-      return api.call('apiGetProducts');
-    }).then(function(products) {
-      state.products = products;
-      Products.render();
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
-    });
-  },
+  var Products = {
+    render: function () {
+      var tbody = document.getElementById("products-tbody");
+      var products = this.getFilteredProducts();
+      this.populateCategoryFilter();
 
-  remove: function(id) {
-    if (!confirm('Bạn có chắc muốn xoá sản phẩm này?')) return;
-    api.call('apiDeleteProduct', id).then(function() {
-      showToast('Đã xoá sản phẩm', 'green');
-      return api.call('apiGetProducts');
-    }).then(function(products) {
-      state.products = products;
-      Products.render();
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
-    });
-  },
+      if (products.length === 0) {
+        showEmptyState("products-tbody", "Chưa có sản phẩm nào");
+        return;
+      }
 
-  editPrice: function(id) {
-    if (!state.isAdmin) return;
-    var p = state.products.find(function(pr) { return pr.id === id; });
-    if (!p) return;
-    document.getElementById('price-product-id').value = p.id;
-    document.getElementById('price-product-name').textContent = p.name;
-    document.getElementById('price-buy').value = p.buy_price || 0;
-    document.getElementById('price-sell').value = p.sell_price || 0;
-    M.updateTextFields();
-    M.Modal.getInstance(document.getElementById('price-modal')).open();
-  },
+      tbody.innerHTML = products
+        .map(function (p) {
+          return (
+            "<tr>" +
+            "<td>" +
+            escapeHtml(p.name) +
+            "</td>" +
+            "<td>" +
+            escapeHtml(getCategoryName(p.category_id)) +
+            "</td>" +
+            "<td>" +
+            escapeHtml(p.unit) +
+            "</td>" +
+            '<td class="price-cell" onclick="Products.editPrice(\'' +
+            p.id +
+            "')\">" +
+            formatCurrency(p.buy_price) +
+            "</td>" +
+            '<td class="price-cell" onclick="Products.editPrice(\'' +
+            p.id +
+            "')\">" +
+            formatCurrency(p.sell_price) +
+            "</td>" +
+            '<td class="admin-only">' +
+            "<a onclick=\"Products.edit('" +
+            p.id +
+            '\')" class="btn-small blue waves-effect"><i class="material-icons">edit</i></a> ' +
+            "<a onclick=\"Products.remove('" +
+            p.id +
+            '\')" class="btn-small red waves-effect"><i class="material-icons">delete</i></a>' +
+            "</td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+      updateAdminUI();
+    },
 
-  savePrice: function() {
-    var productId = document.getElementById('price-product-id').value;
-    var buyPrice = Number(document.getElementById('price-buy').value) || 0;
-    var sellPrice = Number(document.getElementById('price-sell').value) || 0;
-    if (buyPrice < 0 || sellPrice < 0) { showToast('Giá phải >= 0', 'orange'); return; }
+    getFilteredProducts: function () {
+      var products = state.products.filter(function (p) {
+        return p.status === "active";
+      });
+      var keyword = (document.getElementById("product-search") || {}).value;
+      var catId = (document.getElementById("category-filter") || {}).value;
+      if (keyword) {
+        var kw = keyword.toLowerCase();
+        products = products.filter(function (p) {
+          return p.name.toLowerCase().indexOf(kw) !== -1;
+        });
+      }
+      if (catId) {
+        products = products.filter(function (p) {
+          return p.category_id === catId;
+        });
+      }
+      return products;
+    },
 
-    api.call('apiUpdatePrice', productId, buyPrice, sellPrice).then(function() {
-      M.Modal.getInstance(document.getElementById('price-modal')).close();
-      showToast('Đã cập nhật giá', 'green');
-      return api.call('apiGetProducts');
-    }).then(function(products) {
-      state.products = products;
-      Products.render();
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
+    populateCategoryFilter: function () {
+      var selects = [
+        document.getElementById("category-filter"),
+        document.getElementById("product-category"),
+      ];
+      var flat = flattenCategories(state.categories);
+      selects.forEach(function (select) {
+        if (!select) return;
+        var current = select.value;
+        var isFilter = select.id === "category-filter";
+        select.innerHTML = isFilter
+          ? '<option value="">Tất cả danh mục</option>'
+          : '<option value="">Chọn danh mục</option>';
+        flat.forEach(function (cat) {
+          var prefix = cat.parent_id ? "  -- " : "";
+          select.innerHTML +=
+            '<option value="' +
+            cat.id +
+            '"' +
+            (current === cat.id ? " selected" : "") +
+            ">" +
+            prefix +
+            escapeHtml(cat.name) +
+            "</option>";
+        });
+        M.FormSelect.init(select);
+      });
+    },
+
+    showAddModal: function () {
+      document.getElementById("product-id").value = "";
+      document.getElementById("product-form").reset();
+      document.getElementById("product-modal-title").textContent =
+        "Thêm sản phẩm";
+      this.populateCategoryFilter();
+      M.updateTextFields();
+      M.Modal.getInstance(document.getElementById("product-modal")).open();
+    },
+
+    edit: function (id) {
+      var p = state.products.find(function (pr) {
+        return pr.id === id;
+      });
+      if (!p) return;
+      document.getElementById("product-id").value = p.id;
+      document.getElementById("product-name").value = p.name;
+      document.getElementById("product-unit").value = p.unit;
+      document.getElementById("product-barcode").value = p.barcode || "";
+      document.getElementById("product-buy-price").value = p.buy_price || 0;
+      document.getElementById("product-sell-price").value = p.sell_price || 0;
+      document.getElementById("product-modal-title").textContent =
+        "Sửa sản phẩm";
+      this.populateCategoryFilter();
+      document.getElementById("product-category").value = p.category_id || "";
+      M.FormSelect.init(document.getElementById("product-category"));
+      M.updateTextFields();
+      M.Modal.getInstance(document.getElementById("product-modal")).open();
+    },
+
+    save: function () {
+      var rules = [
+        {
+          field: "product-name",
+          check: function (v) {
+            return v.trim().length > 0;
+          },
+        },
+        {
+          field: "product-unit",
+          check: function (v) {
+            return v.trim().length > 0;
+          },
+        },
+        {
+          field: "product-buy-price",
+          check: function (v) {
+            return !isNaN(v) && Number(v) >= 0;
+          },
+        },
+        {
+          field: "product-sell-price",
+          check: function (v) {
+            return !isNaN(v) && Number(v) >= 0;
+          },
+        },
+      ];
+      if (!validateForm(rules)) {
+        showToast("Vui lòng kiểm tra lại thông tin", "orange");
+        return;
+      }
+
+      var id = document.getElementById("product-id").value;
+      var data = {
+        name: document.getElementById("product-name").value,
+        category_id: document.getElementById("product-category").value,
+        unit: document.getElementById("product-unit").value,
+        barcode: document.getElementById("product-barcode").value,
+        buy_price:
+          Number(document.getElementById("product-buy-price").value) || 0,
+        sell_price:
+          Number(document.getElementById("product-sell-price").value) || 0,
+      };
+
+      var promise = id
+        ? api.call("apiUpdateProduct", id, data)
+        : api.call("apiCreateProduct", data);
+      promise
+        .then(function () {
+          M.Modal.getInstance(document.getElementById("product-modal")).close();
+          showToast(id ? "Đã cập nhật sản phẩm" : "Đã thêm sản phẩm", "green");
+          return api.call("apiGetProducts");
+        })
+        .then(function (products) {
+          state.products = products;
+          Products.render();
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
+
+    remove: function (id) {
+      if (!confirm("Bạn có chắc muốn xoá sản phẩm này?")) return;
+      api
+        .call("apiDeleteProduct", id)
+        .then(function () {
+          showToast("Đã xoá sản phẩm", "green");
+          return api.call("apiGetProducts");
+        })
+        .then(function (products) {
+          state.products = products;
+          Products.render();
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
+
+    editPrice: function (id) {
+      if (!state.isAdmin) return;
+      var p = state.products.find(function (pr) {
+        return pr.id === id;
+      });
+      if (!p) return;
+      document.getElementById("price-product-id").value = p.id;
+      document.getElementById("price-product-name").textContent = p.name;
+      document.getElementById("price-buy").value = p.buy_price || 0;
+      document.getElementById("price-sell").value = p.sell_price || 0;
+      M.updateTextFields();
+      M.Modal.getInstance(document.getElementById("price-modal")).open();
+    },
+
+    savePrice: function () {
+      var productId = document.getElementById("price-product-id").value;
+      var buyPrice = Number(document.getElementById("price-buy").value) || 0;
+      var sellPrice = Number(document.getElementById("price-sell").value) || 0;
+      if (buyPrice < 0 || sellPrice < 0) {
+        showToast("Giá phải >= 0", "orange");
+        return;
+      }
+
+      api
+        .call("apiUpdatePrice", productId, buyPrice, sellPrice)
+        .then(function () {
+          M.Modal.getInstance(document.getElementById("price-modal")).close();
+          showToast("Đã cập nhật giá", "green");
+          return api.call("apiGetProducts");
+        })
+        .then(function (products) {
+          state.products = products;
+          Products.render();
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
+  };
+
+  // Search event
+  var searchInput = document.getElementById("product-search");
+  if (searchInput) {
+    var searchTimeout;
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function () {
+        Products.render();
+      }, 300);
     });
   }
-};
-
-// Search event
-var searchInput = document.getElementById('product-search');
-if (searchInput) {
-  var searchTimeout;
-  searchInput.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(function() { Products.render(); }, 300);
-  });
-}
 </script>
