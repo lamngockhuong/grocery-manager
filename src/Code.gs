@@ -222,6 +222,16 @@ function apiDeleteProductImage(productId) {
   }
 }
 
+function apiCleanupOrphanImages() {
+  try {
+    Auth.requireAdmin();
+    var result = ImageService.cleanupOrphanImages();
+    return { success: true, data: result };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 // Prices
 function apiUpdatePrice(productId, buyPrice, sellPrice) {
   try {

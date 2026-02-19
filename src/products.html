@@ -488,7 +488,8 @@
     function onImageError(img) {
       var isLarge = img.classList && img.classList.contains("large");
       img.outerHTML =
-        '<div class="product-image-placeholder' + (isLarge ? " large" : "") +
+        '<div class="product-image-placeholder' +
+        (isLarge ? " large" : "") +
         '"><i class="material-icons">broken_image</i></div>';
     }
 
@@ -503,8 +504,18 @@
     }
 
     function remove() {
+      var container = document.getElementById(
+        "product-image-preview-container",
+      );
+      if (container) {
+        container.innerHTML =
+          '<div class="product-image-placeholder"><i class="material-icons">image</i></div>';
+      }
+      var removeBtn = document.getElementById("btn-remove-image");
+      if (removeBtn) removeBtn.style.display = "none";
+      var urlInput = document.getElementById("product-image-url");
+      if (urlInput) urlInput.value = "";
       _pendingImage = { remove: true };
-      reset();
     }
 
     function getPending() {
@@ -798,12 +809,13 @@
               Products.render();
             });
           } else if (pending && pending.base64) {
+            var slugName = toSlug(data.name) + ".jpg";
             api
               .call(
                 "apiUploadProductImage",
                 savedId,
                 pending.base64,
-                pending.fileName,
+                slugName,
                 pending.mimeType,
               )
               .then(function (imgResult) {

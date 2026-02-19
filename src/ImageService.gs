@@ -38,7 +38,7 @@ var ImageService = (function () {
     var file = folder.createFile(blob);
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
-    return "https://drive.google.com/uc?id=" + file.getId() + "&export=view";
+    return "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w800";
   }
 
   function deleteImage(imageUrl) {
@@ -52,8 +52,40 @@ var ImageService = (function () {
     }
   }
 
+  // Clean up orphaned images in current user's Drive folder
+  function cleanupOrphanImages() {
+    var folders = DriveApp.getFoldersByName(DRIVE.FOLDER_NAME);
+    if (!folders.hasNext()) return { deleted: 0, total: 0 };
+
+    // Collect active image file IDs from sheet
+    var products = SheetHelper.getAll(SHEETS.PRODUCTS);
+    var activeIds = {};
+    products.forEach(function (p) {
+      if (p.image_url && _isDriveUrl(p.image_url)) {
+        var fid = _extractFileId(p.image_url);
+        if (fid) activeIds[fid] = true;
+      }
+    });
+
+    // Scan folder and trash orphans
+    var folder = folders.next();
+    var files = folder.getFiles();
+    var deleted = 0;
+    var total = 0;
+    while (files.hasNext()) {
+      var file = files.next();
+      total++;
+      if (!activeIds[file.getId()]) {
+        file.setTrashed(true);
+        deleted++;
+      }
+    }
+    return { deleted: deleted, total: total };
+  }
+
   return {
     uploadImage: uploadImage,
     deleteImage: deleteImage,
+    cleanupOrphanImages: cleanupOrphanImages,
   };
 })();
