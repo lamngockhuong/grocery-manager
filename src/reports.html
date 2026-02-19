@@ -5,9 +5,9 @@
   <div class="row">
     <div class="col s12">
       <ul class="tabs" id="report-tabs">
-        <li class="tab col s4"><a href="#report-low-stock" class="active">Sắp hết hàng</a></li>
+        <li class="tab col s4"><a href="#report-low-stock" class="active">Hết hàng</a></li>
         <li class="tab col s4"><a href="#report-price-history">Lịch sử giá</a></li>
-        <li class="tab col s4"><a href="#report-inventory-summary">Tổng hợp tồn kho</a></li>
+        <li class="tab col s4"><a href="#report-inventory-summary">Tồn kho</a></li>
       </ul>
     </div>
   </div>
@@ -17,7 +17,7 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr><th>Sản phẩm</th><th>Danh mục</th><th>Tồn kho</th><th>Tối thiểu</th><th>Thiếu</th></tr>
+          <tr><th>Sản phẩm</th><th class="hide-on-small">Danh mục</th><th>Tồn kho</th><th class="hide-on-small">Tối thiểu</th><th>Thiếu</th></tr>
         </thead>
         <tbody id="report-low-stock-tbody">
           <tr><td colspan="5" class="center grey-text">Đang tải...</td></tr>
@@ -100,9 +100,9 @@ var Reports = {
       tbody.innerHTML = data.map(function(r) {
         return '<tr class="red lighten-5">' +
           '<td>' + escapeHtml(r.product_name) + '</td>' +
-          '<td>' + escapeHtml(r.category) + '</td>' +
+          '<td class="hide-on-small">' + escapeHtml(r.category) + '</td>' +
           '<td>' + r.quantity + '</td>' +
-          '<td>' + r.min_stock + '</td>' +
+          '<td class="hide-on-small">' + r.min_stock + '</td>' +
           '<td><strong>' + r.deficit + '</strong></td>' +
         '</tr>';
       }).join('');

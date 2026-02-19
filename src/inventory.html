@@ -25,13 +25,13 @@
 
   <!-- Inventory table -->
   <div class="table-wrapper">
-    <table class="striped responsive-table">
+    <table class="striped">
       <thead>
         <tr>
           <th>Sản phẩm</th>
           <th>Tồn kho</th>
-          <th>Tối thiểu</th>
-          <th>Nhập hàng cuối</th>
+          <th class="hide-on-small">Tối thiểu</th>
+          <th class="hide-on-small">Nhập hàng cuối</th>
           <th class="admin-only">Thao tác</th>
         </tr>
       </thead>
@@ -116,11 +116,11 @@ var Inventory = {
       return '<tr class="' + (isLow ? 'red lighten-5' : '') + '">' +
         '<td>' + escapeHtml(i.product_name) + '</td>' +
         '<td>' + i.quantity + (isLow ? ' <i class="material-icons tiny red-text">warning</i>' : '') + '</td>' +
-        '<td>' + i.min_stock + '</td>' +
-        '<td>' + formatDate(i.last_restock) + '</td>' +
+        '<td class="hide-on-small">' + i.min_stock + '</td>' +
+        '<td class="hide-on-small">' + formatDate(i.last_restock) + '</td>' +
         '<td class="admin-only">' +
-          '<a onclick="Inventory.showRestock(\'' + i.product_id + '\')" class="btn-small blue waves-effect">Nhập hàng</a> ' +
-          '<a onclick="Inventory.showMinStock(\'' + i.product_id + '\')" class="btn-small grey waves-effect">Đặt min</a>' +
+          '<a onclick="Inventory.showRestock(\'' + i.product_id + '\')" class="btn-small blue waves-effect">Nhập</a> ' +
+          '<a onclick="Inventory.showMinStock(\'' + i.product_id + '\')" class="btn-small grey waves-effect">Min</a>' +
         '</td>' +
       '</tr>';
     }).join('');

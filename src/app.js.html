@@ -73,6 +73,11 @@ var router = {
       }
     }
 
+    // Close sidenav on mobile navigation
+    var sidenavEl = document.getElementById('sidenav');
+    var sidenavInstance = M.Sidenav.getInstance(sidenavEl);
+    if (sidenavInstance) sidenavInstance.close();
+
     this.current = hash;
     this.onRouteChange(hash);
   },
@@ -172,7 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (contentEl) showLoading('main-content');
 
   state.init().then(function() {
-    document.getElementById('user-info').textContent = state.user.name || state.user.email;
+    var displayName = state.user.name || state.user.email;
+    document.getElementById('user-info').textContent = displayName;
+    document.getElementById('sidenav-user').textContent = displayName;
     updateAdminUI();
     router.init();
     if (contentEl) contentEl.innerHTML = '';

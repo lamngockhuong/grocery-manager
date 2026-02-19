@@ -19,15 +19,16 @@
     </div>
     <div class="col s6 m2" style="padding-top: 20px">
       <button
-        class="btn blue-grey waves-effect"
+        class="btn blue-grey waves-effect waves-light"
         onclick="BarcodeScanner.scanToSearch()"
         title="Quét mã vạch tìm sản phẩm"
+        style="width: 100%"
       >
         <i class="material-icons left">qr_code_scanner</i>Quét
       </button>
     </div>
     <div class="col s6 m2 admin-only" style="padding-top: 20px">
-      <button class="btn blue waves-effect" onclick="Products.showAddModal()">
+      <button class="btn blue waves-effect waves-light" onclick="Products.showAddModal()" style="width: 100%">
         <i class="material-icons left">add</i>Thêm
       </button>
     </div>
@@ -35,12 +36,12 @@
 
   <!-- Products table -->
   <div class="table-wrapper">
-    <table class="striped responsive-table">
+    <table class="striped">
       <thead>
         <tr>
           <th>Tên sản phẩm</th>
-          <th>Danh mục</th>
-          <th>Đơn vị</th>
+          <th class="hide-on-small">Danh mục</th>
+          <th class="hide-on-small">Đơn vị</th>
           <th>Giá nhập</th>
           <th>Giá bán</th>
           <th class="admin-only">Thao tác</th>
@@ -307,10 +308,10 @@
             "<td>" +
             escapeHtml(p.name) +
             "</td>" +
-            "<td>" +
+            '<td class="hide-on-small">' +
             escapeHtml(getCategoryName(p.category_id)) +
             "</td>" +
-            "<td>" +
+            '<td class="hide-on-small">' +
             escapeHtml(p.unit) +
             "</td>" +
             '<td class="price-cell" onclick="Products.editPrice(\'' +
