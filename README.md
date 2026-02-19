@@ -18,43 +18,48 @@ Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Shee
 ```
 
 ### Backend Files (`.gs`)
-| File | Description |
-|------|-------------|
-| Config.gs | Constants, sheet names, column mappings |
-| SheetHelper.gs | Generic CRUD utilities for Sheets |
-| CacheHelper.gs | CacheService wrapper with chunking (>100KB) |
-| Auth.gs | Authentication & role-based access |
-| Code.gs | doGet(), include(), setupSheets(), API wrappers |
-| ProductService.gs | Product CRUD + search/filter |
-| PriceService.gs | Price CRUD + auto history logging |
-| CategoryService.gs | Category CRUD with parent-child tree |
-| InventoryService.gs | Inventory management + low stock alerts |
-| ReportService.gs | Dashboard stats + 3 report types |
+
+| File                | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| Config.gs           | Constants, sheet names, column mappings         |
+| SheetHelper.gs      | Generic CRUD utilities for Sheets               |
+| CacheHelper.gs      | CacheService wrapper with chunking (>100KB)     |
+| Auth.gs             | Authentication & role-based access              |
+| Code.gs             | doGet(), include(), setupSheets(), API wrappers |
+| ProductService.gs   | Product CRUD + search/filter                    |
+| PriceService.gs     | Price CRUD + auto history logging               |
+| CategoryService.gs  | Category CRUD with parent-child tree            |
+| InventoryService.gs | Inventory management + low stock alerts         |
+| ReportService.gs    | Dashboard stats + 3 report types                |
 
 ### Frontend Files (`.html`)
-| File | Description |
-|------|-------------|
-| index.html | SPA shell with nav, routing |
-| app.js.html | Router, state manager, API wrapper, utils |
-| styles.css.html | Custom styles + responsive |
-| products.html | Product list, search, modals |
-| categories.html | Category tree, CRUD modals |
-| inventory.html | Inventory table, restock, min stock |
-| dashboard.html | Stats cards, low stock warnings |
-| reports.html | 3 report tabs with filters |
+
+| File            | Description                               |
+| --------------- | ----------------------------------------- |
+| index.html      | SPA shell with nav, routing               |
+| app.js.html     | Router, state manager, API wrapper, utils |
+| styles.css.html | Custom styles + responsive                |
+| products.html   | Product list, search, modals              |
+| categories.html | Category tree, CRUD modals                |
+| inventory.html  | Inventory table, restock, min stock       |
+| dashboard.html  | Stats cards, low stock warnings           |
+| reports.html    | 3 report tabs with filters                |
 
 ## Setup
 
 ### 1. Create Google Apps Script Project
+
 1. Go to [script.google.com](https://script.google.com)
 2. Create new project
 3. Copy all files from `src/` into the project
 
 ### 2. Run Setup
+
 1. In GAS editor, run `setupSheets()` function
 2. This creates 6 sheets with headers and adds you as admin
 
 ### 3. Deploy
+
 1. Deploy > New deployment
 2. Type: Web app
 3. Execute as: **User accessing the web app**
@@ -62,6 +67,7 @@ Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Shee
 5. Click Deploy
 
 ### Using clasp (optional)
+
 ```bash
 npm install -g @google/clasp
 clasp login
