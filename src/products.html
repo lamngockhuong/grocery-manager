@@ -406,7 +406,11 @@
       if (keyword) {
         var kw = keyword.toLowerCase();
         products = products.filter(function (p) {
-          return p.name.toLowerCase().indexOf(kw) !== -1;
+          return (
+            p.name.toLowerCase().indexOf(kw) !== -1 ||
+            String(p.barcode || "").toLowerCase().indexOf(kw) !== -1 ||
+            String(p.description || "").toLowerCase().indexOf(kw) !== -1
+          );
         });
       }
       if (catId) {

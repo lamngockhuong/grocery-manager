@@ -141,7 +141,12 @@ var ProductService = (function () {
       });
     var kw = keyword.toLowerCase();
     return getProducts().filter(function (p) {
-      return p.status === "active" && p.name.toLowerCase().indexOf(kw) !== -1;
+      if (p.status !== "active") return false;
+      return (
+        p.name.toLowerCase().indexOf(kw) !== -1 ||
+        String(p.barcode || "").toLowerCase().indexOf(kw) !== -1 ||
+        String(p.description || "").toLowerCase().indexOf(kw) !== -1
+      );
     });
   }
 

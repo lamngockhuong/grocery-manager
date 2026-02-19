@@ -57,6 +57,7 @@ var PriceService = (function () {
 
       var oldBuy = Number(current.buy_price) || 0;
       var oldSell = Number(current.sell_price) || 0;
+      var priceChanged = oldBuy !== newBuyPrice || oldSell !== newSellPrice;
 
       // Update Prices sheet
       SheetHelper.update(SHEETS.PRICES, current.id, {
@@ -66,16 +67,18 @@ var PriceService = (function () {
         updated_by: email,
       });
 
-      // Log to PriceHistory
-      SheetHelper.create(SHEETS.PRICE_HISTORY, {
-        product_id: productId,
-        old_buy: oldBuy,
-        new_buy: newBuyPrice,
-        old_sell: oldSell,
-        new_sell: newSellPrice,
-        changed_at: new Date().toISOString(),
-        changed_by: email,
-      });
+      // Log to PriceHistory only if price actually changed
+      if (priceChanged) {
+        SheetHelper.create(SHEETS.PRICE_HISTORY, {
+          product_id: productId,
+          old_buy: oldBuy,
+          new_buy: newBuyPrice,
+          old_sell: oldSell,
+          new_sell: newSellPrice,
+          changed_at: new Date().toISOString(),
+          changed_by: email,
+        });
+      }
 
       // Invalidate caches
       CacheHelper.remove(CACHE_KEY);
