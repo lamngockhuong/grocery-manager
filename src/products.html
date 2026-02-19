@@ -11,7 +11,13 @@
     </div>
     <div class="col s12 m3">
       <div class="input-field">
-        <select id="category-filter" onchange="Paginator.reset('products'); Products.render()">
+        <select
+          id="category-filter"
+          onchange="
+            Paginator.reset('products');
+            Products.render();
+          "
+        >
           <option value="">Tất cả danh mục</option>
         </select>
         <label>Danh mục</label>
@@ -28,7 +34,11 @@
       </button>
     </div>
     <div class="col s6 m2 admin-only" style="padding-top: 20px">
-      <button class="btn blue waves-effect waves-light" onclick="Products.showAddModal()" style="width: 100%">
+      <button
+        class="btn blue waves-effect waves-light"
+        onclick="Products.showAddModal()"
+        style="width: 100%"
+      >
         <i class="material-icons left">add</i>Thêm
       </button>
     </div>
@@ -92,7 +102,10 @@
           </a>
         </div>
         <div class="input-field">
-          <textarea id="product-description" class="materialize-textarea"></textarea>
+          <textarea
+            id="product-description"
+            class="materialize-textarea"
+          ></textarea>
           <label for="product-description">Mô tả</label>
         </div>
         <div class="row">
@@ -109,7 +122,11 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button id="btn-save-product" class="btn blue waves-effect" onclick="Products.save()">
+      <button
+        id="btn-save-product"
+        class="btn blue waves-effect"
+        onclick="Products.save()"
+      >
         Lưu
       </button>
     </div>
@@ -134,7 +151,11 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button id="btn-save-price" class="btn blue waves-effect" onclick="Products.savePrice()">
+      <button
+        id="btn-save-price"
+        class="btn blue waves-effect"
+        onclick="Products.savePrice()"
+      >
         Lưu giá
       </button>
     </div>
@@ -309,10 +330,15 @@
       }
 
       // Sort then paginate
-      products = TableSort.sort('products', products);
+      products = TableSort.sort("products", products);
       var totalItems = products.length;
-      products = Paginator.paginate('products', products);
-      Paginator.renderControls('products', totalItems, 'products-pagination', Products.render.bind(Products));
+      products = Paginator.paginate("products", products);
+      Paginator.renderControls(
+        "products",
+        totalItems,
+        "products-pagination",
+        Products.render.bind(Products),
+      );
 
       tbody.innerHTML = products
         .map(function (p) {
@@ -358,7 +384,13 @@
       var fn = "Products.render.bind(Products)";
       row.innerHTML =
         TableSort.th("products", "name", "Tên sản phẩm", fn) +
-        TableSort.th("products", "category_id", "Danh mục", fn, "hide-on-small") +
+        TableSort.th(
+          "products",
+          "category_id",
+          "Danh mục",
+          fn,
+          "hide-on-small",
+        ) +
         TableSort.th("products", "unit", "Đơn vị", fn, "hide-on-small") +
         TableSort.th("products", "buy_price", "Giá nhập", fn) +
         TableSort.th("products", "sell_price", "Giá bán", fn) +
@@ -433,7 +465,8 @@
       document.getElementById("product-name").value = p.name;
       document.getElementById("product-unit").value = p.unit;
       document.getElementById("product-barcode").value = p.barcode || "";
-      document.getElementById("product-description").value = p.description || "";
+      document.getElementById("product-description").value =
+        p.description || "";
       document.getElementById("product-buy-price").value = p.buy_price || 0;
       document.getElementById("product-sell-price").value = p.sell_price || 0;
       M.textareaAutoResize(document.getElementById("product-description"));
@@ -501,11 +534,15 @@
           showToast(id ? "Đã cập nhật sản phẩm" : "Đã thêm sản phẩm", "green");
           if (id) {
             // Update local state directly
-            var idx = state.products.findIndex(function (p) { return p.id === id; });
+            var idx = state.products.findIndex(function (p) {
+              return p.id === id;
+            });
             if (idx !== -1) Object.assign(state.products[idx], data);
           } else {
             // New product — merge returned data with form data
-            var newProduct = Object.assign({}, result, data, { status: "active" });
+            var newProduct = Object.assign({}, result, data, {
+              status: "active",
+            });
             state.products.unshift(newProduct);
           }
           Products.render();
@@ -524,7 +561,9 @@
         .call("apiDeleteProduct", id)
         .then(function () {
           showToast("Đã xoá sản phẩm", "green");
-          state.products = state.products.filter(function (p) { return p.id !== id; });
+          state.products = state.products.filter(function (p) {
+            return p.id !== id;
+          });
           Products.render();
         })
         .catch(function (e) {
@@ -561,7 +600,9 @@
         .then(function () {
           M.Modal.getInstance(document.getElementById("price-modal")).close();
           showToast("Đã cập nhật giá", "green");
-          var p = state.products.find(function (pr) { return pr.id === productId; });
+          var p = state.products.find(function (pr) {
+            return pr.id === productId;
+          });
           if (p) {
             p.buy_price = buyPrice;
             p.sell_price = sellPrice;

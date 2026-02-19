@@ -2,8 +2,7 @@
  * CacheHelper.gs - CacheService wrapper with chunking for >100KB data
  */
 
-var CacheHelper = (function() {
-
+var CacheHelper = (function () {
   var CHUNK_SIZE = 90000; // bytes, safe under 100KB CacheService limit
 
   function _getCache() {
@@ -13,7 +12,7 @@ var CacheHelper = (function() {
   function get(key) {
     try {
       var cache = _getCache();
-      var countStr = cache.get(key + '_count');
+      var countStr = cache.get(key + "_count");
 
       // No chunks -> try single key
       if (!countStr) {
@@ -24,19 +23,19 @@ var CacheHelper = (function() {
       var count = parseInt(countStr, 10);
       var keys = [];
       for (var i = 0; i < count; i++) {
-        keys.push(key + '_chunk_' + i);
+        keys.push(key + "_chunk_" + i);
       }
 
       var chunks = cache.getAll(keys);
-      var assembled = '';
+      var assembled = "";
       for (var j = 0; j < count; j++) {
-        var chunk = chunks[key + '_chunk_' + j];
+        var chunk = chunks[key + "_chunk_" + j];
         if (!chunk) return null; // Partial cache miss
         assembled += chunk;
       }
       return JSON.parse(assembled);
     } catch (e) {
-      Logger.log('CacheHelper.get error: ' + e.message);
+      Logger.log("CacheHelper.get error: " + e.message);
       return null;
     }
   }
@@ -59,12 +58,15 @@ var CacheHelper = (function() {
       var chunks = {};
       var count = Math.ceil(jsonStr.length / CHUNK_SIZE);
       for (var i = 0; i < count; i++) {
-        chunks[key + '_chunk_' + i] = jsonStr.substr(i * CHUNK_SIZE, CHUNK_SIZE);
+        chunks[key + "_chunk_" + i] = jsonStr.substr(
+          i * CHUNK_SIZE,
+          CHUNK_SIZE,
+        );
       }
-      chunks[key + '_count'] = String(count);
+      chunks[key + "_count"] = String(count);
       cache.putAll(chunks, ttl);
     } catch (e) {
-      Logger.log('CacheHelper.set error: ' + e.message);
+      Logger.log("CacheHelper.set error: " + e.message);
       // Cache failure is non-critical, continue without cache
     }
   }
@@ -72,20 +74,20 @@ var CacheHelper = (function() {
   function remove(key) {
     try {
       var cache = _getCache();
-      var countStr = cache.get(key + '_count');
+      var countStr = cache.get(key + "_count");
 
       if (countStr) {
         var count = parseInt(countStr, 10);
-        var keys = [key + '_count'];
+        var keys = [key + "_count"];
         for (var i = 0; i < count; i++) {
-          keys.push(key + '_chunk_' + i);
+          keys.push(key + "_chunk_" + i);
         }
         cache.removeAll(keys);
       }
 
       cache.remove(key);
     } catch (e) {
-      Logger.log('CacheHelper.remove error: ' + e.message);
+      Logger.log("CacheHelper.remove error: " + e.message);
     }
   }
 
@@ -94,7 +96,7 @@ var CacheHelper = (function() {
     try {
       remove(prefix);
     } catch (e) {
-      Logger.log('CacheHelper.invalidate error: ' + e.message);
+      Logger.log("CacheHelper.invalidate error: " + e.message);
     }
   }
 
@@ -102,7 +104,6 @@ var CacheHelper = (function() {
     get: get,
     set: set,
     remove: remove,
-    invalidate: invalidate
+    invalidate: invalidate,
   };
-
 })();

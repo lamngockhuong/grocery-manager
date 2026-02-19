@@ -2,9 +2,8 @@
  * InventoryService.gs - Inventory management with low stock alerts
  */
 
-var InventoryService = (function() {
-
-  var CACHE_KEY = 'inventory';
+var InventoryService = (function () {
+  var CACHE_KEY = "inventory";
 
   function getInventory() {
     var cached = CacheHelper.get(CACHE_KEY);
@@ -14,22 +13,24 @@ var InventoryService = (function() {
     var products = SheetHelper.getAll(SHEETS.PRODUCTS);
 
     var productMap = {};
-    products.forEach(function(p) {
-      if (p.status === 'active') productMap[p.id] = p.name;
+    products.forEach(function (p) {
+      if (p.status === "active") productMap[p.id] = p.name;
     });
 
     var result = inventory
-      .filter(function(i) { return productMap[i.product_id]; })
-      .map(function(i) {
+      .filter(function (i) {
+        return productMap[i.product_id];
+      })
+      .map(function (i) {
         return {
           id: i.id,
           product_id: i.product_id,
-          product_name: productMap[i.product_id] || '',
+          product_name: productMap[i.product_id] || "",
           quantity: Number(i.quantity) || 0,
           min_stock: Number(i.min_stock) || 5,
-          last_restock: i.last_restock || '',
-          restock_note: i.restock_note || '',
-          updated_at: i.updated_at || ''
+          last_restock: i.last_restock || "",
+          restock_note: i.restock_note || "",
+          updated_at: i.updated_at || "",
         };
       });
 
@@ -48,14 +49,15 @@ var InventoryService = (function() {
   function updateQuantity(productId, newQuantity) {
     Auth.requireAdmin();
     newQuantity = Number(newQuantity);
-    if (isNaN(newQuantity) || newQuantity < 0) throw new Error('Số lượng phải >= 0');
+    if (isNaN(newQuantity) || newQuantity < 0)
+      throw new Error("Số lượng phải >= 0");
 
     var record = _findInventoryRecord(productId);
-    if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
+    if (!record) throw new Error("Không tìm thấy tồn kho cho sản phẩm");
 
     SheetHelper.update(SHEETS.INVENTORY, record.id, {
       quantity: newQuantity,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     });
     CacheHelper.remove(CACHE_KEY);
     return { success: true };
@@ -64,19 +66,20 @@ var InventoryService = (function() {
   function restock(productId, addQuantity, note) {
     Auth.requireAdmin();
     addQuantity = Number(addQuantity);
-    if (isNaN(addQuantity) || addQuantity <= 0) throw new Error('Số lượng nhập thêm phải > 0');
+    if (isNaN(addQuantity) || addQuantity <= 0)
+      throw new Error("Số lượng nhập thêm phải > 0");
 
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
       var record = _findInventoryRecord(productId);
-      if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
+      if (!record) throw new Error("Không tìm thấy tồn kho cho sản phẩm");
 
       var currentQty = Number(record.quantity) || 0;
       var updateData = {
         quantity: currentQty + addQuantity,
         last_restock: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
       if (note !== undefined && note !== null) {
         updateData.restock_note = String(note).substring(0, 200);
@@ -92,14 +95,15 @@ var InventoryService = (function() {
   function setMinStock(productId, minStock) {
     Auth.requireAdmin();
     minStock = Number(minStock);
-    if (isNaN(minStock) || minStock < 0) throw new Error('Mức tối thiểu phải >= 0');
+    if (isNaN(minStock) || minStock < 0)
+      throw new Error("Mức tối thiểu phải >= 0");
 
     var record = _findInventoryRecord(productId);
-    if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
+    if (!record) throw new Error("Không tìm thấy tồn kho cho sản phẩm");
 
     SheetHelper.update(SHEETS.INVENTORY, record.id, {
       min_stock: minStock,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     });
     CacheHelper.remove(CACHE_KEY);
     return { success: true };
@@ -108,8 +112,12 @@ var InventoryService = (function() {
   function getLowStockProducts() {
     var inventory = getInventory();
     return inventory
-      .filter(function(i) { return i.quantity < i.min_stock; })
-      .sort(function(a, b) { return (a.min_stock - a.quantity) - (b.min_stock - b.quantity); })
+      .filter(function (i) {
+        return i.quantity < i.min_stock;
+      })
+      .sort(function (a, b) {
+        return a.min_stock - a.quantity - (b.min_stock - b.quantity);
+      })
       .reverse();
   }
 
@@ -118,8 +126,8 @@ var InventoryService = (function() {
       product_id: productId,
       quantity: 0,
       min_stock: 5,
-      last_restock: '',
-      updated_at: new Date().toISOString()
+      last_restock: "",
+      updated_at: new Date().toISOString(),
     });
     CacheHelper.remove(CACHE_KEY);
   }
@@ -130,7 +138,6 @@ var InventoryService = (function() {
     restock: restock,
     setMinStock: setMinStock,
     getLowStockProducts: getLowStockProducts,
-    createInventoryForProduct: createInventoryForProduct
+    createInventoryForProduct: createInventoryForProduct,
   };
-
 })();

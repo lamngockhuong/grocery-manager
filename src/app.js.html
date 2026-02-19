@@ -219,58 +219,74 @@
   var TableSort = {
     _state: {}, // { tableId: { column: '', dir: 'asc'|'desc' } }
 
-    toggle: function(tableId, column, renderFn) {
+    toggle: function (tableId, column, renderFn) {
       var s = this._state[tableId];
       if (!s || s.column !== column) {
-        this._state[tableId] = { column: column, dir: 'asc' };
-      } else if (s.dir === 'asc') {
-        s.dir = 'desc';
+        this._state[tableId] = { column: column, dir: "asc" };
+      } else if (s.dir === "asc") {
+        s.dir = "desc";
       } else {
         delete this._state[tableId];
       }
-      if (typeof Paginator !== 'undefined') Paginator.reset(tableId);
+      if (typeof Paginator !== "undefined") Paginator.reset(tableId);
       if (renderFn) renderFn();
     },
 
-    sort: function(tableId, data) {
+    sort: function (tableId, data) {
       var s = this._state[tableId];
       if (!s) return data;
       var col = s.column;
-      var dir = s.dir === 'asc' ? 1 : -1;
-      return data.slice().sort(function(a, b) {
-        var va = a[col], vb = b[col];
-        if (typeof va === 'string') va = va.toLowerCase();
-        if (typeof vb === 'string') vb = vb.toLowerCase();
+      var dir = s.dir === "asc" ? 1 : -1;
+      return data.slice().sort(function (a, b) {
+        var va = a[col],
+          vb = b[col];
+        if (typeof va === "string") va = va.toLowerCase();
+        if (typeof vb === "string") vb = vb.toLowerCase();
         if (va < vb) return -1 * dir;
         if (va > vb) return 1 * dir;
         return 0;
       });
     },
 
-    icon: function(tableId, column) {
+    icon: function (tableId, column) {
       var s = this._state[tableId];
-      if (!s || s.column !== column) return '<i class="material-icons tiny sort-icon">unfold_more</i>';
-      return s.dir === 'asc'
+      if (!s || s.column !== column)
+        return '<i class="material-icons tiny sort-icon">unfold_more</i>';
+      return s.dir === "asc"
         ? '<i class="material-icons tiny sort-icon active">arrow_upward</i>'
         : '<i class="material-icons tiny sort-icon active">arrow_downward</i>';
     },
 
-    th: function(tableId, column, label, renderFn, extraClass) {
-      return '<th class="sortable-th ' + (extraClass || '') + '" onclick="TableSort.toggle(\'' + tableId + '\',\'' + column + '\',' + renderFn + ')">' +
-        label + ' ' + this.icon(tableId, column) + '</th>';
-    }
+    th: function (tableId, column, label, renderFn, extraClass) {
+      return (
+        '<th class="sortable-th ' +
+        (extraClass || "") +
+        '" onclick="TableSort.toggle(\'' +
+        tableId +
+        "','" +
+        column +
+        "'," +
+        renderFn +
+        ')">' +
+        label +
+        " " +
+        this.icon(tableId, column) +
+        "</th>"
+      );
+    },
   };
 
   // === Paginator Utility ===
   var Paginator = {
     _state: {}, // { tableId: { page: 1, pageSize: 25 } }
 
-    _getState: function(tableId) {
-      if (!this._state[tableId]) this._state[tableId] = { page: 1, pageSize: 25 };
+    _getState: function (tableId) {
+      if (!this._state[tableId])
+        this._state[tableId] = { page: 1, pageSize: 25 };
       return this._state[tableId];
     },
 
-    paginate: function(tableId, data) {
+    paginate: function (tableId, data) {
       var s = this._getState(tableId);
       var totalPages = Math.ceil(data.length / s.pageSize) || 1;
       if (s.page > totalPages) s.page = totalPages;
@@ -278,37 +294,66 @@
       return data.slice(start, start + s.pageSize);
     },
 
-    reset: function(tableId) {
+    reset: function (tableId) {
       var s = this._getState(tableId);
       s.page = 1;
     },
 
-    renderControls: function(tableId, totalItems, containerId, renderFn) {
+    renderControls: function (tableId, totalItems, containerId, renderFn) {
       var el = document.getElementById(containerId);
       if (!el) return;
       var s = this._getState(tableId);
       var totalPages = Math.ceil(totalItems / s.pageSize) || 1;
       var start = (s.page - 1) * s.pageSize + 1;
       var end = Math.min(s.page * s.pageSize, totalItems);
-      if (totalItems === 0) { start = 0; end = 0; }
+      if (totalItems === 0) {
+        start = 0;
+        end = 0;
+      }
 
       el.innerHTML =
-        '<span class="pagination-info">Hiển thị ' + start + '-' + end + ' / ' + totalItems + '</span>' +
+        '<span class="pagination-info">Hiển thị ' +
+        start +
+        "-" +
+        end +
+        " / " +
+        totalItems +
+        "</span>" +
         '<div class="pagination-buttons">' +
-          '<button class="btn-small waves-effect' + (s.page <= 1 ? ' disabled' : '') + '" onclick="Paginator.goTo(\'' + tableId + '\',' + (s.page - 1) + ',' + renderFn + ')">' +
-            '<i class="material-icons">chevron_left</i></button> ' +
-          '<span class="pagination-page">Trang ' + s.page + ' / ' + totalPages + '</span> ' +
-          '<button class="btn-small waves-effect' + (s.page >= totalPages ? ' disabled' : '') + '" onclick="Paginator.goTo(\'' + tableId + '\',' + (s.page + 1) + ',' + renderFn + ')">' +
-            '<i class="material-icons">chevron_right</i></button>' +
-        '</div>';
+        '<button class="btn-small waves-effect' +
+        (s.page <= 1 ? " disabled" : "") +
+        '" onclick="Paginator.goTo(\'' +
+        tableId +
+        "'," +
+        (s.page - 1) +
+        "," +
+        renderFn +
+        ')">' +
+        '<i class="material-icons">chevron_left</i></button> ' +
+        '<span class="pagination-page">Trang ' +
+        s.page +
+        " / " +
+        totalPages +
+        "</span> " +
+        '<button class="btn-small waves-effect' +
+        (s.page >= totalPages ? " disabled" : "") +
+        '" onclick="Paginator.goTo(\'' +
+        tableId +
+        "'," +
+        (s.page + 1) +
+        "," +
+        renderFn +
+        ')">' +
+        '<i class="material-icons">chevron_right</i></button>' +
+        "</div>";
     },
 
-    goTo: function(tableId, page, renderFn) {
+    goTo: function (tableId, page, renderFn) {
       var s = this._getState(tableId);
       if (page < 1) return;
       s.page = page;
       if (renderFn) renderFn();
-    }
+    },
   };
 
   // === Init ===

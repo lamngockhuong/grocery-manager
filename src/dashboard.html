@@ -24,9 +24,11 @@
   </div>
 
   <!-- Low stock warning -->
-  <div class="card" id="low-stock-card" style="display:none">
+  <div class="card" id="low-stock-card" style="display: none">
     <div class="card-content">
-      <span class="card-title red-text"><i class="material-icons">warning</i> Cảnh báo sắp hết hàng</span>
+      <span class="card-title red-text"
+        ><i class="material-icons">warning</i> Cảnh báo sắp hết hàng</span
+      >
       <ul id="low-stock-list" class="collection"></ul>
     </div>
   </div>
@@ -38,10 +40,17 @@
       <div class="table-wrapper">
         <table class="striped">
           <thead>
-            <tr><th>Sản phẩm</th><th>Giá nhập</th><th>Giá bán</th><th class="hide-on-small">Thời gian</th></tr>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Giá nhập</th>
+              <th>Giá bán</th>
+              <th class="hide-on-small">Thời gian</th>
+            </tr>
           </thead>
           <tbody id="recent-changes-tbody">
-            <tr><td colspan="4" class="center grey-text">Đang tải...</td></tr>
+            <tr>
+              <td colspan="4" class="center grey-text">Đang tải...</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -50,55 +59,92 @@
 </div>
 
 <script>
-var Dashboard = {
-  renderStats: function(stats) {
-      document.getElementById('stat-total-products').textContent = stats.totalProducts || 0;
-      document.getElementById('stat-total-value').textContent = formatCurrency(stats.totalValue);
-      document.getElementById('stat-low-stock').textContent = stats.lowStockCount || 0;
+  var Dashboard = {
+    renderStats: function (stats) {
+      document.getElementById("stat-total-products").textContent =
+        stats.totalProducts || 0;
+      document.getElementById("stat-total-value").textContent = formatCurrency(
+        stats.totalValue,
+      );
+      document.getElementById("stat-low-stock").textContent =
+        stats.lowStockCount || 0;
 
       if (stats.lowStockCount > 0) {
-        document.getElementById('low-stock-card').style.display = 'block';
-        document.getElementById('low-stock-list').innerHTML = stats.lowStockProducts
-          .map(function(p) {
-            return '<li class="collection-item"><span class="red-text">' +
-              escapeHtml(p.product_name) + '</span>: con ' + p.quantity + '/' + p.min_stock + '</li>';
-          }).join('');
+        document.getElementById("low-stock-card").style.display = "block";
+        document.getElementById("low-stock-list").innerHTML =
+          stats.lowStockProducts
+            .map(function (p) {
+              return (
+                '<li class="collection-item"><span class="red-text">' +
+                escapeHtml(p.product_name) +
+                "</span>: con " +
+                p.quantity +
+                "/" +
+                p.min_stock +
+                "</li>"
+              );
+            })
+            .join("");
       } else {
-        document.getElementById('low-stock-card').style.display = 'none';
+        document.getElementById("low-stock-card").style.display = "none";
       }
 
-      var tbody = document.getElementById('recent-changes-tbody');
+      var tbody = document.getElementById("recent-changes-tbody");
       if (!stats.recentChanges || stats.recentChanges.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Chưa có thay đổi giá nào</td></tr>';
+        tbody.innerHTML =
+          '<tr><td colspan="4" class="center grey-text">Chưa có thay đổi giá nào</td></tr>';
       } else {
-        tbody.innerHTML = stats.recentChanges.map(function(c) {
-          var buyChanged = Number(c.old_buy) !== Number(c.new_buy);
-          var sellChanged = Number(c.old_sell) !== Number(c.new_sell);
-          var newBuyHtml = buyChanged ? '<strong>' + formatCurrency(c.new_buy) + '</strong>' : formatCurrency(c.new_buy);
-          var newSellHtml = sellChanged ? '<strong>' + formatCurrency(c.new_sell) + '</strong>' : formatCurrency(c.new_sell);
-          return '<tr>' +
-            '<td>' + escapeHtml(c.product_name || c.product_id) + '</td>' +
-            '<td>' + formatCurrency(c.old_buy) + ' &rarr; ' + newBuyHtml + '</td>' +
-            '<td>' + formatCurrency(c.old_sell) + ' &rarr; ' + newSellHtml + '</td>' +
-            '<td class="hide-on-small">' + formatDate(c.changed_at) + '</td>' +
-          '</tr>';
-        }).join('');
+        tbody.innerHTML = stats.recentChanges
+          .map(function (c) {
+            var buyChanged = Number(c.old_buy) !== Number(c.new_buy);
+            var sellChanged = Number(c.old_sell) !== Number(c.new_sell);
+            var newBuyHtml = buyChanged
+              ? "<strong>" + formatCurrency(c.new_buy) + "</strong>"
+              : formatCurrency(c.new_buy);
+            var newSellHtml = sellChanged
+              ? "<strong>" + formatCurrency(c.new_sell) + "</strong>"
+              : formatCurrency(c.new_sell);
+            return (
+              "<tr>" +
+              "<td>" +
+              escapeHtml(c.product_name || c.product_id) +
+              "</td>" +
+              "<td>" +
+              formatCurrency(c.old_buy) +
+              " &rarr; " +
+              newBuyHtml +
+              "</td>" +
+              "<td>" +
+              formatCurrency(c.old_sell) +
+              " &rarr; " +
+              newSellHtml +
+              "</td>" +
+              '<td class="hide-on-small">' +
+              formatDate(c.changed_at) +
+              "</td>" +
+              "</tr>"
+            );
+          })
+          .join("");
       }
-  },
+    },
 
-  render: function() {
-    if (state.dashboardStats) {
-      var stats = state.dashboardStats;
-      state.dashboardStats = null; // Clear so subsequent visits fetch fresh data via RPC
-      this.renderStats(stats);
-      return;
-    }
-    var self = this;
-    api.call('apiGetDashboardStats').then(function(stats) {
-      self.renderStats(stats);
-    }).catch(function(e) {
-      showToast('Lỗi tải dashboard: ' + e.message, 'red');
-    });
-  }
-};
+    render: function () {
+      if (state.dashboardStats) {
+        var stats = state.dashboardStats;
+        state.dashboardStats = null; // Clear so subsequent visits fetch fresh data via RPC
+        this.renderStats(stats);
+        return;
+      }
+      var self = this;
+      api
+        .call("apiGetDashboardStats")
+        .then(function (stats) {
+          self.renderStats(stats);
+        })
+        .catch(function (e) {
+          showToast("Lỗi tải dashboard: " + e.message, "red");
+        });
+    },
+  };
 </script>

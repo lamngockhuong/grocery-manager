@@ -2,14 +2,15 @@
  * SheetHelper.gs - Generic CRUD utilities for Google Sheets
  */
 
-var SheetHelper = (function() {
-
+var SheetHelper = (function () {
   var _ssCache = null;
 
   function _getSpreadsheet() {
     if (_ssCache) return _ssCache;
     var id = getSpreadsheetId();
-    _ssCache = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+    _ssCache = id
+      ? SpreadsheetApp.openById(id)
+      : SpreadsheetApp.getActiveSpreadsheet();
     return _ssCache;
   }
 
@@ -28,20 +29,20 @@ var SheetHelper = (function() {
 
   function _rowToObject(headers, row) {
     var obj = {};
-    headers.forEach(function(h, i) {
-      obj[h] = row[i] !== undefined ? row[i] : '';
+    headers.forEach(function (h, i) {
+      obj[h] = row[i] !== undefined ? row[i] : "";
     });
     return obj;
   }
 
   function _objectToRow(headers, obj) {
-    return headers.map(function(h) {
-      return obj[h] !== undefined ? obj[h] : '';
+    return headers.map(function (h) {
+      return obj[h] !== undefined ? obj[h] : "";
     });
   }
 
   function generateId(prefix) {
-    return (prefix || '') + Utilities.getUuid().replace(/-/g, '').substr(0, 12);
+    return (prefix || "") + Utilities.getUuid().replace(/-/g, "").substr(0, 12);
   }
 
   function getAll(sheetName) {
@@ -52,10 +53,14 @@ var SheetHelper = (function() {
       var headers = _getHeaders(sheet);
       var data = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
       return data
-        .map(function(row) { return _rowToObject(headers, row); })
-        .filter(function(obj) { return obj[headers[0]] !== ''; });
+        .map(function (row) {
+          return _rowToObject(headers, row);
+        })
+        .filter(function (obj) {
+          return obj[headers[0]] !== "";
+        });
     } catch (e) {
-      Logger.log('SheetHelper.getAll error: ' + e.message);
+      Logger.log("SheetHelper.getAll error: " + e.message);
       throw e;
     }
   }
@@ -74,7 +79,7 @@ var SheetHelper = (function() {
       }
       return null;
     } catch (e) {
-      Logger.log('SheetHelper.getById error: ' + e.message);
+      Logger.log("SheetHelper.getById error: " + e.message);
       throw e;
     }
   }
@@ -83,7 +88,7 @@ var SheetHelper = (function() {
     try {
       var sheet = getSheet(sheetName);
       var headers = _getHeaders(sheet);
-      var prefix = ID_PREFIXES[sheetName] || '';
+      var prefix = ID_PREFIXES[sheetName] || "";
       if (!data.id) {
         data.id = generateId(prefix);
       }
@@ -91,7 +96,7 @@ var SheetHelper = (function() {
       sheet.appendRow(row);
       return data;
     } catch (e) {
-      Logger.log('SheetHelper.create error: ' + e.message);
+      Logger.log("SheetHelper.create error: " + e.message);
       throw e;
     }
   }
@@ -101,13 +106,15 @@ var SheetHelper = (function() {
       var sheet = getSheet(sheetName);
       var headers = _getHeaders(sheet);
       var lastRow = sheet.getLastRow();
-      if (lastRow <= 1) throw new Error('No data in sheet');
-      var allData = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+      if (lastRow <= 1) throw new Error("No data in sheet");
+      var allData = sheet
+        .getRange(2, 1, lastRow - 1, headers.length)
+        .getValues();
       for (var i = 0; i < allData.length; i++) {
         if (String(allData[i][0]) === String(id)) {
           var existing = _rowToObject(headers, allData[i]);
           // Merge data
-          Object.keys(data).forEach(function(key) {
+          Object.keys(data).forEach(function (key) {
             existing[key] = data[key];
           });
           var newRow = _objectToRow(headers, existing);
@@ -117,7 +124,7 @@ var SheetHelper = (function() {
       }
       throw new Error('Record with id "' + id + '" not found in ' + sheetName);
     } catch (e) {
-      Logger.log('SheetHelper.update error: ' + e.message);
+      Logger.log("SheetHelper.update error: " + e.message);
       throw e;
     }
   }
@@ -128,7 +135,9 @@ var SheetHelper = (function() {
       var headers = _getHeaders(sheet);
       var lastRow = sheet.getLastRow();
       if (lastRow <= 1) return false;
-      var allData = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+      var allData = sheet
+        .getRange(2, 1, lastRow - 1, headers.length)
+        .getValues();
       for (var i = 0; i < allData.length; i++) {
         if (String(allData[i][0]) === String(id)) {
           sheet.deleteRow(i + 2);
@@ -137,7 +146,7 @@ var SheetHelper = (function() {
       }
       return false;
     } catch (e) {
-      Logger.log('SheetHelper.remove error: ' + e.message);
+      Logger.log("SheetHelper.remove error: " + e.message);
       throw e;
     }
   }
@@ -155,7 +164,6 @@ var SheetHelper = (function() {
     update: update,
     remove: remove,
     query: query,
-    generateId: generateId
+    generateId: generateId,
   };
-
 })();

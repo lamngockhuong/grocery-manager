@@ -2,8 +2,7 @@
  * Auth.gs - Authentication & role-based access control
  */
 
-var Auth = (function() {
-
+var Auth = (function () {
   var _usersCache = null;
 
   function _getUsers() {
@@ -15,10 +14,10 @@ var Auth = (function() {
     var email = Session.getActiveUser().getEmail();
     if (!email) {
       throw new Error(
-        'Không thể xác định người dùng. Vui lòng đảm bảo: ' +
-        '(1) Bạn đã đăng nhập Google, ' +
-        '(2) Bạn đã cấp quyền cho ứng dụng khi được hỏi, ' +
-        '(3) Sử dụng đúng URL deployment mới nhất (/exec).'
+        "Không thể xác định người dùng. Vui lòng đảm bảo: " +
+          "(1) Bạn đã đăng nhập Google, " +
+          "(2) Bạn đã cấp quyền cho ứng dụng khi được hỏi, " +
+          "(3) Sử dụng đúng URL deployment mới nhất (/exec).",
       );
     }
     return email;
@@ -51,7 +50,9 @@ var Auth = (function() {
   function requireAdmin() {
     var email = getCurrentUser();
     if (!isAdmin(email)) {
-      throw new Error('Bạn không có quyền thực hiện thao tác này. Yêu cầu quyền admin.');
+      throw new Error(
+        "Bạn không có quyền thực hiện thao tác này. Yêu cầu quyền admin.",
+      );
     }
     return email;
   }
@@ -60,7 +61,9 @@ var Auth = (function() {
     var email = getCurrentUser();
     var user = _findUser(email);
     if (!user) {
-      throw new Error('Tài khoản ' + email + ' không có quyền truy cập hệ thống.');
+      throw new Error(
+        "Tài khoản " + email + " không có quyền truy cập hệ thống.",
+      );
     }
     return user;
   }
@@ -69,12 +72,12 @@ var Auth = (function() {
     var email = getCurrentUser();
     var user = _findUser(email);
     if (!user) {
-      throw new Error('Tài khoản ' + email + ' không có quyền truy cập.');
+      throw new Error("Tài khoản " + email + " không có quyền truy cập.");
     }
     return {
       email: user.email,
       role: user.role,
-      name: user.name
+      name: user.name,
     };
   }
 
@@ -84,7 +87,6 @@ var Auth = (function() {
     isAdmin: isAdmin,
     requireAdmin: requireAdmin,
     checkAccess: checkAccess,
-    getAuthInfo: getAuthInfo
+    getAuthInfo: getAuthInfo,
   };
-
 })();

@@ -5,9 +5,15 @@
   <div class="row">
     <div class="col s12">
       <ul class="tabs" id="report-tabs">
-        <li class="tab col s4"><a href="#report-low-stock" class="active">Hết hàng</a></li>
-        <li class="tab col s4"><a href="#report-price-history">Lịch sử giá</a></li>
-        <li class="tab col s4"><a href="#report-inventory-summary">Tồn kho</a></li>
+        <li class="tab col s4">
+          <a href="#report-low-stock" class="active">Hết hàng</a>
+        </li>
+        <li class="tab col s4">
+          <a href="#report-price-history">Lịch sử giá</a>
+        </li>
+        <li class="tab col s4">
+          <a href="#report-inventory-summary">Tồn kho</a>
+        </li>
       </ul>
     </div>
   </div>
@@ -17,10 +23,18 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr id="report-lowstock-thead-row"><th>Sản phẩm</th><th class="hide-on-small">Danh mục</th><th>Tồn kho</th><th class="hide-on-small">Tối thiểu</th><th>Thiếu</th></tr>
+          <tr id="report-lowstock-thead-row">
+            <th>Sản phẩm</th>
+            <th class="hide-on-small">Danh mục</th>
+            <th>Tồn kho</th>
+            <th class="hide-on-small">Tối thiểu</th>
+            <th>Thiếu</th>
+          </tr>
         </thead>
         <tbody id="report-low-stock-tbody">
-          <tr><td colspan="5" class="center grey-text">Đang tải...</td></tr>
+          <tr>
+            <td colspan="5" class="center grey-text">Đang tải...</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -28,27 +42,32 @@
 
   <!-- Tab 2: Price History -->
   <div id="report-price-history">
-    <div class="row" style="margin-top:10px">
+    <div class="row" style="margin-top: 10px">
       <div class="col s12 m4">
         <div class="input-field">
-          <select id="ph-product-filter"><option value="">Tất cả sản phẩm</option></select>
+          <select id="ph-product-filter">
+            <option value="">Tất cả sản phẩm</option>
+          </select>
           <label>Sản phẩm</label>
         </div>
       </div>
       <div class="col s6 m3">
         <div class="input-field">
-          <input type="date" id="ph-start-date">
+          <input type="date" id="ph-start-date" />
           <label for="ph-start-date">Từ ngày</label>
         </div>
       </div>
       <div class="col s6 m3">
         <div class="input-field">
-          <input type="date" id="ph-end-date">
+          <input type="date" id="ph-end-date" />
           <label for="ph-end-date">Đến ngày</label>
         </div>
       </div>
-      <div class="col s12 m2" style="padding-top:20px">
-        <button class="btn blue waves-effect" onclick="Reports.loadPriceHistory()">
+      <div class="col s12 m2" style="padding-top: 20px">
+        <button
+          class="btn blue waves-effect"
+          onclick="Reports.loadPriceHistory()"
+        >
           <i class="material-icons left">search</i>Xem
         </button>
       </div>
@@ -56,10 +75,20 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr><th>Sản phẩm</th><th>Giá nhập cũ&rarr;mới</th><th>Giá bán cũ&rarr;mới</th><th>Ngày</th><th class="hide-on-small">Người sửa</th></tr>
+          <tr>
+            <th>Sản phẩm</th>
+            <th>Giá nhập cũ&rarr;mới</th>
+            <th>Giá bán cũ&rarr;mới</th>
+            <th>Ngày</th>
+            <th class="hide-on-small">Người sửa</th>
+          </tr>
         </thead>
         <tbody id="report-ph-tbody">
-          <tr><td colspan="5" class="center grey-text">Chọn bộ lọc và nhấn Xem</td></tr>
+          <tr>
+            <td colspan="5" class="center grey-text">
+              Chọn bộ lọc và nhấn Xem
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -70,10 +99,17 @@
     <div class="table-wrapper">
       <table class="striped">
         <thead>
-          <tr><th>Danh mục</th><th>Số mặt hàng</th><th>Tổng tồn kho</th><th>Tổng giá trị</th></tr>
+          <tr>
+            <th>Danh mục</th>
+            <th>Số mặt hàng</th>
+            <th>Tổng tồn kho</th>
+            <th>Tổng giá trị</th>
+          </tr>
         </thead>
         <tbody id="report-inv-summary-tbody">
-          <tr><td colspan="4" class="center grey-text">Đang tải...</td></tr>
+          <tr>
+            <td colspan="4" class="center grey-text">Đang tải...</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -81,117 +117,184 @@
 </div>
 
 <script>
-var Reports = {
-  render: function() {
-    var tabsEl = document.getElementById('report-tabs');
-    if (tabsEl) M.Tabs.init(tabsEl);
-    this.loadLowStock();
-    this.loadInventorySummary();
-    this.populateProductFilter();
-  },
+  var Reports = {
+    render: function () {
+      var tabsEl = document.getElementById("report-tabs");
+      if (tabsEl) M.Tabs.init(tabsEl);
+      this.loadLowStock();
+      this.loadInventorySummary();
+      this.populateProductFilter();
+    },
 
-  _lowStockData: [],
+    _lowStockData: [],
 
-  renderLowStockHeaders: function() {
-    var row = document.getElementById('report-lowstock-thead-row');
-    if (!row) return;
-    var fn = 'Reports.renderLowStockTable.bind(Reports)';
-    row.innerHTML =
-      TableSort.th('lowstock', 'product_name', 'Sản phẩm', fn) +
-      TableSort.th('lowstock', 'category', 'Danh mục', fn, 'hide-on-small') +
-      TableSort.th('lowstock', 'quantity', 'Tồn kho', fn) +
-      TableSort.th('lowstock', 'min_stock', 'Tối thiểu', fn, 'hide-on-small') +
-      TableSort.th('lowstock', 'deficit', 'Thiếu', fn);
-  },
+    renderLowStockHeaders: function () {
+      var row = document.getElementById("report-lowstock-thead-row");
+      if (!row) return;
+      var fn = "Reports.renderLowStockTable.bind(Reports)";
+      row.innerHTML =
+        TableSort.th("lowstock", "product_name", "Sản phẩm", fn) +
+        TableSort.th("lowstock", "category", "Danh mục", fn, "hide-on-small") +
+        TableSort.th("lowstock", "quantity", "Tồn kho", fn) +
+        TableSort.th(
+          "lowstock",
+          "min_stock",
+          "Tối thiểu",
+          fn,
+          "hide-on-small",
+        ) +
+        TableSort.th("lowstock", "deficit", "Thiếu", fn);
+    },
 
-  renderLowStockTable: function() {
-    this.renderLowStockHeaders();
-    var tbody = document.getElementById('report-low-stock-tbody');
-    var data = this._lowStockData;
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Không có sản phẩm sắp hết</td></tr>';
-      return;
-    }
-    data = TableSort.sort('lowstock', data);
-    tbody.innerHTML = data.map(function(r) {
-      return '<tr class="red lighten-5">' +
-        '<td>' + escapeHtml(r.product_name) + '</td>' +
-        '<td class="hide-on-small">' + escapeHtml(r.category) + '</td>' +
-        '<td>' + r.quantity + '</td>' +
-        '<td class="hide-on-small">' + r.min_stock + '</td>' +
-        '<td><strong>' + r.deficit + '</strong></td>' +
-      '</tr>';
-    }).join('');
-  },
-
-  loadLowStock: function() {
-    var self = this;
-    api.call('apiGetLowStockReport').then(function(data) {
-      self._lowStockData = data || [];
-      self.renderLowStockTable();
-    }).catch(function(e) {
-      showToast('Lỗi tải báo cáo: ' + e.message, 'red');
-    });
-  },
-
-  loadPriceHistory: function() {
-    var productId = document.getElementById('ph-product-filter').value;
-    var start = document.getElementById('ph-start-date').value;
-    var end = document.getElementById('ph-end-date').value;
-
-    showLoading('report-ph-tbody');
-    api.call('apiGetPriceHistoryReport', productId, start, end).then(function(data) {
-      var tbody = document.getElementById('report-ph-tbody');
+    renderLowStockTable: function () {
+      this.renderLowStockHeaders();
+      var tbody = document.getElementById("report-low-stock-tbody");
+      var data = this._lowStockData;
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="center grey-text">Không có dữ liệu</td></tr>';
+        tbody.innerHTML =
+          '<tr><td colspan="5" class="center grey-text">Không có sản phẩm sắp hết</td></tr>';
         return;
       }
-      tbody.innerHTML = data.map(function(r) {
-        var buyChanged = Number(r.old_buy) !== Number(r.new_buy);
-        var sellChanged = Number(r.old_sell) !== Number(r.new_sell);
-        var newBuyHtml = buyChanged ? '<strong>' + formatCurrency(r.new_buy) + '</strong>' : formatCurrency(r.new_buy);
-        var newSellHtml = sellChanged ? '<strong>' + formatCurrency(r.new_sell) + '</strong>' : formatCurrency(r.new_sell);
-        return '<tr>' +
-          '<td>' + escapeHtml(r.product_name) + '</td>' +
-          '<td>' + formatCurrency(r.old_buy) + ' &rarr; ' + newBuyHtml + '</td>' +
-          '<td>' + formatCurrency(r.old_sell) + ' &rarr; ' + newSellHtml + '</td>' +
-          '<td>' + formatDate(r.changed_at) + '</td>' +
-          '<td class="hide-on-small">' + escapeHtml(r.changed_by) + '</td>' +
-        '</tr>';
-      }).join('');
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
-    });
-  },
+      data = TableSort.sort("lowstock", data);
+      tbody.innerHTML = data
+        .map(function (r) {
+          return (
+            '<tr class="red lighten-5">' +
+            "<td>" +
+            escapeHtml(r.product_name) +
+            "</td>" +
+            '<td class="hide-on-small">' +
+            escapeHtml(r.category) +
+            "</td>" +
+            "<td>" +
+            r.quantity +
+            "</td>" +
+            '<td class="hide-on-small">' +
+            r.min_stock +
+            "</td>" +
+            "<td><strong>" +
+            r.deficit +
+            "</strong></td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+    },
 
-  loadInventorySummary: function() {
-    api.call('apiGetInventorySummaryReport').then(function(data) {
-      var tbody = document.getElementById('report-inv-summary-tbody');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="center grey-text">Không có dữ liệu</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.map(function(r) {
-        return '<tr>' +
-          '<td>' + escapeHtml(r.category_name) + '</td>' +
-          '<td>' + r.product_count + '</td>' +
-          '<td>' + r.total_quantity + '</td>' +
-          '<td>' + formatCurrency(r.total_value) + '</td>' +
-        '</tr>';
-      }).join('');
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
-    });
-  },
+    loadLowStock: function () {
+      var self = this;
+      api
+        .call("apiGetLowStockReport")
+        .then(function (data) {
+          self._lowStockData = data || [];
+          self.renderLowStockTable();
+        })
+        .catch(function (e) {
+          showToast("Lỗi tải báo cáo: " + e.message, "red");
+        });
+    },
 
-  populateProductFilter: function() {
-    var select = document.getElementById('ph-product-filter');
-    if (!select) return;
-    select.innerHTML = '<option value="">Tất cả sản phẩm</option>';
-    state.products.forEach(function(p) {
-      select.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name) + '</option>';
-    });
-    M.FormSelect.init(select);
-  }
-};
+    loadPriceHistory: function () {
+      var productId = document.getElementById("ph-product-filter").value;
+      var start = document.getElementById("ph-start-date").value;
+      var end = document.getElementById("ph-end-date").value;
+
+      showLoading("report-ph-tbody");
+      api
+        .call("apiGetPriceHistoryReport", productId, start, end)
+        .then(function (data) {
+          var tbody = document.getElementById("report-ph-tbody");
+          if (!data || data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="5" class="center grey-text">Không có dữ liệu</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data
+            .map(function (r) {
+              var buyChanged = Number(r.old_buy) !== Number(r.new_buy);
+              var sellChanged = Number(r.old_sell) !== Number(r.new_sell);
+              var newBuyHtml = buyChanged
+                ? "<strong>" + formatCurrency(r.new_buy) + "</strong>"
+                : formatCurrency(r.new_buy);
+              var newSellHtml = sellChanged
+                ? "<strong>" + formatCurrency(r.new_sell) + "</strong>"
+                : formatCurrency(r.new_sell);
+              return (
+                "<tr>" +
+                "<td>" +
+                escapeHtml(r.product_name) +
+                "</td>" +
+                "<td>" +
+                formatCurrency(r.old_buy) +
+                " &rarr; " +
+                newBuyHtml +
+                "</td>" +
+                "<td>" +
+                formatCurrency(r.old_sell) +
+                " &rarr; " +
+                newSellHtml +
+                "</td>" +
+                "<td>" +
+                formatDate(r.changed_at) +
+                "</td>" +
+                '<td class="hide-on-small">' +
+                escapeHtml(r.changed_by) +
+                "</td>" +
+                "</tr>"
+              );
+            })
+            .join("");
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
+
+    loadInventorySummary: function () {
+      api
+        .call("apiGetInventorySummaryReport")
+        .then(function (data) {
+          var tbody = document.getElementById("report-inv-summary-tbody");
+          if (!data || data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="4" class="center grey-text">Không có dữ liệu</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data
+            .map(function (r) {
+              return (
+                "<tr>" +
+                "<td>" +
+                escapeHtml(r.category_name) +
+                "</td>" +
+                "<td>" +
+                r.product_count +
+                "</td>" +
+                "<td>" +
+                r.total_quantity +
+                "</td>" +
+                "<td>" +
+                formatCurrency(r.total_value) +
+                "</td>" +
+                "</tr>"
+              );
+            })
+            .join("");
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
+
+    populateProductFilter: function () {
+      var select = document.getElementById("ph-product-filter");
+      if (!select) return;
+      select.innerHTML = '<option value="">Tất cả sản phẩm</option>';
+      state.products.forEach(function (p) {
+        select.innerHTML +=
+          '<option value="' + p.id + '">' + escapeHtml(p.name) + "</option>";
+      });
+      M.FormSelect.init(select);
+    },
+  };
 </script>

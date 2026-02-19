@@ -1,6 +1,10 @@
 <div class="container">
   <h5>Quản Lý Danh Mục</h5>
-  <button class="btn blue waves-effect admin-only" onclick="Categories.showAddModal()" style="margin-bottom:20px">
+  <button
+    class="btn blue waves-effect admin-only"
+    onclick="Categories.showAddModal()"
+    style="margin-bottom: 20px"
+  >
     <i class="material-icons left">add</i>Thêm danh mục
   </button>
 
@@ -12,9 +16,9 @@
     <div class="modal-content">
       <h5 id="category-modal-title">Thêm danh mục</h5>
       <form id="category-form" onsubmit="return false;">
-        <input type="hidden" id="category-id">
+        <input type="hidden" id="category-id" />
         <div class="input-field">
-          <input id="category-name" type="text" required>
+          <input id="category-name" type="text" required />
           <label for="category-name">Tên danh mục</label>
         </div>
         <div class="input-field">
@@ -27,109 +31,155 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close btn-flat">Huỷ</a>
-      <button class="btn blue waves-effect" onclick="Categories.save()">Lưu</button>
+      <button class="btn blue waves-effect" onclick="Categories.save()">
+        Lưu
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-var Categories = {
-  render: function() {
-    var list = document.getElementById('categories-list');
-    if (!state.categories || state.categories.length === 0) {
-      list.innerHTML = '<li class="collection-item empty-state"><i class="material-icons">inbox</i><p>Chưa có danh mục nào</p></li>';
-      return;
-    }
+  var Categories = {
+    render: function () {
+      var list = document.getElementById("categories-list");
+      if (!state.categories || state.categories.length === 0) {
+        list.innerHTML =
+          '<li class="collection-item empty-state"><i class="material-icons">inbox</i><p>Chưa có danh mục nào</p></li>';
+        return;
+      }
 
-    list.innerHTML = state.categories.map(function(cat) {
-      var childrenHtml = '';
-      if (cat.children && cat.children.length > 0) {
-        childrenHtml = cat.children.map(function(c) {
-          return '<li class="collection-item" style="padding-left:40px">' +
-            '<i class="material-icons tiny">subdirectory_arrow_right</i> ' + escapeHtml(c.name) +
+      list.innerHTML = state.categories
+        .map(function (cat) {
+          var childrenHtml = "";
+          if (cat.children && cat.children.length > 0) {
+            childrenHtml = cat.children
+              .map(function (c) {
+                return (
+                  '<li class="collection-item" style="padding-left:40px">' +
+                  '<i class="material-icons tiny">subdirectory_arrow_right</i> ' +
+                  escapeHtml(c.name) +
+                  '<span class="secondary-content admin-only">' +
+                  "<a onclick=\"Categories.edit('" +
+                  c.id +
+                  '\')" style="cursor:pointer;margin-right:10px"><i class="material-icons">edit</i></a>' +
+                  "<a onclick=\"Categories.remove('" +
+                  c.id +
+                  '\')" style="cursor:pointer"><i class="material-icons red-text">delete</i></a>' +
+                  "</span></li>"
+                );
+              })
+              .join("");
+          }
+          return (
+            '<li class="collection-item"><strong>' +
+            escapeHtml(cat.name) +
+            "</strong>" +
             '<span class="secondary-content admin-only">' +
-              '<a onclick="Categories.edit(\'' + c.id + '\')" style="cursor:pointer;margin-right:10px"><i class="material-icons">edit</i></a>' +
-              '<a onclick="Categories.remove(\'' + c.id + '\')" style="cursor:pointer"><i class="material-icons red-text">delete</i></a>' +
-            '</span></li>';
-        }).join('');
+            "<a onclick=\"Categories.edit('" +
+            cat.id +
+            '\')" style="cursor:pointer;margin-right:10px"><i class="material-icons">edit</i></a>' +
+            "<a onclick=\"Categories.remove('" +
+            cat.id +
+            '\')" style="cursor:pointer"><i class="material-icons red-text">delete</i></a>' +
+            "</span></li>" +
+            childrenHtml
+          );
+        })
+        .join("");
+      updateAdminUI();
+    },
+
+    _populateParentSelect: function (excludeId) {
+      var select = document.getElementById("category-parent");
+      select.innerHTML = '<option value="">Không có (top-level)</option>';
+      state.categories.forEach(function (cat) {
+        if (cat.id !== excludeId) {
+          select.innerHTML +=
+            '<option value="' +
+            cat.id +
+            '">' +
+            escapeHtml(cat.name) +
+            "</option>";
+        }
+      });
+      M.FormSelect.init(select);
+    },
+
+    showAddModal: function () {
+      document.getElementById("category-id").value = "";
+      document.getElementById("category-form").reset();
+      document.getElementById("category-modal-title").textContent =
+        "Thêm danh mục";
+      this._populateParentSelect();
+      M.updateTextFields();
+      M.Modal.getInstance(document.getElementById("category-modal")).open();
+    },
+
+    edit: function (id) {
+      var flat = flattenCategories(state.categories);
+      var cat = flat.find(function (c) {
+        return c.id === id;
+      });
+      if (!cat) return;
+      document.getElementById("category-id").value = cat.id;
+      document.getElementById("category-name").value = cat.name;
+      document.getElementById("category-modal-title").textContent =
+        "Sửa danh mục";
+      this._populateParentSelect(cat.id);
+      document.getElementById("category-parent").value = cat.parent_id || "";
+      M.FormSelect.init(document.getElementById("category-parent"));
+      M.updateTextFields();
+      M.Modal.getInstance(document.getElementById("category-modal")).open();
+    },
+
+    save: function () {
+      var name = document.getElementById("category-name").value.trim();
+      if (!name) {
+        showToast("Tên danh mục không được để trống", "orange");
+        return;
       }
-      return '<li class="collection-item"><strong>' + escapeHtml(cat.name) + '</strong>' +
-        '<span class="secondary-content admin-only">' +
-          '<a onclick="Categories.edit(\'' + cat.id + '\')" style="cursor:pointer;margin-right:10px"><i class="material-icons">edit</i></a>' +
-          '<a onclick="Categories.remove(\'' + cat.id + '\')" style="cursor:pointer"><i class="material-icons red-text">delete</i></a>' +
-        '</span></li>' + childrenHtml;
-    }).join('');
-    updateAdminUI();
-  },
 
-  _populateParentSelect: function(excludeId) {
-    var select = document.getElementById('category-parent');
-    select.innerHTML = '<option value="">Không có (top-level)</option>';
-    state.categories.forEach(function(cat) {
-      if (cat.id !== excludeId) {
-        select.innerHTML += '<option value="' + cat.id + '">' + escapeHtml(cat.name) + '</option>';
-      }
-    });
-    M.FormSelect.init(select);
-  },
+      var id = document.getElementById("category-id").value;
+      var data = {
+        name: name,
+        parent_id: document.getElementById("category-parent").value,
+      };
 
-  showAddModal: function() {
-    document.getElementById('category-id').value = '';
-    document.getElementById('category-form').reset();
-    document.getElementById('category-modal-title').textContent = 'Thêm danh mục';
-    this._populateParentSelect();
-    M.updateTextFields();
-    M.Modal.getInstance(document.getElementById('category-modal')).open();
-  },
+      var promise = id
+        ? api.call("apiUpdateCategory", id, data)
+        : api.call("apiCreateCategory", data);
+      promise
+        .then(function () {
+          M.Modal.getInstance(
+            document.getElementById("category-modal"),
+          ).close();
+          showToast(id ? "Đã cập nhật danh mục" : "Đã thêm danh mục", "green");
+          return api.call("apiGetCategories");
+        })
+        .then(function (categories) {
+          state.categories = categories;
+          Categories.render();
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
 
-  edit: function(id) {
-    var flat = flattenCategories(state.categories);
-    var cat = flat.find(function(c) { return c.id === id; });
-    if (!cat) return;
-    document.getElementById('category-id').value = cat.id;
-    document.getElementById('category-name').value = cat.name;
-    document.getElementById('category-modal-title').textContent = 'Sửa danh mục';
-    this._populateParentSelect(cat.id);
-    document.getElementById('category-parent').value = cat.parent_id || '';
-    M.FormSelect.init(document.getElementById('category-parent'));
-    M.updateTextFields();
-    M.Modal.getInstance(document.getElementById('category-modal')).open();
-  },
-
-  save: function() {
-    var name = document.getElementById('category-name').value.trim();
-    if (!name) { showToast('Tên danh mục không được để trống', 'orange'); return; }
-
-    var id = document.getElementById('category-id').value;
-    var data = {
-      name: name,
-      parent_id: document.getElementById('category-parent').value
-    };
-
-    var promise = id ? api.call('apiUpdateCategory', id, data) : api.call('apiCreateCategory', data);
-    promise.then(function() {
-      M.Modal.getInstance(document.getElementById('category-modal')).close();
-      showToast(id ? 'Đã cập nhật danh mục' : 'Đã thêm danh mục', 'green');
-      return api.call('apiGetCategories');
-    }).then(function(categories) {
-      state.categories = categories;
-      Categories.render();
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
-    });
-  },
-
-  remove: function(id) {
-    if (!confirm('Bạn có chắc muốn xoá danh mục này?')) return;
-    api.call('apiDeleteCategory', id).then(function() {
-      showToast('Đã xoá danh mục', 'green');
-      return api.call('apiGetCategories');
-    }).then(function(categories) {
-      state.categories = categories;
-      Categories.render();
-    }).catch(function(e) {
-      showToast('Lỗi: ' + e.message, 'red');
-    });
-  }
-};
+    remove: function (id) {
+      if (!confirm("Bạn có chắc muốn xoá danh mục này?")) return;
+      api
+        .call("apiDeleteCategory", id)
+        .then(function () {
+          showToast("Đã xoá danh mục", "green");
+          return api.call("apiGetCategories");
+        })
+        .then(function (categories) {
+          state.categories = categories;
+          Categories.render();
+        })
+        .catch(function (e) {
+          showToast("Lỗi: " + e.message, "red");
+        });
+    },
+  };
 </script>

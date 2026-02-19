@@ -8,28 +8,33 @@ function doGet(e) {
   } catch (err) {
     return HtmlService.createHtmlOutput(
       '<html><head><meta name="viewport" content="width=device-width,initial-scale=1">' +
-      '<style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;' +
-      'min-height:100vh;margin:0;background:#f5f5f5;color:#333}' +
-      '.card{background:#fff;padding:40px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);' +
-      'text-align:center;max-width:400px}h2{color:#d32f2f;margin-bottom:16px}' +
-      'p{color:#666;line-height:1.5}</style></head>' +
-      '<body><div class="card"><h2>Không có quyền truy cập</h2>' +
-      '<p>' + err.message + '</p></div></body></html>'
-    ).setTitle('Không có quyền truy cập');
+        "<style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;" +
+        "min-height:100vh;margin:0;background:#f5f5f5;color:#333}" +
+        ".card{background:#fff;padding:40px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);" +
+        "text-align:center;max-width:400px}h2{color:#d32f2f;margin-bottom:16px}" +
+        "p{color:#666;line-height:1.5}</style></head>" +
+        '<body><div class="card"><h2>Không có quyền truy cập</h2>' +
+        "<p>" +
+        err.message +
+        "</p></div></body></html>",
+    ).setTitle("Không có quyền truy cập");
   }
-  var template = HtmlService.createTemplateFromFile('index');
+  var template = HtmlService.createTemplateFromFile("index");
   var initialData = null;
   try {
     initialData = getInitialData();
   } catch (e) {
-    Logger.log('getInitialData failed, falling back to RPC: ' + e.message);
+    Logger.log("getInitialData failed, falling back to RPC: " + e.message);
   }
   template.appName = APP_NAME;
-  template.initialDataJson = JSON.stringify(initialData)
-    .replace(/<\/script>/gi, '<\\/script>');
-  return template.evaluate()
+  template.initialDataJson = JSON.stringify(initialData).replace(
+    /<\/script>/gi,
+    "<\\/script>",
+  );
+  return template
+    .evaluate()
     .setTitle(APP_NAME)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .addMetaTag("viewport", "width=device-width, initial-scale=1")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }
 
@@ -45,7 +50,7 @@ function getInitialData() {
     user: user,
     products: products,
     categories: categories,
-    dashboardStats: dashboardStats
+    dashboardStats: dashboardStats,
   };
 }
 
@@ -62,14 +67,17 @@ function setupSheets() {
   if (id) {
     ss = SpreadsheetApp.openById(id);
   } else {
-    ss = SpreadsheetApp.create('Grocery Manager Data');
+    ss = SpreadsheetApp.create("Grocery Manager Data");
     // Auto-save new spreadsheet ID to Script Properties
-    PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', ss.getId());
-    Logger.log('Đã tạo spreadsheet mới: ' + ss.getUrl());
+    PropertiesService.getScriptProperties().setProperty(
+      "SPREADSHEET_ID",
+      ss.getId(),
+    );
+    Logger.log("Đã tạo spreadsheet mới: " + ss.getUrl());
   }
 
   var sheetNames = Object.keys(COLUMNS);
-  sheetNames.forEach(function(sheetName) {
+  sheetNames.forEach(function (sheetName) {
     var sheet = ss.getSheetByName(sheetName);
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
@@ -81,9 +89,9 @@ function setupSheets() {
 
     // Format header row
     var headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setFontWeight('bold');
-    headerRange.setBackground('#4285f4');
-    headerRange.setFontColor('#ffffff');
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#4285f4");
+    headerRange.setFontColor("#ffffff");
 
     // Freeze header row
     sheet.setFrozenRows(1);
@@ -92,17 +100,26 @@ function setupSheets() {
   // Add sample admin user if Users sheet is empty
   var usersSheet = ss.getSheetByName(SHEETS.USERS);
   if (usersSheet.getLastRow() <= 1) {
-    var email = Session.getActiveUser().getEmail() || 'admin@example.com';
-    usersSheet.appendRow([email, 'Admin', ROLES.ADMIN, new Date().toISOString()]);
+    var email = Session.getActiveUser().getEmail() || "admin@example.com";
+    usersSheet.appendRow([
+      email,
+      "Admin",
+      ROLES.ADMIN,
+      new Date().toISOString(),
+    ]);
   }
 
   // Remove default "Sheet1" if it exists and is empty
-  var defaultSheet = ss.getSheetByName('Sheet1');
-  if (defaultSheet && defaultSheet.getLastRow() <= 1 && ss.getSheets().length > 1) {
+  var defaultSheet = ss.getSheetByName("Sheet1");
+  if (
+    defaultSheet &&
+    defaultSheet.getLastRow() <= 1 &&
+    ss.getSheets().length > 1
+  ) {
     ss.deleteSheet(defaultSheet);
   }
 
-  Logger.log('Setup complete: ' + sheetNames.length + ' sheets created.');
+  Logger.log("Setup complete: " + sheetNames.length + " sheets created.");
 }
 
 /**
@@ -110,8 +127,8 @@ function setupSheets() {
  * Chạy 1 lần nếu muốn dùng spreadsheet có sẵn.
  */
 function setupSpreadsheetId(id) {
-  PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', id);
-  Logger.log('SPREADSHEET_ID đã được lưu: ' + id);
+  PropertiesService.getScriptProperties().setProperty("SPREADSHEET_ID", id);
+  Logger.log("SPREADSHEET_ID đã được lưu: " + id);
 }
 
 // ==================== API Wrapper Functions ====================
@@ -173,7 +190,10 @@ function apiSearchProducts(keyword) {
 // Prices
 function apiUpdatePrice(productId, buyPrice, sellPrice) {
   try {
-    return { success: true, data: PriceService.updatePrice(productId, buyPrice, sellPrice) };
+    return {
+      success: true,
+      data: PriceService.updatePrice(productId, buyPrice, sellPrice),
+    };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -182,7 +202,10 @@ function apiUpdatePrice(productId, buyPrice, sellPrice) {
 function apiGetPriceHistory(productId, start, end) {
   try {
     Auth.checkAccess();
-    return { success: true, data: PriceService.getPriceHistory(productId, start, end) };
+    return {
+      success: true,
+      data: PriceService.getPriceHistory(productId, start, end),
+    };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -234,7 +257,10 @@ function apiGetInventory() {
 
 function apiUpdateQuantity(productId, qty) {
   try {
-    return { success: true, data: InventoryService.updateQuantity(productId, qty) };
+    return {
+      success: true,
+      data: InventoryService.updateQuantity(productId, qty),
+    };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -242,7 +268,10 @@ function apiUpdateQuantity(productId, qty) {
 
 function apiRestock(productId, addQty, note) {
   try {
-    return { success: true, data: InventoryService.restock(productId, addQty, note) };
+    return {
+      success: true,
+      data: InventoryService.restock(productId, addQty, note),
+    };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -251,7 +280,10 @@ function apiRestock(productId, addQty, note) {
 function apiSetMinStock(productId, min) {
   try {
     Auth.checkAccess();
-    return { success: true, data: InventoryService.setMinStock(productId, min) };
+    return {
+      success: true,
+      data: InventoryService.setMinStock(productId, min),
+    };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -288,7 +320,10 @@ function apiGetLowStockReport() {
 function apiGetPriceHistoryReport(productId, start, end) {
   try {
     Auth.checkAccess();
-    return { success: true, data: ReportService.getPriceHistoryReport(productId, start, end) };
+    return {
+      success: true,
+      data: ReportService.getPriceHistoryReport(productId, start, end),
+    };
   } catch (e) {
     return { success: false, error: e.message };
   }

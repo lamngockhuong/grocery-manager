@@ -2,9 +2,8 @@
  * PriceService.gs - Price CRUD with auto PriceHistory logging
  */
 
-var PriceService = (function() {
-
-  var CACHE_KEY = 'prices';
+var PriceService = (function () {
+  var CACHE_KEY = "prices";
 
   function getPrices() {
     var cached = CacheHelper.get(CACHE_KEY);
@@ -29,11 +28,11 @@ var PriceService = (function() {
       buy_price: Number(buyPrice) || 0,
       sell_price: Number(sellPrice) || 0,
       updated_at: new Date().toISOString(),
-      updated_by: email
+      updated_by: email,
     };
     var result = SheetHelper.create(SHEETS.PRICES, record);
     CacheHelper.remove(CACHE_KEY);
-    CacheHelper.remove('products_with_prices');
+    CacheHelper.remove("products_with_prices");
     return result;
   }
 
@@ -43,15 +42,18 @@ var PriceService = (function() {
     // Validate
     newBuyPrice = Number(newBuyPrice);
     newSellPrice = Number(newSellPrice);
-    if (isNaN(newBuyPrice) || newBuyPrice < 0) throw new Error('Giá nhập phải >= 0');
-    if (isNaN(newSellPrice) || newSellPrice < 0) throw new Error('Giá bán phải >= 0');
+    if (isNaN(newBuyPrice) || newBuyPrice < 0)
+      throw new Error("Giá nhập phải >= 0");
+    if (isNaN(newSellPrice) || newSellPrice < 0)
+      throw new Error("Giá bán phải >= 0");
 
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
       // Get current price (fresh read under lock)
       var current = getPrice(productId);
-      if (!current) throw new Error('Không tìm thấy giá cho sản phẩm ' + productId);
+      if (!current)
+        throw new Error("Không tìm thấy giá cho sản phẩm " + productId);
 
       var oldBuy = Number(current.buy_price) || 0;
       var oldSell = Number(current.sell_price) || 0;
@@ -61,7 +63,7 @@ var PriceService = (function() {
         buy_price: newBuyPrice,
         sell_price: newSellPrice,
         updated_at: new Date().toISOString(),
-        updated_by: email
+        updated_by: email,
       });
 
       // Log to PriceHistory
@@ -72,14 +74,18 @@ var PriceService = (function() {
         old_sell: oldSell,
         new_sell: newSellPrice,
         changed_at: new Date().toISOString(),
-        changed_by: email
+        changed_by: email,
       });
 
       // Invalidate caches
       CacheHelper.remove(CACHE_KEY);
-      CacheHelper.remove('products_with_prices');
+      CacheHelper.remove("products_with_prices");
 
-      return { product_id: productId, buy_price: newBuyPrice, sell_price: newSellPrice };
+      return {
+        product_id: productId,
+        buy_price: newBuyPrice,
+        sell_price: newSellPrice,
+      };
     } finally {
       lock.releaseLock();
     }
@@ -89,19 +95,25 @@ var PriceService = (function() {
     var history = SheetHelper.getAll(SHEETS.PRICE_HISTORY);
 
     if (productId) {
-      history = history.filter(function(h) { return h.product_id === productId; });
+      history = history.filter(function (h) {
+        return h.product_id === productId;
+      });
     }
     if (startDate) {
       var start = new Date(startDate);
-      history = history.filter(function(h) { return new Date(h.changed_at) >= start; });
+      history = history.filter(function (h) {
+        return new Date(h.changed_at) >= start;
+      });
     }
     if (endDate) {
       var end = new Date(endDate);
       end.setHours(23, 59, 59);
-      history = history.filter(function(h) { return new Date(h.changed_at) <= end; });
+      history = history.filter(function (h) {
+        return new Date(h.changed_at) <= end;
+      });
     }
 
-    history.sort(function(a, b) {
+    history.sort(function (a, b) {
       return new Date(b.changed_at) - new Date(a.changed_at);
     });
 
@@ -110,7 +122,7 @@ var PriceService = (function() {
 
   function getRecentPriceChanges(limit) {
     var history = SheetHelper.getAll(SHEETS.PRICE_HISTORY);
-    history.sort(function(a, b) {
+    history.sort(function (a, b) {
       return new Date(b.changed_at) - new Date(a.changed_at);
     });
     return history.slice(0, limit || 5);
@@ -122,7 +134,6 @@ var PriceService = (function() {
     createPrice: createPrice,
     updatePrice: updatePrice,
     getPriceHistory: getPriceHistory,
-    getRecentPriceChanges: getRecentPriceChanges
+    getRecentPriceChanges: getRecentPriceChanges,
   };
-
 })();
