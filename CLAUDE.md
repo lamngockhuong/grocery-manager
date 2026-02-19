@@ -13,9 +13,11 @@ Browser SPA (Materialize CSS)
   └── google.script.run (async RPC)
         └── api* wrapper functions (Code.gs) — try-catch + {success, data, error}
               └── Service modules (IIFE pattern) — business logic + auth
-                    └── SheetHelper.gs — generic CRUD
-                          └── Google Sheets (6 sheets as database)
-                    └── CacheHelper.gs — chunked CacheService (10min TTL)
+                    ├── SheetHelper.gs — generic CRUD
+                    │     └── Google Sheets (6 sheets as database)
+                    ├── CacheHelper.gs — chunked CacheService (10min TTL)
+                    └── ImageService.gs — product images
+                          └── Google Drive (image storage)
 ```
 
 **Key patterns:**
@@ -58,7 +60,8 @@ CacheHelper.gs     ← depends on Config (CACHE_TTL)
 Auth.gs            ← depends on SheetHelper, Config
 CategoryService.gs ← depends on SheetHelper, Auth, CacheHelper
 PriceService.gs    ← depends on SheetHelper, Auth, CacheHelper
-ProductService.gs  ← depends on SheetHelper, Auth, CacheHelper, PriceService, InventoryService, CategoryService
+ImageService.gs    ← depends on Config (DRIVE constants)
+ProductService.gs  ← depends on SheetHelper, Auth, CacheHelper, PriceService, InventoryService, CategoryService, ImageService
 InventoryService.gs← depends on SheetHelper, Auth, CacheHelper
 ReportService.gs   ← depends on all Services
 Code.gs            ← depends on all modules (API layer + setup)

@@ -430,6 +430,99 @@ function bulkUpdateStatus(ids, status) {
 }
 ```
 
+## Image Upload Handling
+
+### Backend Image Upload
+
+**ImageService.uploadImage() pattern:**
+
+```javascript
+function uploadImage(base64Data, fileName, mimeType) {
+  // 1. Validate file size (max 2MB)
+  var sizeBytes = Math.ceil((base64Data.length * 3) / 4);
+  if (sizeBytes > DRIVE.MAX_FILE_SIZE) {
+    throw new Error("File quá lớn. Tối đa 2MB.");
+  }
+
+  // 2. Decode base64 and create blob
+  var decoded = Utilities.base64Decode(base64Data);
+  var blob = Utilities.newBlob(decoded, mimeType || "image/jpeg", fileName);
+
+  // 3. Get or create Drive folder
+  var folder = _getOrCreateFolder();
+
+  // 4. Upload file with public sharing
+  var file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  // 5. Return shareable URL format
+  return "https://drive.google.com/uc?id=" + file.getId() + "&export=view";
+}
+```
+
+**URL Format:**
+
+- All image URLs are Google Drive public view URLs
+- Format: `https://drive.google.com/uc?id={fileId}&export=view`
+- Directly displayable in `<img>` tags
+
+### Frontend Image Upload
+
+**Client-side compression before sending:**
+
+```javascript
+var ProductImage = {
+  // 1. Read file as base64
+  // 2. Load into canvas
+  // 3. Compress: max 800px, JPEG quality 0.7
+  // 4. Send compressed base64 via API
+
+  compress: function(file, callback) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement("canvas");
+        var scale = Math.min(1, 800 / Math.max(img.width, img.height));
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        var compressed = canvas.toDataURL("image/jpeg", 0.7);
+        callback(compressed);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+```
+
+**Supported Input Methods:**
+
+- File upload: `<input type="file" accept="image/*">`
+- Camera capture: `<input type="file" accept="image/*" capture="environment">`
+- URL paste: Manual paste of image URL (auto-detect Google Drive URLs)
+
+### Image Cleanup
+
+**When replacing product image:**
+
+```javascript
+// Old image is automatically deleted by ImageService.deleteImage()
+// which moves file to Drive trash
+ProductService.updateImageUrl(id, newImageUrl);
+// Internally calls ImageService.deleteImage(oldImageUrl)
+```
+
+**Graceful URL format handling:**
+
+- Non-Drive URLs are ignored (no-op delete)
+- Malformed URLs don't crash the system
+- File ID extraction handles both URL formats:
+  - `https://drive.google.com/uc?id=FILE_ID&export=view`
+  - `https://drive.google.com/file/d/FILE_ID/view`
+
 ## Logging
 
 ### Backend Logging

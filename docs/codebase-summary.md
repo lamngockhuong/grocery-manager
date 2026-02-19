@@ -22,6 +22,7 @@ src/
 ├── PriceService.gs          # Price CRUD + history
 ├── CategoryService.gs       # Category CRUD
 ├── InventoryService.gs      # Inventory CRUD + restock
+├── ImageService.gs          # Product image upload/delete via Google Drive
 ├── ReportService.gs         # Dashboard & reports
 ├── index.html               # SPA shell & routing
 ├── app.js.html              # State manager, API wrapper, utils
@@ -60,14 +61,15 @@ function apiGetProducts() {
 
 Each service is an Immediately Invoked Function Expression (IIFE) exporting public methods:
 
-#### ProductService.gs (192 LOC)
+#### ProductService.gs (210 LOC)
 
 **Methods:**
 
 - `getProducts()` - Get all active products (cached)
 - `getProductById(id)` - Get by ID
 - `createProduct(data)` - Validates duplicate names, auto-creates price & inventory
-- `updateProduct(id, data)` - Partial updates, delegates price changes to PriceService
+- `updateProduct(id, data)` - Partial updates, delegates price changes to PriceService, handles image_url
+- `updateImageUrl(id, imageUrl)` - Update only image_url field, delete old image
 - `deleteProduct(id)` - Soft delete (status='inactive')
 - `searchProducts(keyword)` - Case-insensitive search by name, barcode, description
 - `filterByCategory(categoryId)` - Filter by parent category
@@ -80,6 +82,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - Unit required
 - Category must exist (if specified)
 - Prices >= 0
+- Image URL must be valid Google Drive URL (if provided)
 
 **Cache Keys:** `products`, `products_with_prices`
 
@@ -134,6 +137,21 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - `getPriceHistoryReport(productId, start, end)` - Price changes timeline
 - `getInventorySummaryReport()` - Inventory value by category
 
+#### ImageService.gs (60 LOC)
+
+**Methods:**
+
+- `uploadImage(base64Data, fileName, mimeType)` - Upload compressed image to Google Drive
+  - Validates file size (max 2MB per DRIVE.MAX_FILE_SIZE)
+  - Returns Google Drive URL: `https://drive.google.com/uc?id={fileId}&export=view`
+  - Folder: DRIVE.FOLDER_NAME (auto-created if missing)
+  - File is publicly viewable (ANYONE_WITH_LINK access)
+- `deleteImage(imageUrl)` - Move old image to trash
+  - Safely handles non-Drive URLs (no-op)
+  - Extracts fileId from Drive URL formats
+
+**Dependencies:** Config.gs (DRIVE constants)
+
 ### Layer 3: Utilities
 
 #### Auth.gs (78 LOC)
@@ -180,7 +198,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - Stores `{key}_chunk_0`, `{key}_chunk_1`, etc.
 - Handles partial cache misses gracefully
 
-#### Config.gs (46 LOC)
+#### Config.gs (91 LOC)
 
 **Constants:**
 
@@ -191,6 +209,10 @@ SHEETS = {...};               // Sheet names (6 sheets)
 COLUMNS = {...};              // Column mappings per sheet
 CACHE_TTL = 600;              // 10 minutes (seconds)
 ROLES = {ADMIN, VIEWER};      // Role constants
+DRIVE = {
+  FOLDER_NAME: getProperty('DRIVE_FOLDER_NAME') || 'grocery-product-images',
+  MAX_FILE_SIZE: 2*1024*1024             // 2MB limit
+};
 ID_PREFIXES = {...};          // Prefixes for ID generation (P, PR, INV, PH, CAT)
 ```
 
@@ -297,7 +319,7 @@ app.router.on("inventory", showInventoryPage);
 - Export buttons (CSV/Print) - not yet implemented in v1
 - Admin-only: some filters
 
-### Styling (styles.css.html, 277 LOC)
+### Styling (styles.css.html)
 
 - Override Materialize defaults
 - Custom color scheme (blue primary, orange accent)
@@ -305,6 +327,8 @@ app.router.on("inventory", showInventoryPage);
 - Modal customization (centered via translateX(-50%) override)
 - Sort indicator styles (arrow icons on sortable columns)
 - Pagination controls styling
+- Product image preview/placeholder styles
+- Image action buttons styling (file upload, camera, delete)
 - @media queries for mobile (<768px)
 
 ## Data Flow
@@ -384,17 +408,18 @@ dashboard.html: update stats cards + warning list
 
 ### Products Sheet
 
-| Column      | Type    | Notes                                  |
-| ----------- | ------- | -------------------------------------- |
-| id          | string  | P{uuid}, auto-generated                |
-| name        | string  | Unique (case-insensitive, active only) |
-| category_id | string  | FK to Categories.id, optional          |
-| unit        | string  | 'kg', 'liter', 'piece', etc.           |
-| barcode     | string  | Optional, may be empty                 |
-| description | string  | Optional notes                         |
-| status      | string  | 'active' or 'inactive' (soft delete)   |
-| created_at  | ISO8601 | Immutable                              |
-| updated_at  | ISO8601 | Updated on any change                  |
+| Column      | Type    | Notes                                                  |
+| ----------- | ------- | ------------------------------------------------------ |
+| id          | string  | P{uuid}, auto-generated                                |
+| name        | string  | Unique (case-insensitive, active only)                 |
+| category_id | string  | FK to Categories.id, optional                          |
+| unit        | string  | 'kg', 'liter', 'piece', etc.                           |
+| barcode     | string  | Optional, may be empty                                 |
+| description | string  | Optional notes                                         |
+| image_url   | string  | Google Drive URL format (`https://drive.google.com/...`) |
+| status      | string  | 'active' or 'inactive' (soft delete)                   |
+| created_at  | ISO8601 | Immutable                                              |
+| updated_at  | ISO8601 | Updated on any change                                  |
 
 ### Prices Sheet
 
@@ -459,7 +484,8 @@ dashboard.html: update stats cards + warning list
 - `CacheService` - In-memory cache
 - `LockService` - Atomic operations
 - `Session` - User identity
-- `Utilities` - UUID generation
+- `Utilities` - UUID generation, Base64 encoding
+- `DriveApp` - Google Drive file storage
 - `Logger` - Debug logging
 
 ## Code Patterns

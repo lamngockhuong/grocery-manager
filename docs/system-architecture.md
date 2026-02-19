@@ -88,8 +88,10 @@ UI Pages (Materialize CSS)
 ├── products.html
 │   ├── Product table (search, filter by category)
 │   ├── Column sorting (ASC/DESC/none) + pagination (25/page)
-│   ├── Add Product modal
-│   ├── Edit Product modal
+│   ├── Add Product modal (with image upload)
+│   ├── Edit Product modal (with image preview/edit)
+│   ├── Product Detail modal (shows image preview)
+│   ├── Product Image UI (file upload, camera capture, URL paste, compression)
 │   └── Price Edit modal (atomic, LockService-protected)
 ├── categories.html
 │   ├── Category tree view
@@ -118,7 +120,7 @@ Code.gs (API Gateway)
 ├── doGet(e) → Returns SPA shell (index.html)
 ├── include(filename) → Server-side includes for HTML
 ├── setupSheets() → One-time initialization
-└── API Wrappers (20 functions)
+└── API Wrappers (22 functions)
     ├── Auth: apiGetAuthInfo()
     ├── Products: apiGetProducts, apiCreateProduct, apiUpdateProduct,
     │            apiDeleteProduct, apiSearchProducts
@@ -127,6 +129,7 @@ Code.gs (API Gateway)
     │              apiUpdateCategory, apiDeleteCategory
     ├── Inventory: apiGetInventory, apiUpdateQuantity, apiRestock,
     │             apiSetMinStock, apiGetLowStock
+    ├── Images: apiUploadProductImage, apiDeleteProductImage
     └── Reports: apiGetDashboardStats, apiGetLowStockReport,
                apiGetPriceHistoryReport, apiGetInventorySummaryReport
 
@@ -138,11 +141,12 @@ Service Layer (IIFE Modules)
 │   ├── requireAdmin() → Throw if not admin
 │   ├── checkAccess() → Verify user in system (called by ALL APIs)
 │   └── getAuthInfo() → {email, role, name}
-├── ProductService.gs (192 LOC) - Product CRUD
+├── ProductService.gs (210 LOC) - Product CRUD
 │   ├── getProducts() [cached]
 │   ├── getProductById(id)
 │   ├── createProduct(data) → Auto-creates price & inventory
-│   ├── updateProduct(id, data) → Delegates price to PriceService
+│   ├── updateProduct(id, data) → Delegates price to PriceService, handles image_url
+│   ├── updateImageUrl(id, imageUrl) → Update only image_url, delete old
 │   ├── deleteProduct(id) → Soft delete
 │   ├── searchProducts(keyword)
 │   ├── filterByCategory(categoryId)
@@ -168,11 +172,14 @@ Service Layer (IIFE Modules)
 │   ├── restock(productId, addQty, note) [atomic with LockService, optional note]
 │   ├── setMinStock(productId, min)
 │   └── getLowStockProducts() [quantity < min_stock]
-└── ReportService.gs (118 LOC) - Analytics
-    ├── getDashboardStats() → Total products, inventory value, low stock
-    ├── getLowStockReport() → All low stock items with details
-    ├── getPriceHistoryReport(productId, start, end) → Timeline
-    └── getInventorySummaryReport() → Inventory value by category
+├── ReportService.gs (118 LOC) - Analytics
+│   ├── getDashboardStats() → Total products, inventory value, low stock
+│   ├── getLowStockReport() → All low stock items with details
+│   ├── getPriceHistoryReport(productId, start, end) → Timeline
+│   └── getInventorySummaryReport() → Inventory value by category
+└── ImageService.gs (60 LOC) - Product Images
+    ├── uploadImage(base64Data, fileName, mimeType) → Google Drive storage
+    └── deleteImage(imageUrl) → Move to trash
 
 Utility Layer
 ├── SheetHelper.gs (159 LOC) - Generic CRUD
@@ -430,14 +437,15 @@ retrieve → get all 3 chunks → concatenate → parse JSON
 │ created_at      │         │ unit             │
 │                 │         │ barcode          │
 │                 │         │ description      │
+│                 │         │ image_url        │
 │                 │         │ status           │
 │                 │         │ created_at       │
 │                 │         │ updated_at       │
 └─────────────────┘         └────────┬─────────┘
-         ▲                            │
+         ▲                           │
          │ (self-join, parent_id)    │
-         │                            │
-         │                            ▼
+         │                           │
+         │                           ▼
     Prices & Inventory         ┌──────────────────┐
     join via product_id        │     Prices       │
                                ├──────────────────┤

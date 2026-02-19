@@ -46,11 +46,13 @@ Tertiary: Store accountants/business analysts
 
 ### 1. Product Management
 
-- CRUD operations on products (name, unit, category, barcode, description)
-- Search products by keyword
+- CRUD operations on products (name, unit, category, barcode, description, image_url)
+- Search products by keyword or barcode
 - Filter by category
 - Soft delete with status tracking (active/inactive)
 - Automatic creation of related price & inventory records
+- Product images with upload, camera capture, URL paste
+- Client-side compression (max 800px, JPEG 0.7 quality)
 
 ### 2. Price Management
 
@@ -84,10 +86,19 @@ Tertiary: Store accountants/business analysts
 - Inventory summary by category
 - All reports cacheable for fast loading
 
-### 6. Role-Based Access Control
+### 6. Product Image Management
 
-- **Admin**: Full CRUD on all entities
-- **Viewer**: Read-only access (no edit/delete buttons)
+- Upload product images to Google Drive
+- Support multiple input methods: file upload, camera capture, URL paste
+- Client-side compression to reduce file size
+- Image preview in product list and detail modals
+- Admin-only image upload/delete operations
+- Automatic cleanup of old images when replaced
+
+### 7. Role-Based Access Control
+
+- **Admin**: Full CRUD on all entities, image upload/delete
+- **Viewer**: Read-only access (no edit/delete buttons, no image upload)
 - Server-side enforcement via Auth.checkAccess()
 - User management via Users sheet
 
