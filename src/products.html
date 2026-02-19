@@ -141,6 +141,14 @@
       </table>
     </div>
     <div class="modal-footer">
+      <a
+        id="detail-search-price"
+        class="btn-flat blue-text"
+        target="_blank"
+        rel="noopener"
+      >
+        <i class="material-icons left">search</i>Tìm giá Google
+      </a>
       <a class="modal-close btn-flat">Đóng</a>
     </div>
   </div>
@@ -596,6 +604,8 @@
       });
       if (!p) return;
       document.getElementById("detail-product-name").textContent = p.name;
+      document.getElementById("detail-search-price").href =
+        "https://www.google.com/search?q=" + encodeURIComponent("giá " + p.name);
       var rows = [
         ["Danh mục", escapeHtml(getCategoryName(p.category_id)) || "—"],
         ["Đơn vị", escapeHtml(p.unit)],
