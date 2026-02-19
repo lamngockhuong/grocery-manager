@@ -11,7 +11,7 @@
     </div>
     <div class="col s12 m3">
       <div class="input-field">
-        <select id="category-filter" onchange="Products.render()">
+        <select id="category-filter" onchange="Paginator.reset('products'); Products.render()">
           <option value="">Tất cả danh mục</option>
         </select>
         <label>Danh mục</label>
@@ -38,7 +38,7 @@
   <div class="table-wrapper">
     <table class="striped">
       <thead>
-        <tr>
+        <tr id="products-thead-row">
           <th>Tên sản phẩm</th>
           <th class="hide-on-small">Danh mục</th>
           <th class="hide-on-small">Đơn vị</th>
@@ -50,6 +50,7 @@
       <tbody id="products-tbody"></tbody>
     </table>
   </div>
+  <div id="products-pagination" class="pagination-controls"></div>
 
   <!-- Add/Edit Product Modal -->
   <div id="product-modal" class="modal">
@@ -299,11 +300,19 @@
       var tbody = document.getElementById("products-tbody");
       var products = this.getFilteredProducts();
       this.populateCategoryFilter();
+      this.renderHeaders();
 
       if (products.length === 0) {
         showEmptyState("products-tbody", "Chưa có sản phẩm nào");
+        document.getElementById("products-pagination").innerHTML = "";
         return;
       }
+
+      // Sort then paginate
+      products = TableSort.sort('products', products);
+      var totalItems = products.length;
+      products = Paginator.paginate('products', products);
+      Paginator.renderControls('products', totalItems, 'products-pagination', Products.render.bind(Products));
 
       tbody.innerHTML = products
         .map(function (p) {
@@ -341,6 +350,19 @@
         })
         .join("");
       updateAdminUI();
+    },
+
+    renderHeaders: function () {
+      var row = document.getElementById("products-thead-row");
+      if (!row) return;
+      var fn = "Products.render.bind(Products)";
+      row.innerHTML =
+        TableSort.th("products", "name", "Tên sản phẩm", fn) +
+        TableSort.th("products", "category_id", "Danh mục", fn, "hide-on-small") +
+        TableSort.th("products", "unit", "Đơn vị", fn, "hide-on-small") +
+        TableSort.th("products", "buy_price", "Giá nhập", fn) +
+        TableSort.th("products", "sell_price", "Giá bán", fn) +
+        '<th class="admin-only">Thao tác</th>';
     },
 
     getFilteredProducts: function () {
@@ -562,6 +584,7 @@
     searchInput.addEventListener("input", function () {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(function () {
+        Paginator.reset("products");
         Products.render();
       }, 300);
     });

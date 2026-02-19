@@ -24,7 +24,7 @@ var SHEETS = {
 var COLUMNS = {
   Products: ['id', 'name', 'category_id', 'unit', 'barcode', 'description', 'status', 'created_at', 'updated_at'],
   Prices: ['id', 'product_id', 'buy_price', 'sell_price', 'updated_at', 'updated_by'],
-  Inventory: ['id', 'product_id', 'quantity', 'min_stock', 'last_restock', 'updated_at'],
+  Inventory: ['id', 'product_id', 'quantity', 'min_stock', 'last_restock', 'restock_note', 'updated_at'],
   PriceHistory: ['id', 'product_id', 'old_buy', 'new_buy', 'old_sell', 'new_sell', 'changed_at', 'changed_by'],
   Users: ['email', 'name', 'role', 'created_at'],
   Categories: ['id', 'name', 'parent_id', 'created_at']

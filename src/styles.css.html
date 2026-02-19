@@ -125,6 +125,49 @@
     cursor: pointer;
   }
 
+  /* Sortable table headers */
+  .sortable-th {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .sortable-th:hover {
+    background: #e8eaf6;
+  }
+  .sort-icon {
+    vertical-align: middle;
+    font-size: 14px !important;
+    opacity: 0.35;
+  }
+  .sort-icon.active {
+    opacity: 1;
+    color: #1565c0;
+  }
+
+  /* Pagination controls */
+  .pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pagination-info {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  .pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pagination-page {
+    font-size: 0.9rem;
+    min-width: 90px;
+    text-align: center;
+  }
+
   @media (max-width: 600px) {
     .hide-on-small {
       display: none;

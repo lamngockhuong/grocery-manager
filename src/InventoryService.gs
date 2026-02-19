@@ -28,6 +28,7 @@ var InventoryService = (function() {
           quantity: Number(i.quantity) || 0,
           min_stock: Number(i.min_stock) || 5,
           last_restock: i.last_restock || '',
+          restock_note: i.restock_note || '',
           updated_at: i.updated_at || ''
         };
       });
@@ -60,7 +61,7 @@ var InventoryService = (function() {
     return { success: true };
   }
 
-  function restock(productId, addQuantity) {
+  function restock(productId, addQuantity, note) {
     Auth.requireAdmin();
     addQuantity = Number(addQuantity);
     if (isNaN(addQuantity) || addQuantity <= 0) throw new Error('Số lượng nhập thêm phải > 0');
@@ -72,11 +73,15 @@ var InventoryService = (function() {
       if (!record) throw new Error('Không tìm thấy tồn kho cho sản phẩm');
 
       var currentQty = Number(record.quantity) || 0;
-      SheetHelper.update(SHEETS.INVENTORY, record.id, {
+      var updateData = {
         quantity: currentQty + addQuantity,
         last_restock: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      });
+      };
+      if (note !== undefined && note !== null) {
+        updateData.restock_note = String(note).substring(0, 200);
+      }
+      SheetHelper.update(SHEETS.INVENTORY, record.id, updateData);
       CacheHelper.remove(CACHE_KEY);
       return { success: true, new_quantity: currentQty + addQuantity };
     } finally {

@@ -240,9 +240,9 @@ function apiUpdateQuantity(productId, qty) {
   }
 }
 
-function apiRestock(productId, addQty) {
+function apiRestock(productId, addQty, note) {
   try {
-    return { success: true, data: InventoryService.restock(productId, addQty) };
+    return { success: true, data: InventoryService.restock(productId, addQty, note) };
   } catch (e) {
     return { success: false, error: e.message };
   }
