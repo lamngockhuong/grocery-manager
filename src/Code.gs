@@ -24,7 +24,7 @@ function setupSheets() {
     ss = SpreadsheetApp.openById(id);
   } else {
     ss = SpreadsheetApp.create('Grocery Manager Data');
-    // Tự động lưu ID của spreadsheet mới vào Script Properties
+    // Auto-save new spreadsheet ID to Script Properties
     PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', ss.getId());
     Logger.log('Đã tạo spreadsheet mới: ' + ss.getUrl());
   }
