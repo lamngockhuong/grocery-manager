@@ -5,8 +5,9 @@
 var SheetHelper = (function() {
 
   function _getSpreadsheet() {
-    if (SPREADSHEET_ID) {
-      return SpreadsheetApp.openById(SPREADSHEET_ID);
+    var id = getSpreadsheetId();
+    if (id) {
+      return SpreadsheetApp.openById(id);
     }
     return SpreadsheetApp.getActiveSpreadsheet();
   }

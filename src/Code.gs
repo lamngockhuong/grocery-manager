@@ -5,7 +5,7 @@
 function doGet(e) {
   return HtmlService.createTemplateFromFile('index')
     .evaluate()
-    .setTitle('Quan Ly Gia San Pham')
+    .setTitle('Quản Lý Giá Sản Phẩm')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }
@@ -19,10 +19,14 @@ function include(filename) {
  */
 function setupSheets() {
   var ss;
-  if (SPREADSHEET_ID) {
-    ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var id = getSpreadsheetId();
+  if (id) {
+    ss = SpreadsheetApp.openById(id);
   } else {
-    ss = SpreadsheetApp.getActiveSpreadsheet();
+    ss = SpreadsheetApp.create('Grocery Manager Data');
+    // Tự động lưu ID của spreadsheet mới vào Script Properties
+    PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', ss.getId());
+    Logger.log('Đã tạo spreadsheet mới: ' + ss.getUrl());
   }
 
   var sheetNames = Object.keys(COLUMNS);
@@ -60,6 +64,15 @@ function setupSheets() {
   }
 
   Logger.log('Setup complete: ' + sheetNames.length + ' sheets created.');
+}
+
+/**
+ * Gán SPREADSHEET_ID vào Script Properties.
+ * Chạy 1 lần nếu muốn dùng spreadsheet có sẵn.
+ */
+function setupSpreadsheetId(id) {
+  PropertiesService.getScriptProperties().setProperty('SPREADSHEET_ID', id);
+  Logger.log('SPREADSHEET_ID đã được lưu: ' + id);
 }
 
 // ==================== API Wrapper Functions ====================

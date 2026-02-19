@@ -2,8 +2,13 @@
  * Config.gs - Application constants and configuration
  */
 
-// Replace with your actual Spreadsheet ID after creating it
-var SPREADSHEET_ID = '';
+/**
+ * Lấy SPREADSHEET_ID từ Script Properties.
+ * Đặt giá trị qua: setupSpreadsheetId(id) hoặc GAS Editor > Project Settings > Script Properties.
+ */
+function getSpreadsheetId() {
+  return PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '';
+}
 
 var SHEETS = {
   PRODUCTS: 'Products',
