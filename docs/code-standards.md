@@ -17,7 +17,7 @@ This document establishes coding standards for the Grocery Manager project. All 
 
 **Global Variables:**
 
-- Intentional: `SPREADSHEET_ID`, `SHEETS`, `COLUMNS`, `CACHE_TTL`, `ROLES`, `ID_PREFIXES`
+- Intentional: `SPREADSHEET_ID`, `APP_NAME`, `SHEETS`, `COLUMNS`, `CACHE_TTL`, `ROLES`, `ID_PREFIXES`
 - Must be UPPERCASE with underscores
 - Documented in Config.gs
 

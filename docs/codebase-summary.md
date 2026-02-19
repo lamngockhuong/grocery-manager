@@ -186,6 +186,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 ```javascript
 SPREADSHEET_ID = '';          // User fills in after setup
+APP_NAME = '...';             // From Script Properties (default: 'Quản Lý Tạp Hoá')
 SHEETS = {...};               // Sheet names (6 sheets)
 COLUMNS = {...};              // Column mappings per sheet
 CACHE_TTL = 600;              // 10 minutes (seconds)

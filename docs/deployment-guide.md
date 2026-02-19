@@ -53,6 +53,8 @@ In GAS editor: Select `setupSheets()` → Run → Authorize
 
 **Nếu muốn dùng spreadsheet có sẵn:** Chạy `setupSpreadsheetId('your-spreadsheet-id')` trong GAS editor trước khi chạy `setupSheets()`. Hoặc vào Project Settings → Script Properties → thêm key `SPREADSHEET_ID`.
 
+**Đổi tên app:** Vào Project Settings → Script Properties → thêm key `APP_NAME` với giá trị mong muốn (mặc định: `Quản Lý Tạp Hoá`). Tên hiển thị ở navbar và tiêu đề trang.
+
 ### Step 6: Deploy
 
 ```bash

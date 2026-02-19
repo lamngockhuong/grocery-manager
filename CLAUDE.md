@@ -29,7 +29,7 @@ Browser SPA (Materialize CSS)
 
 ## Database (Google Sheets)
 
-6 sheets: Products, Prices, Inventory, PriceHistory, Users, Categories. Column definitions in `Config.gs` COLUMNS object. All IDs are UUID-based (prefix + `Utilities.getUuid()`). `SPREADSHEET_ID` stored in Script Properties via `PropertiesService.getScriptProperties()`.
+6 sheets: Products, Prices, Inventory, PriceHistory, Users, Categories. Column definitions in `Config.gs` COLUMNS object. All IDs are UUID-based (prefix + `Utilities.getUuid()`). `SPREADSHEET_ID` and `APP_NAME` (default: "Quản Lý Tạp Hoá") stored in Script Properties via `PropertiesService.getScriptProperties()`.
 
 ## Development
 

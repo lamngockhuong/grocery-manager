@@ -10,6 +10,8 @@ function getSpreadsheetId() {
   return PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '';
 }
 
+var APP_NAME = PropertiesService.getScriptProperties().getProperty('APP_NAME') || 'Quản Lý Tạp Hoá';
+
 var SHEETS = {
   PRODUCTS: 'Products',
   PRICES: 'Prices',

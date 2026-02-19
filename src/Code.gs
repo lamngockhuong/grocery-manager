@@ -24,10 +24,11 @@ function doGet(e) {
   } catch (e) {
     Logger.log('getInitialData failed, falling back to RPC: ' + e.message);
   }
+  template.appName = APP_NAME;
   template.initialDataJson = JSON.stringify(initialData)
     .replace(/<\/script>/gi, '<\\/script>');
   return template.evaluate()
-    .setTitle('Quản Lý Giá Sản Phẩm')
+    .setTitle(APP_NAME)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }

@@ -190,6 +190,7 @@ Utility Layer
 ├── Auth.gs - See above
 └── Config.gs (39 LOC) - Constants
     ├── SPREADSHEET_ID
+    ├── APP_NAME: From Script Properties (default: 'Quản Lý Tạp Hoá')
     ├── SHEETS: {PRODUCTS, PRICES, INVENTORY, PRICE_HISTORY, USERS, CATEGORIES}
     ├── COLUMNS: Column mappings per sheet
     ├── CACHE_TTL: 10 minutes
