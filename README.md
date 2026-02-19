@@ -4,17 +4,23 @@ Website quản lý giá sản phẩm cho tạp hoá (500-2000 SKU), full-stack t
 
 ## Features
 
-- **Product Management**: CRUD sản phẩm, tìm kiếm, lọc theo danh mục
-- **Price Management**: Cập nhật giá nhập/bán, tự động ghi lịch sử giá
+- **Product Management**: CRUD sản phẩm, tìm kiếm (theo tên/barcode/mô tả), lọc theo danh mục, xem chi tiết modal
+- **Product Images**: Upload/hiển thị ảnh sản phẩm qua Google Drive
+- **Barcode Scanner**: Quét barcode bằng camera thiết bị
+- **Google Price Search**: Tìm giá sản phẩm trên Google từ modal chi tiết
+- **Price Management**: Cập nhật giá nhập/bán, tự động ghi lịch sử giá (bỏ qua nếu giá không đổi)
 - **Category Management**: Danh mục cha-con (2 cấp)
-- **Inventory**: Quản lý tồn kho, cảnh báo sắp hết hàng, nhập hàng
+- **Inventory**: Quản lý tồn kho, cảnh báo sắp hết hàng, nhập hàng với ghi chú
 - **Reports**: Dashboard tổng quan, báo cáo sắp hết hàng, lịch sử giá, tổng hợp tồn kho
+- **Table Features**: Sắp xếp cột, phân trang
 - **Auth**: Phân quyền admin/viewer theo email
+- **Configurable**: Tên app thay đổi qua Script Properties (`APP_NAME`)
 
 ## Architecture
 
 ```bash
 Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Sheets (6 sheets)
+                                                   └-> Google Drive (product images)
 ```
 
 ### Backend Files (`.gs`)
@@ -30,6 +36,7 @@ Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Shee
 | PriceService.gs     | Price CRUD + auto history logging               |
 | CategoryService.gs  | Category CRUD with parent-child tree            |
 | InventoryService.gs | Inventory management + low stock alerts         |
+| ImageService.gs     | Product image upload/serve via Google Drive     |
 | ReportService.gs    | Dashboard stats + 3 report types                |
 
 ### Frontend Files (`.html`)
@@ -90,7 +97,7 @@ pnpm run deploy    # push code + create new deployment
 
 ## Database (6 Sheets)
 
-- **Products**: id, name, category_id, unit, barcode, description, status, created_at, updated_at
+- **Products**: id, name, category_id, unit, barcode, description, image_id, status, created_at, updated_at
 - **Prices**: id, product_id, buy_price, sell_price, updated_at, updated_by
 - **Inventory**: id, product_id, quantity, min_stock, last_restock, updated_at
 - **PriceHistory**: id, product_id, old_buy, new_buy, old_sell, new_sell, changed_at, changed_by
