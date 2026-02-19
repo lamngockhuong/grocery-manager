@@ -87,6 +87,7 @@ app.js.html (Core)
 UI Pages (Materialize CSS)
 ├── products.html
 │   ├── Product table (search, filter by category)
+│   ├── Column sorting (ASC/DESC/none) + pagination (25/page)
 │   ├── Add Product modal
 │   ├── Edit Product modal
 │   └── Price Edit modal (atomic, LockService-protected)
@@ -96,7 +97,8 @@ UI Pages (Materialize CSS)
 │   └── Validation (no products before delete)
 ├── inventory.html
 │   ├── Inventory table with low stock indicators
-│   ├── Restock modal (atomic)
+│   ├── Column sorting (ASC/DESC/none) + pagination (25/page)
+│   ├── Restock modal (atomic, with optional note)
 │   ├── Set Min Stock modal
 │   └── Summary cards (total value, low stock count)
 ├── dashboard.html
@@ -104,9 +106,9 @@ UI Pages (Materialize CSS)
 │   ├── Low stock warnings (linked to products)
 │   └── Recent changes timeline
 └── reports.html
-    ├── Tab 1: Low Stock Report
-    ├── Tab 2: Price History (product, date range filter)
-    └── Tab 3: Inventory Summary (by category)
+    ├── Tab 1: Low Stock Report (column sorting)
+    ├── Tab 2: Price History (product, date range, bold changed prices)
+    └── Tab 3: Inventory Summary (by category, column sorting)
 ```
 
 ### Backend Service Layers
@@ -136,11 +138,11 @@ Service Layer (IIFE Modules)
 │   ├── requireAdmin() → Throw if not admin
 │   ├── checkAccess() → Verify user in system (called by ALL APIs)
 │   └── getAuthInfo() → {email, role, name}
-├── ProductService.gs (177 LOC) - Product CRUD
+├── ProductService.gs (192 LOC) - Product CRUD
 │   ├── getProducts() [cached]
 │   ├── getProductById(id)
 │   ├── createProduct(data) → Auto-creates price & inventory
-│   ├── updateProduct(id, data)
+│   ├── updateProduct(id, data) → Delegates price to PriceService
 │   ├── deleteProduct(id) → Soft delete
 │   ├── searchProducts(keyword)
 │   ├── filterByCategory(categoryId)
@@ -159,11 +161,11 @@ Service Layer (IIFE Modules)
 │   ├── createCategory(data)
 │   ├── updateCategory(id, data)
 │   └── deleteCategory(id) [validates no products]
-├── InventoryService.gs (131 LOC) - Inventory CRUD + Restock
+├── InventoryService.gs (136 LOC) - Inventory CRUD + Restock
 │   ├── getInventory() [cached]
 │   ├── createInventoryForProduct(productId)
 │   ├── updateQuantity(productId, qty)
-│   ├── restock(productId, addQty) [atomic with LockService]
+│   ├── restock(productId, addQty, note) [atomic with LockService, optional note]
 │   ├── setMinStock(productId, min)
 │   └── getLowStockProducts() [quantity < min_stock]
 └── ReportService.gs (118 LOC) - Analytics
@@ -188,7 +190,7 @@ Utility Layer
 │   ├── remove(key) → Delete (cleans up chunks)
 │   └── invalidate(prefix) → Remove by prefix
 ├── Auth.gs - See above
-└── Config.gs (39 LOC) - Constants
+└── Config.gs (46 LOC) - Constants
     ├── SPREADSHEET_ID
     ├── APP_NAME: From Script Properties (default: 'Quản Lý Tạp Hoá')
     ├── SHEETS: {PRODUCTS, PRICES, INVENTORY, PRICE_HISTORY, USERS, CATEGORIES}
@@ -458,9 +460,9 @@ retrieve → get all 3 chunks → concatenate → parse JSON
         │ quantity             │          │ old_buy                 │
         │ min_stock            │          │ new_buy                 │
         │ last_restock         │          │ old_sell                │
-        │ updated_at           │          │ new_sell                │
-        └──────────────────────┘          │ changed_at              │
-                                          │ changed_by (FK)         │
+        │ restock_note         │          │ new_sell                │
+        │ updated_at           │          │ changed_at              │
+        └──────────────────────┘          │ changed_by (FK)         │
                                           └─────────────────────────┘
 
 ┌──────────────────┐

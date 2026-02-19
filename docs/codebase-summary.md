@@ -7,7 +7,7 @@ The Grocery Manager codebase is organized into two main layers:
 1. **Backend** (Google Apps Script): 10 .gs files handling API, services, and data access
 2. **Frontend** (HTML/JS/CSS): 8 .html files for SPA UI, routing, and styling
 
-Total: 19 files, 2,634 LOC in `src/` directory.
+Total: 19 files, 3,366 LOC in `src/` directory.
 
 ## Directory Structure
 
@@ -60,14 +60,14 @@ function apiGetProducts() {
 
 Each service is an Immediately Invoked Function Expression (IIFE) exporting public methods:
 
-#### ProductService.gs (177 LOC)
+#### ProductService.gs (192 LOC)
 
 **Methods:**
 
 - `getProducts()` - Get all active products (cached)
 - `getProductById(id)` - Get by ID
 - `createProduct(data)` - Validates duplicate names, auto-creates price & inventory
-- `updateProduct(id, data)` - Partial updates
+- `updateProduct(id, data)` - Partial updates, delegates price changes to PriceService
 - `deleteProduct(id)` - Soft delete (status='inactive')
 - `searchProducts(keyword)` - Case-insensitive keyword search
 - `filterByCategory(categoryId)` - Filter by parent category
@@ -112,14 +112,14 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **Validation:** No products in category before deletion
 
-#### InventoryService.gs (131 LOC)
+#### InventoryService.gs (136 LOC)
 
 **Methods:**
 
 - `getInventory()` - Get all inventory records (cached)
 - `createInventoryForProduct(productId)` - Auto-create on product creation
 - `updateQuantity(productId, qty)` - Direct quantity update
-- `restock(productId, addQty)` - Atomic add quantity (LockService)
+- `restock(productId, addQty, note)` - Atomic add quantity (LockService), optional restock note (max 200 chars)
 - `setMinStock(productId, min)` - Set minimum threshold
 - `getLowStockProducts()` - Get items below min_stock
 
@@ -180,7 +180,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - Stores `{key}_chunk_0`, `{key}_chunk_1`, etc.
 - Handles partial cache misses gracefully
 
-#### Config.gs (39 LOC)
+#### Config.gs (46 LOC)
 
 **Constants:**
 
@@ -207,7 +207,7 @@ ID_PREFIXES = {...};          // Prefixes for ID generation (P, PR, INV, PH, CAT
 
 **Routing:** Hash-based (#/products, #/inventory, etc.)
 
-### State Manager & API (app.js.html, 184 LOC)
+### State Manager & API (app.js.html, 337 LOC)
 
 **API Wrapper:**
 
@@ -241,14 +241,18 @@ app.router.on("inventory", showInventoryPage);
 - `formatCurrency(value)` - Format to Vietnamese Dong (₫)
 - `escapeHtml(text)` - XSS prevention
 - `validateForm(formSelector)` - Client-side validation
+- `sortTable(tableData, column, direction)` - Client-side table sorting (ASC/DESC/none)
+- `paginate(data, page, perPage)` - Client-side pagination (25 items/page)
 
 ### Pages (UI Components)
 
-#### products.html (277 LOC)
+#### products.html (592 LOC)
 
 - Table: id, name, category, unit, barcode, buy_price, sell_price
 - Search bar (client-side filter)
 - Filter by category dropdown
+- Column sorting (ASC/DESC/none toggle)
+- Pagination (25 items/page)
 - Add Product modal
 - Edit Product modal
 - Price Edit modal (separate action)
@@ -263,37 +267,43 @@ app.router.on("inventory", showInventoryPage);
 - Delete with confirmation (validates no products)
 - Admin-only buttons
 
-#### inventory.html (180 LOC)
+#### inventory.html (214 LOC)
 
-- Inventory table: product, quantity, min_stock, last_restock
+- Inventory table: product, quantity, min_stock, last_restock, restock_note
 - Summary cards: total products, total value (VND), low stock count
 - Low stock visual indicator (red badge)
-- Restock modal (add quantity)
+- Column sorting (ASC/DESC/none toggle)
+- Pagination (25 items/page)
+- Restock modal (add quantity + optional note, max 200 chars)
+- Restock note tooltip display on last_restock column
 - Set Min Stock modal
+- Loading states on restock/min-stock buttons
 - Admin-only edit buttons
 
-#### dashboard.html (91 LOC)
+#### dashboard.html (104 LOC)
 
 - Stats cards: total products, inventory value (₫), low stock count
 - Low stock warning list (clickable links to products)
-- Recent changes timeline
+- Recent changes timeline (bold highlighting for changed prices)
 - Refresh stats button
 - Real-time updates on page load
 
-#### reports.html (170 LOC)
+#### reports.html (197 LOC)
 
-- Tab 1: Low Stock Report (table with details)
-- Tab 2: Price History (product selector, date range, chart)
-- Tab 3: Inventory Summary (table by category, totals)
+- Tab 1: Low Stock Report (table with details, column sorting)
+- Tab 2: Price History (product selector, date range, bold changed prices)
+- Tab 3: Inventory Summary (table by category, totals, column sorting)
 - Export buttons (CSV/Print) - not yet implemented in v1
 - Admin-only: some filters
 
-### Styling (styles.css.html, 26 LOC)
+### Styling (styles.css.html, 277 LOC)
 
 - Override Materialize defaults
 - Custom color scheme (blue primary, orange accent)
 - Responsive table styles
 - Modal customization
+- Sort indicator styles (arrow icons on sortable columns)
+- Pagination controls styling
 - @media queries for mobile (<768px)
 
 ## Data Flow
@@ -398,14 +408,15 @@ dashboard.html: update stats cards + warning list
 
 ### Inventory Sheet
 
-| Column       | Type    | Notes                            |
-| ------------ | ------- | -------------------------------- |
-| id           | string  | INV{uuid}                        |
-| product_id   | string  | FK to Products.id                |
-| quantity     | number  | Current stock                    |
-| min_stock    | number  | Reorder point                    |
-| last_restock | ISO8601 | Timestamp of last restock() call |
-| updated_at   | ISO8601 | Updated on any change            |
+| Column       | Type    | Notes                                         |
+| ------------ | ------- | --------------------------------------------- |
+| id           | string  | INV{uuid}                                     |
+| product_id   | string  | FK to Products.id                             |
+| quantity     | number  | Current stock                                 |
+| min_stock    | number  | Reorder point                                 |
+| last_restock | ISO8601 | Timestamp of last restock() call              |
+| restock_note | string  | Optional note on last restock (max 200 chars) |
+| updated_at   | ISO8601 | Updated on any change                         |
 
 ### PriceHistory Sheet
 
@@ -523,7 +534,7 @@ try {
 ### Optimization Opportunities
 
 1. Implement `getByIdMap()` for faster lookups
-2. Add pagination to large reports
+2. ~~Add pagination to large reports~~ — Done: client-side pagination (25/page) on Products & Inventory
 3. Implement server-side filtering (not done in v1)
 4. Consider batch sheet reads with SpreadsheetApp.getValues()
 
