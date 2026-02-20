@@ -162,8 +162,12 @@ Tertiary: Store accountants/business analysts
 | F08 | Inventory summary reports    | Complete | v1     |
 | F09 | Role-based access            | Complete | v1     |
 | F10 | Multi-user access            | Complete | v1     |
-| F11 | Product image management     | Complete | v1.1   |
-| F12 | Orphan image cleanup (admin) | Complete | v1.1   |
+| F11 | Product image management     | Complete | v1     |
+| F12 | Orphan image cleanup (admin) | Complete | v1     |
+| F13 | Barcode scanner (camera)     | Complete | v1     |
+| F14 | Google price search          | Complete | v1     |
+| F15 | Table sorting & pagination   | Complete | v1     |
+| F16 | Product detail modal         | Complete | v1     |
 
 ### Non-Functional PDRs
 
@@ -188,21 +192,22 @@ Tertiary: Store accountants/business analysts
 
 ## Future Roadmap
 
-### Phase 2 (Future)
+### Phase 2 (v2.0 — Q3/Q4 2026)
 
-- Barcode scanner integration (mobile-friendly)
+- Performance optimization (ID map cache, server-side filtering)
 - Supplier management & auto-reorder
 - Multi-language support (Vietnamese/English)
 - Auto-backup to Google Drive
-- Receipt/POS integration
+- Bulk actions & CSV/Excel export
 
-### Phase 3 (Future)
+### Phase 3 (v3.0 — Q1/Q2 2027)
 
 - Profit margin tracking
 - Sales analytics
 - Stock rotation (FIFO/LIFO)
 - Batch expiration tracking
 - Supplier performance reports
+- Receipt/POS integration
 
 ## Constraints
 
@@ -225,12 +230,13 @@ Tertiary: Store accountants/business analysts
 
 ## Development Status
 
-**Current Version:** v1.0.0 (Complete)
+**Current Version:** v1.0.0 (Production — February 2026)
 
-- 19 files total (10 .gs, 8 .html, 1 appsscript.json)
-- 2,634 LOC in src/
+- 20 files total (11 .gs, 8 .html, 1 appsscript.json)
+- ~4,484 LOC in src/
 - All core features implemented and tested
-- Production-ready
+- Includes: barcode scanner, product images, Google price search, sorting/pagination
+- Code quality: dprint (formatting) + ESLint (linting)
 
 **Maintenance:** Ongoing (bugfixes, performance tuning)
 

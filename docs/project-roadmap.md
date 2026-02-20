@@ -2,109 +2,74 @@
 
 ## Current Status
 
-**Version:** 1.0.0 (Released)
+**Version:** 1.0.0
 **Status:** Production-Ready
-**Release Date:** 2024
+**Start Date:** February 19, 2026
 **Maintenance:** Ongoing
 
-All core features implemented and tested. System is stable and handling 500-2,000 SKU deployments successfully.
+All core features implemented and deployed. System handles 500-2,000 SKU grocery stores on Google Apps Script + Google Sheets.
 
 ## Release Timeline
 
-### Version 1.0.0 (Complete)
+### Version 1.0.0 (Current)
 
-**Release Date:** 2024
+**Release Date:** February 2026
 **Status:** ✅ Production
 
 **Features Delivered:**
 
-- [x] Product CRUD + search + filter
-- [x] Price management + atomic updates + history tracking
-- [x] Category management (2-level hierarchy)
-- [x] Inventory tracking + restock + low stock alerts
-- [x] Dashboard with stats and warnings
+- [x] Product CRUD + search + filter (by name/barcode/description)
+- [x] Product images (upload, camera, URL paste, compression via Google Drive)
+- [x] Barcode scanner with camera-based scanning
+- [x] Google price search from product detail modal
+- [x] Price management + atomic updates + auto history logging
+- [x] Category management (2-level parent-child hierarchy)
+- [x] Inventory tracking + restock with notes + low stock alerts
+- [x] Dashboard with stats and low stock warnings
 - [x] Reports (low stock, price history, inventory summary)
+- [x] Table sorting and pagination
 - [x] Role-based access control (admin/viewer)
 - [x] Multi-user support with permissions
 - [x] Caching with chunking (>100KB support)
 - [x] Atomic operations (LockService)
 - [x] Setup automation (setupSheets)
-- [x] Product images (upload, camera, URL paste, compression)
-
-**Known Limitations:**
-
-- Linear search in getById() for large datasets
-- No pagination in UI (all data loaded at once)
-- No barcode scanner integration
-- Single language (Vietnamese)
-- No backup automation
-- Manual PriceHistory sheet archival required after 5+ years
+- [x] Configurable app name via Script Properties
+- [x] Server-side embedded initial data (eliminate first-load RPCs)
+- [x] Mobile responsiveness
+- [x] Code formatting and linting (dprint + ESLint)
+- [x] Screenshots and bilingual documentation (English + Vietnamese)
+- [x] Secure repo for public access
 
 ## Planned Releases
 
-### Version 1.1.0 (Bugfixes & Performance)
+### Version 2.0.0 (Next Major Release)
 
-**Target:** Q1/Q2 2025
+**Target:** Q3/Q4 2026
 **Status:** Planning
 
-**Planned Improvements:**
+#### 1. Performance Optimization
 
-- [ ] Performance: Implement ID map cache for O(1) lookups
-- [ ] Performance: Add server-side filtering (reduce client-side load)
-- [ ] Bugfix: Handle >2,000 products (optimize sheet reads)
-- [ ] UI: Add pagination to product/inventory tables
-- [ ] UI: Sort indicators on table columns
-- [ ] UI: Bulk actions (select multiple, change status)
+- [ ] ID map cache for O(1) lookups
+- [ ] Handle >2,000 products (optimize sheet reads)
+- [ ] Server-side filtering (reduce client-side load)
+
+#### 2. UI Enhancements
+
+- [ ] Bulk actions (select multiple, change status)
 - [ ] Reports: Export to CSV/Excel format
 - [ ] Reports: Print-friendly styling
-- [ ] Docs: Add video tutorials
-- [ ] DevOps: Pre-commit hooks for code quality
 
-**Effort:** 40-60 hours
-**Resources Needed:** 1 developer, QA tester
-
-**Success Criteria:**
-
-- Dashboard loads <1s with 2,000+ products
-- All tables paginated (50 rows/page)
-- CSV export working for all reports
-- <2% regression in existing features
-
----
-
-### Version 2.0.0 (Major Feature Release)
-
-**Target:** Q3/Q4 2025
-**Status:** Concept
-
-**New Features:**
-
-#### 1. Barcode Scanner Integration
-
-- Integrate QuaggaJS (barcode recognition library)
-- Quick product lookup via barcode
-- Fast checkout/restock workflow
-- Works on mobile devices
-- Camera permission handling
-
-**Scope:** 20-30 hours
-**Effort Points:** 8
-**Owner:** TBD
-
-#### 2. Multi-Language Support
+#### 3. Multi-Language Support
 
 - Vietnamese (current)
 - English (new)
-- Chinese (future)
 - Localization framework (i18n)
 - Language preference per user
-- RTL support planning
 
 **Scope:** 15-25 hours
-**Effort Points:** 5
 **Owner:** TBD
 
-#### 3. Supplier Management
+#### 4. Supplier Management
 
 - Track suppliers for each product
 - Supplier contact info & pricing
@@ -122,7 +87,7 @@ All core features implemented and tested. System is stable and handling 500-2,00
 **Effort Points:** 12
 **Owner:** TBD
 
-#### 4. Auto-Backup & Version Control
+#### 5. Auto-Backup & Version Control
 
 - Daily auto-backup to Google Drive
 - Version history (weekly snapshots)
@@ -134,11 +99,11 @@ All core features implemented and tested. System is stable and handling 500-2,00
 **Effort Points:** 8
 **Owner:** TBD
 
-**Combined Effort:** 85-125 hours (4-6 weeks, 1 developer)
+**Combined Effort:** 80-120 hours (4-6 weeks, 1 developer)
 
 **Success Criteria:**
 
-- Barcode scanner working on iOS/Android
+- ID map cache achieving O(1) lookups
 - Language switch functional (no page reload)
 - Supplier lookup working in product creation
 - Daily backup running automatically
@@ -148,8 +113,8 @@ All core features implemented and tested. System is stable and handling 500-2,00
 
 ### Version 3.0.0 (Analytics & Business Intelligence)
 
-**Target:** 2026 (Future)
-**Status:** Concept (Not Started)
+**Target:** Q1/Q2 2027
+**Status:** Concept
 
 **New Features:**
 
@@ -227,7 +192,7 @@ All core features implemented and tested. System is stable and handling 500-2,00
 
 ---
 
-## Future Roadmap (2026+)
+## Future Roadmap (2027+)
 
 ### Potential Features (Concept Phase)
 
@@ -248,10 +213,9 @@ All core features implemented and tested. System is stable and handling 500-2,00
 
 | Issue                             | Severity | Fix Effort                 | Priority |
 | --------------------------------- | -------- | -------------------------- | -------- |
-| Linear search in getById() O(n)   | Low      | 10h                        | v1.1     |
-| No pagination in tables           | Medium   | 15h                        | v1.1     |
-| PriceHistory unbounded growth     | Low      | 5h (archival script)       | v1.1     |
-| No error logging beyond Logger    | Low      | 10h                        | v1.1     |
+| Linear search in getById() O(n)   | Low      | 10h                        | v2.0     |
+| PriceHistory unbounded growth     | Low      | 5h (archival script)       | v2.0     |
+| No error logging beyond Logger    | Low      | 10h                        | v2.0     |
 | Materialize CSS maintenance (old) | Low      | 15h (migrate to Tailwind?) | Future   |
 | No unit tests                     | Medium   | 40h (add Jest)             | Future   |
 
@@ -284,7 +248,7 @@ All core features implemented and tested. System is stable and handling 500-2,00
 - [ ] Migrate PriceHistory if >1M rows
 - [ ] User feedback compilation
 
-## Success Metrics (v1.0)
+## Success Metrics
 
 ### Functional Completeness
 
@@ -316,55 +280,34 @@ All core features implemented and tested. System is stable and handling 500-2,00
 - Manual testing: All workflows passed
 - Store owners can manage inventory without errors
 
-## Roadmap Metrics
+## Timeline
 
-### Development Velocity
-
-**v1.0:** 2,634 LOC in ~80-100 hours (estimated)
-**Average:** 26-33 LOC/hour
-
-**Future Estimates:**
-
-- v1.1: 40-60h (performance + UI) → +400-600 LOC
-- v2.0: 85-125h (barcode + languages + suppliers + backup) → +1,000-1,500 LOC
-- v3.0: 125-175h (analytics) → +1,500-2,000 LOC
-
-### Timeline (Realistic)
-
-```bash
-2024:
-  ✅ v1.0 Released (complete)
-
-2025:
-  Q1/Q2:  📋 v1.1 (bugfixes, performance)
-  Q3/Q4:  📋 v2.0 (barcode, languages, suppliers, backup)
-
+```
 2026:
+  Feb:    ✅ v1.0 Released (all core features)
+  Q3/Q4:  📋 v2.0 (performance, i18n, suppliers, backup)
+
+2027:
   Q1/Q2:  📋 v3.0 (analytics, profit margins, stock rotation)
   Q3+:    🔮 v4.0 (POS integration, mobile app, API)
 ```
 
 ## Dependency Analysis
 
-### Version 1.1 Dependencies
-
-- **Blocks:** None (improvements only)
-- **Blocked By:** None
-
 ### Version 2.0 Dependencies
 
 - **Blocks:** v3.0 (supplier data needed for analytics)
-- **Blocked By:** v1.1 (performance baseline)
+- **Blocked By:** None
 
 ### Version 3.0 Dependencies
 
 - **Blocks:** v4.0 (data models established)
-- **Blocked By:** v2.0 (supplier data), v1.1 (performance)
+- **Blocked By:** v2.0 (supplier data)
 
 ### Version 4.0 Dependencies
 
 - **Blocks:** None (next major release)
-- **Blocked By:** v3.0 (analytics), v2.0 (barcode, backup)
+- **Blocked By:** v3.0 (analytics), v2.0 (backup)
 
 ## Resource Planning
 
@@ -379,7 +322,6 @@ All core features implemented and tested. System is stable and handling 500-2,00
 
 | Phase            | Developers | QA  | Designers | Est. Time   |
 | ---------------- | ---------- | --- | --------- | ----------- |
-| v1.1 (bugfixes)  | 1          | 0.5 | 0         | 8-12 weeks  |
 | v2.0 (features)  | 1-2        | 1   | 0.5       | 12-16 weeks |
 | v3.0 (analytics) | 2          | 1   | 1         | 16-20 weeks |
 | v4.0 (major)     | 3          | 2   | 1         | 20-24 weeks |
@@ -391,16 +333,15 @@ Assuming $50-100/hour for development:
 | Release | Hours | Low Budget | High Budget |
 | ------- | ----- | ---------- | ----------- |
 | v1.0    | 100   | $5,000     | $10,000     |
-| v1.1    | 50    | $2,500     | $5,000      |
-| v2.0    | 105   | $5,250     | $10,500     |
+| v2.0    | 100   | $5,000     | $10,000     |
 | v3.0    | 150   | $7,500     | $15,000     |
 | v4.0+   | 200+  | $10,000+   | $20,000+    |
 
-**Total (through v3.0):** 405 hours = $20,250 - $40,500
+**Total (through v3.0):** 350 hours = $17,500 - $35,000
 
 ## Community & User Feedback
 
-### v1.0 Feedback Goals
+### Feedback Goals
 
 - [ ] Deploy to 5+ test stores
 - [ ] Gather performance feedback
@@ -412,17 +353,15 @@ Assuming $50-100/hour for development:
 
 - [ ] In-app feedback form (future)
 - [ ] Email survey (quarterly)
-- [ ] GitHub issues (if open-sourced)
+- [ ] GitHub issues
 - [ ] User interviews (monthly)
 
 ## Open Questions
 
-1. **Barcode Scanner (v2.0):** Should we support both hardware scanners and mobile camera?
-2. **Multi-Language (v2.0):** Which languages beyond Vietnamese and English?
-3. **POS Integration (v4.0):** Which POS systems? (Misa, Viettel, custom?)
-4. **Mobile App (v4.0):** Native (iOS/Android) or web-based (PWA)?
-5. **Open Source:** Should we open-source this on GitHub?
-6. **Monetization:** Freemium model or one-time license?
+1. **Multi-Language (v2.0):** Which languages beyond Vietnamese and English?
+2. **POS Integration (v4.0):** Which POS systems? (Misa, Viettel, custom?)
+3. **Mobile App (v4.0):** Native (iOS/Android) or web-based (PWA)?
+4. **Monetization:** Freemium model or one-time license?
 
 ## References
 
@@ -433,6 +372,6 @@ Assuming $50-100/hour for development:
 
 ---
 
-**Last Updated:** February 2025
+**Last Updated:** February 2026
 **Maintainer:** Development Team
-**Review Frequency:** Quarterly (end of Q1, Q2, Q3, Q4)
+**Review Frequency:** Quarterly

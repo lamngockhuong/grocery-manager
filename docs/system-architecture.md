@@ -4,17 +4,17 @@
 
 ```bash
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Browser (Client)                             │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              Single Page Application (SPA)               │  │
-│  │  ┌─────────────┬──────────────┬──────────────────────┐  │  │
-│  │  │  HTML/CSS   │  JavaScript  │    State Manager     │  │  │
-│  │  │ (Materialize)│  (Vanilla)   │   (app.js.html)      │  │  │
-│  │  └─────────────┴──────────────┴──────────────────────┘  │  │
-│  │                                                          │  │
-│  │  Hash Router: #/products, #/inventory, #/dashboard  │  │  │
-│  │  API: google.script.run (async XMLHttpRequest)      │  │  │
-│  └──────────────────────────────────────────────────────────┘  │
+│                     Browser (Client)                            │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Single Page Application (SPA)               │   │
+│  │  ┌─────────────┬──────────────┬──────────────────────┐   │   │
+│  │  │  HTML/CSS   │  JavaScript  │    State Manager     │   │   │
+│  │  │ (Materialize)│  (Vanilla)  │   (app.js.html)      │   │   │
+│  │  └─────────────┴──────────────┴──────────────────────┘   │   │
+│  │                                                          │   │
+│  │  Hash Router: #/products, #/inventory, #/dashboard       │   │
+│  │  API: google.script.run (async XMLHttpRequest)           │   │
+│  └──────────────────────────────────────────────────────────┘   │
 │                                  ↑ ↓                            │
 └──────────────────────────────────┼──────────────────────────────┘
                                    │
@@ -22,48 +22,48 @@
                                    │
 ┌──────────────────────────────────┼──────────────────────────────┐
 │                 Google Apps Script (Server)                     │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                  Code.gs (Entry Point)                   │  │
-│  │  doGet() → SPA Shell                                     │  │
-│  │  apiGetProducts, apiCreateProduct, ... (20 wrappers)    │  │
-│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                  Code.gs (Entry Point)                   │   │
+│  │  doGet() → SPA Shell                                     │   │
+│  │  apiGetProducts, apiCreateProduct, ... (20 wrappers)     │   │
+│  └──────────────────────────────────────────────────────────┘   │
 │                              ↓                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                   Service Layer (IIFE)                   │  │
-│  │  ┌──────────────┬──────────────┬──────────────────────┐ │  │
-│  │  │ ProductService │ PriceService │ CategoryService    │ │  │
-│  │  │ InventoryServ. │ ReportService│                    │ │  │
-│  │  └──────────────┴──────────────┴──────────────────────┘ │  │
-│  │                                                          │  │
-│  │  (Business Logic, Validation, Cache Invalidation)      │  │
-│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                   Service Layer (IIFE)                   │   │
+│  │  ┌────────────────┬──────────────┬─────────────────────┐ │   │
+│  │  │ ProductService │ PriceService │ CategoryService     │ │   │
+│  │  │ InventoryServ. │ ReportService│                     │ │   │
+│  │  └────────────────┴──────────────┴─────────────────────┘ │   │
+│  │                                                          │   │
+│  │  (Business Logic, Validation, Cache Invalidation)        │   │
+│  └──────────────────────────────────────────────────────────┘   │
 │                              ↓                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │                  Utility Layer                           │  │
-│  │  ┌────────────┬────────────┬────────────────────────┐   │  │
-│  │  │ Auth.gs    │SheetHelper │ CacheHelper.gs        │   │  │
-│  │  │(RBAC)      │(Generic    │(Chunked Cache)        │   │  │
-│  │  │            │ CRUD)      │Config.gs (Const)      │   │  │
-│  │  └────────────┴────────────┴────────────────────────┘   │  │
-│  │                                                          │  │
-│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                  Utility Layer                           │   │
+│  │  ┌────────────┬────────────┬─────────────────────────┐   │   │
+│  │  │ Auth.gs    │SheetHelper │ CacheHelper.gs          │   │   │
+│  │  │(RBAC)      │(Generic    │(Chunked Cache)          │   │   │
+│  │  │            │ CRUD)      │Config.gs (Const)        │   │   │
+│  │  └────────────┴────────────┴─────────────────────────┘   │   │
+│  │                                                          │   │
+│  └──────────────────────────────────────────────────────────┘   │
 │                              ↓                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              Google APIs                                 │  │
-│  │  SpreadsheetApp │ CacheService │ Session │ LockService  │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────┘
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Google APIs                                 │   │
+│  │  SpreadsheetApp │ CacheService │ Session │ LockService   │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
                                    ↓
-┌──────────────────────────────────────────────────────────────────┐
-│           Google Sheets (Persistent Data Storage)                │
+┌─────────────────────────────────────────────────────────────────┐
+│           Google Sheets (Persistent Data Storage)               │
 │  ┌──────────────┬──────────────┬──────────────────────────────┐ │
-│  │  Products    │  Prices      │  Inventory  │  Categories   │ │
-│  │  (500-2K)    │  (500-2K)    │  (500-2K)   │  (50-100)     │ │
+│  │  Products    │  Prices      │  Inventory  │  Categories    │ │
+│  │  (500-2K)    │  (500-2K)    │  (500-2K)   │  (50-100)      │ │
 │  └──────────────┴──────────────┴──────────────────────────────┘ │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │  PriceHistory (Unbounded Audit Trail) │ Users (5-20)   │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────┘
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  PriceHistory (Unbounded Audit Trail) │ Users (5-20)      │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Architecture
@@ -93,6 +93,8 @@ UI Pages (Materialize CSS)
 │   ├── Edit Product modal (with image preview/edit)
 │   ├── Product Detail modal (shows image preview)
 │   ├── Product Image UI (file upload, camera capture, URL paste, compression)
+│   ├── Barcode Scanner (camera-based, QuaggaJS)
+│   ├── Google Price Search button (opens Google search in new tab)
 │   └── Price Edit modal (atomic, LockService-protected)
 ├── categories.html
 │   ├── Category tree view
@@ -136,14 +138,14 @@ Code.gs (API Gateway)
                apiGetPriceHistoryReport, apiGetInventorySummaryReport
 
 Service Layer (IIFE Modules)
-├── Auth.gs (78 LOC) - RBAC
+├── Auth.gs (92 LOC) - RBAC
 │   ├── getCurrentUser() → Email from Session
 │   ├── getUserRole(email) → Lookup in Users sheet
 │   ├── isAdmin(email) → Check role
 │   ├── requireAdmin() → Throw if not admin
 │   ├── checkAccess() → Verify user in system (called by ALL APIs)
 │   └── getAuthInfo() → {email, role, name}
-├── ProductService.gs (210 LOC) - Product CRUD
+├── ProductService.gs (235 LOC) - Product CRUD
 │   ├── getProducts() [cached]
 │   ├── getProductById(id)
 │   ├── createProduct(data) → Auto-creates price & inventory
@@ -154,27 +156,27 @@ Service Layer (IIFE Modules)
 │   ├── filterByCategory(categoryId)
 │   ├── getProductsWithPrices() [cached JOIN]
 │   └── bulkUpdateStatus(ids, status)
-├── PriceService.gs (128 LOC) - Price CRUD + History
+├── PriceService.gs (142 LOC) - Price CRUD + History
 │   ├── getPrices() [cached]
 │   ├── createPrice(productId, buy, sell)
 │   ├── updatePrice(productId, buy, sell) [atomic with LockService]
 │   │   └── Auto-logs to PriceHistory (tracks old/new, timestamp, user)
 │   └── getPriceHistory(productId, start, end) [date-filtered]
-├── CategoryService.gs (123 LOC) - Category CRUD
+├── CategoryService.gs (122 LOC) - Category CRUD
 │   ├── getCategories() [cached]
 │   ├── getCategoryById(id)
 │   ├── getCategoryTree() → Build parent-child tree structure
 │   ├── createCategory(data)
 │   ├── updateCategory(id, data)
 │   └── deleteCategory(id) [validates no products]
-├── InventoryService.gs (136 LOC) - Inventory CRUD + Restock
+├── InventoryService.gs (143 LOC) - Inventory CRUD + Restock
 │   ├── getInventory() [cached]
 │   ├── createInventoryForProduct(productId)
 │   ├── updateQuantity(productId, qty)
 │   ├── restock(productId, addQty, note) [atomic with LockService, optional note]
 │   ├── setMinStock(productId, min)
 │   └── getLowStockProducts() [quantity < min_stock]
-├── ReportService.gs (118 LOC) - Analytics
+├── ReportService.gs (139 LOC) - Analytics
 │   ├── getDashboardStats() → Total products, inventory value, low stock
 │   ├── getLowStockReport() → All low stock items with details
 │   ├── getPriceHistoryReport(productId, start, end) → Timeline
@@ -186,7 +188,7 @@ Service Layer (IIFE Modules)
     └── cleanupOrphanImages() → Trash unreferenced Drive files (admin-triggered, user-scoped)
 
 Utility Layer
-├── SheetHelper.gs (159 LOC) - Generic CRUD
+├── SheetHelper.gs (169 LOC) - Generic CRUD
 │   ├── getSheet(sheetName) → Sheet object
 │   ├── getAll(sheetName) → All rows as objects
 │   ├── getById(sheetName, id) → Linear search, O(n)
@@ -195,13 +197,13 @@ Utility Layer
 │   ├── remove(sheetName, id) → Delete row
 │   ├── query(sheetName, filterFn) → Filter via callback
 │   └── generateId(prefix) → UUID-based ID
-├── CacheHelper.gs (108 LOC) - Smart Caching
+├── CacheHelper.gs (109 LOC) - Smart Caching
 │   ├── get(key) → Retrieve (handles chunks)
 │   ├── set(key, data, ttl) → Store (auto-chunks >90KB)
 │   ├── remove(key) → Delete (cleans up chunks)
 │   └── invalidate(prefix) → Remove by prefix
 ├── Auth.gs - See above
-└── Config.gs (46 LOC) - Constants
+└── Config.gs (92 LOC) - Constants
     ├── SPREADSHEET_ID
     ├── APP_NAME: From Script Properties (default: 'Quản Lý Tạp Hoá')
     ├── SHEETS: {PRODUCTS, PRICES, INVENTORY, PRICE_HISTORY, USERS, CATEGORIES}
