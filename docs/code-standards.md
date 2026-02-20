@@ -41,7 +41,7 @@ ProductService.gs
 
 **File Size Limit:** Keep under 200 LOC per file
 
-- Exception: ProductService (177 LOC), PriceService (128 LOC), ReportService (118 LOC) acceptable for feature-complete modules
+- Exception: ProductService (235 LOC), PriceService (142 LOC), ReportService (139 LOC) acceptable for feature-complete modules
 - If approaching 200 LOC, split into smaller services
 
 **File Structure Template:**

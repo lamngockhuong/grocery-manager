@@ -4,10 +4,10 @@
 
 The Grocery Manager codebase is organized into two main layers:
 
-1. **Backend** (Google Apps Script): 10 .gs files handling API, services, and data access
+1. **Backend** (Google Apps Script): 11 .gs files handling API, services, and data access
 2. **Frontend** (HTML/JS/CSS): 8 .html files for SPA UI, routing, and styling
 
-Total: 19 files, 3,366 LOC in `src/` directory.
+Total: 20 files, ~4,484 LOC in `src/` directory.
 
 ## Directory Structure
 
@@ -61,7 +61,7 @@ function apiGetProducts() {
 
 Each service is an Immediately Invoked Function Expression (IIFE) exporting public methods:
 
-#### ProductService.gs (210 LOC)
+#### ProductService.gs (235 LOC)
 
 **Methods:**
 
@@ -86,7 +86,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **Cache Keys:** `products`, `products_with_prices`
 
-#### PriceService.gs (128 LOC)
+#### PriceService.gs (142 LOC)
 
 **Methods:**
 
@@ -102,7 +102,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - Tracks who changed (Session.getActiveUser().getEmail())
 - Tracks when changed (new Date().toISOString())
 
-#### CategoryService.gs (123 LOC)
+#### CategoryService.gs (122 LOC)
 
 **Methods:**
 
@@ -115,7 +115,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **Validation:** No products in category before deletion
 
-#### InventoryService.gs (136 LOC)
+#### InventoryService.gs (143 LOC)
 
 **Methods:**
 
@@ -128,7 +128,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **Low Stock Detection:** quantity < min_stock
 
-#### ReportService.gs (118 LOC)
+#### ReportService.gs (139 LOC)
 
 **Methods:**
 
@@ -159,7 +159,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 ### Layer 3: Utilities
 
-#### Auth.gs (78 LOC)
+#### Auth.gs (92 LOC)
 
 **Methods:**
 
@@ -172,7 +172,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **Error Handling:** Throws Error with Vietnamese messages for invalid states
 
-#### SheetHelper.gs (159 LOC)
+#### SheetHelper.gs (169 LOC)
 
 **Methods:**
 
@@ -187,7 +187,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **ID Generation:** `Utilities.getUuid()` + remove hyphens + substr first 12
 
-#### CacheHelper.gs (108 LOC)
+#### CacheHelper.gs (109 LOC)
 
 **Methods:**
 
@@ -203,7 +203,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 - Stores `{key}_chunk_0`, `{key}_chunk_1`, etc.
 - Handles partial cache misses gracefully
 
-#### Config.gs (91 LOC)
+#### Config.gs (92 LOC)
 
 **Constants:**
 
@@ -281,7 +281,8 @@ app.router.on('inventory', showInventoryPage);
 - Filter by category dropdown
 - Column sorting (ASC/DESC/none toggle)
 - Pagination (25 items/page)
-- Product Detail modal (click product name — shows all fields + Google price search)
+- Product Detail modal (click product name — shows all fields + Google price search button)
+- Barcode Scanner (camera-based, QuaggaJS)
 - Add Product modal
 - Edit Product modal
 - Price Edit modal (separate action)
