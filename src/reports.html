@@ -45,10 +45,10 @@
     <div class="row" style="margin-top: 10px">
       <div class="col s12 m4">
         <div class="input-field">
-          <select id="ph-product-filter">
+          <label class="active">Sản phẩm</label>
+          <select id="ph-product-filter" class="browser-default">
             <option value="">Tất cả sản phẩm</option>
           </select>
-          <label>Sản phẩm</label>
         </div>
       </div>
       <div class="col s6 m3">
@@ -293,7 +293,6 @@ var Reports = {
       select.innerHTML += '<option value="' + p.id + '">' + escapeHtml(p.name)
         + '</option>';
     });
-    M.FormSelect.init(select);
   }
 };
 </script>

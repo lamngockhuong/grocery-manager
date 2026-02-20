@@ -22,10 +22,10 @@
           <label for="category-name">Tên danh mục</label>
         </div>
         <div class="input-field">
-          <select id="category-parent">
+          <label class="active">Danh mục cha</label>
+          <select id="category-parent" class="browser-default">
             <option value="">Không có (top-level)</option>
           </select>
-          <label>Danh mục cha</label>
         </div>
       </form>
     </div>
@@ -101,7 +101,6 @@ var Categories = {
           + '</option>';
       }
     });
-    M.FormSelect.init(select);
   },
 
   showAddModal: function() {
@@ -126,7 +125,6 @@ var Categories = {
       'Sửa danh mục';
     this._populateParentSelect(cat.id);
     document.getElementById('category-parent').value = cat.parent_id || '';
-    M.FormSelect.init(document.getElementById('category-parent'));
     M.updateTextFields();
     M.Modal.getInstance(document.getElementById('category-modal')).open();
   },

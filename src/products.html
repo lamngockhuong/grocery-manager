@@ -13,12 +13,12 @@
       <div class="input-field">
         <select
           id="category-filter"
+          class="browser-default"
           onchange="Paginator.reset('products');
 Products.render()"
         >
           <option value="">Tất cả danh mục</option>
         </select>
-        <label>Danh mục</label>
       </div>
     </div>
     <div class="col s6 m2" style="padding-top: 20px">
@@ -71,8 +71,8 @@ Products.render()"
           <label for="product-name">Tên sản phẩm</label>
         </div>
         <div class="input-field">
-          <select id="product-category"></select>
-          <label>Danh mục</label>
+          <label class="active">Danh mục</label>
+          <select id="product-category" class="browser-default"></select>
         </div>
         <div class="input-field">
           <input id="product-unit" type="text" required />
@@ -550,10 +550,12 @@ var ProductImage = (function() {
 })();
 
 var Products = {
+  _lastCategoryJSON: '',
+
   render: function() {
     var tbody = document.getElementById('products-tbody');
     var products = this.getFilteredProducts();
-    this.populateCategoryFilter();
+    this.syncCategoryFilter();
     this.renderHeaders();
 
     if (products.length === 0) {
@@ -659,32 +661,51 @@ var Products = {
     return products;
   },
 
-  populateCategoryFilter: function() {
-    var selects = [
-      document.getElementById('category-filter'),
-      document.getElementById('product-category')
-    ];
+  syncCategoryFilter: function() {
     var flat = flattenCategories(state.categories);
-    selects.forEach(function(select) {
-      if (!select) return;
-      var current = select.value;
-      var isFilter = select.id === 'category-filter';
-      select.innerHTML = isFilter
-        ? '<option value="">Tất cả danh mục</option>'
-        : '<option value="">Chọn danh mục</option>';
-      flat.forEach(function(cat) {
-        var prefix = cat.parent_id ? '  -- ' : '';
-        select.innerHTML += '<option value="'
-          + cat.id
-          + '"'
-          + (current === cat.id ? ' selected' : '')
-          + '>'
-          + prefix
-          + escapeHtml(cat.name)
-          + '</option>';
-      });
-      M.FormSelect.init(select);
+    var json = JSON.stringify(flat.map(function(c) { return c.id; }));
+    if (json === this._lastCategoryJSON) return;
+    this._lastCategoryJSON = json;
+    this._populateSelect('category-filter', flat, true);
+  },
+
+  _populateSelect: function(selectId, flat, isFilter) {
+    var select = document.getElementById(selectId);
+    if (!select) return;
+    var current = select.value;
+    select.innerHTML = isFilter
+      ? '<option value="">Tất cả danh mục</option>'
+      : '<option value="">Chọn danh mục</option>';
+    flat.forEach(function(cat) {
+      var prefix = cat.parent_id ? '  -- ' : '';
+      select.innerHTML += '<option value="'
+        + cat.id
+        + '"'
+        + (current === cat.id ? ' selected' : '')
+        + '>'
+        + prefix
+        + escapeHtml(cat.name)
+        + '</option>';
     });
+  },
+
+  populateModalCategory: function(selectedId) {
+    var flat = flattenCategories(state.categories);
+    var select = document.getElementById('product-category');
+    if (!select) return;
+    select.innerHTML = '<option value="">Chọn danh mục</option>';
+    flat.forEach(function(cat) {
+      var prefix = cat.parent_id ? '  -- ' : '';
+      select.innerHTML += '<option value="'
+        + cat.id
+        + '"'
+        + (selectedId === cat.id ? ' selected' : '')
+        + '>'
+        + prefix
+        + escapeHtml(cat.name)
+        + '</option>';
+    });
+    if (selectedId) select.value = selectedId;
   },
 
   showAddModal: function() {
@@ -693,7 +714,7 @@ var Products = {
     document.getElementById('product-modal-title').textContent =
       'Thêm sản phẩm';
     ProductImage.reset();
-    this.populateCategoryFilter();
+    this.populateModalCategory('');
     M.updateTextFields();
     M.Modal.getInstance(document.getElementById('product-modal')).open();
   },
@@ -713,9 +734,7 @@ var Products = {
     M.textareaAutoResize(document.getElementById('product-description'));
     ProductImage.loadExisting(p.image_url);
     document.getElementById('product-modal-title').textContent = 'Sửa sản phẩm';
-    this.populateCategoryFilter();
-    document.getElementById('product-category').value = p.category_id || '';
-    M.FormSelect.init(document.getElementById('product-category'));
+    this.populateModalCategory(p.category_id || '');
     M.updateTextFields();
     M.Modal.getInstance(document.getElementById('product-modal')).open();
   },
