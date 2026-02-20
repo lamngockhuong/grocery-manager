@@ -208,6 +208,11 @@ nav .brand-logo {
   margin: 0;
 }
 
+/* Prevent active labels from overlapping adjacent elements */
+.input-field > label:not(.label-icon).active {
+  margin-top: 5px;
+}
+
 /* Sortable table headers */
 .sortable-th {
   cursor: pointer;
