@@ -49,11 +49,11 @@ pnpm open       # open GAS editor in browser
 
 In GAS editor: Select `setupSheets()` → Run → Authorize
 
-**Result:** Tự động tạo spreadsheet mới + lưu ID vào Script Properties + tạo 6 sheets + thêm admin user.
+**Result:** Automatically creates a new spreadsheet + saves ID to Script Properties + creates 6 sheets + adds you as admin.
 
-**Nếu muốn dùng spreadsheet có sẵn:** Chạy `setupSpreadsheetId('your-spreadsheet-id')` trong GAS editor trước khi chạy `setupSheets()`. Hoặc vào Project Settings → Script Properties → thêm key `SPREADSHEET_ID`.
+**Using an existing spreadsheet:** Run `setupSpreadsheetId('your-spreadsheet-id')` in GAS editor before running `setupSheets()`. Or go to Project Settings → Script Properties → add key `SPREADSHEET_ID`.
 
-**Đổi tên app:** Vào Project Settings → Script Properties → thêm key `APP_NAME` với giá trị mong muốn (mặc định: `Quản Lý Tạp Hoá`). Tên hiển thị ở navbar và tiêu đề trang.
+**Change app name:** Go to Project Settings → Script Properties → add key `APP_NAME` with desired value (default: `Quản Lý Tạp Hoá`). Displayed in navbar and page title.
 
 ### Step 6: Deploy
 
@@ -124,7 +124,7 @@ If you want the app to use a specific spreadsheet:
 3. Update `Config.gs`:
 
    ```javascript
-   var SPREADSHEET_ID = '{SPREADSHEET_ID}';
+   var SPREADSHEET_ID = "{SPREADSHEET_ID}";
    ```
 
 4. Re-deploy
@@ -299,9 +299,9 @@ For now: Manual backup or use Google Sheets' version history:
 Add to any function you want to debug:
 
 ```javascript
-Logger.log('Starting operation: ' + new Date().toISOString());
-Logger.log('Product count: ' + products.length);
-Logger.log('Cache hit for: ' + CACHE_KEY);
+Logger.log("Starting operation: " + new Date().toISOString());
+Logger.log("Product count: " + products.length);
+Logger.log("Cache hit for: " + CACHE_KEY);
 ```
 
 Run function and check Execution log.

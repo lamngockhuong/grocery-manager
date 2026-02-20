@@ -1,24 +1,44 @@
-# Grocery Manager - Quản Lý Giá Sản Phẩm
+# Grocery Manager
 
-Website quản lý giá sản phẩm cho tạp hoá (500-2000 SKU), full-stack trên Google Apps Script + Google Sheets.
+[Tiếng Việt](README.vi.md)
+
+Grocery store price management web app (500-2000 SKU), built entirely on Google Apps Script + Google Sheets.
+
+## Screenshots
+
+|                  Dashboard                   |                  Products                  |
+| :------------------------------------------: | :----------------------------------------: |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Products](docs/screenshots/products.png) |
+
+|                     Product Detail                     |                    Product Form                    |
+| :----------------------------------------------------: | :------------------------------------------------: |
+| ![Product Detail](docs/screenshots/product-detail.png) | ![Product Form](docs/screenshots/product-form.png) |
+
+|                   Categories                   |                  Inventory                   |
+| :--------------------------------------------: | :------------------------------------------: |
+| ![Categories](docs/screenshots/categories.png) | ![Inventory](docs/screenshots/inventory.png) |
+
+|                 Reports                  |                     Barcode Scanner                      |
+| :--------------------------------------: | :------------------------------------------------------: |
+| ![Reports](docs/screenshots/reports.png) | ![Barcode Scanner](docs/screenshots/barcode-scanner.png) |
 
 ## Features
 
-- **Product Management**: CRUD sản phẩm, tìm kiếm (theo tên/barcode/mô tả), lọc theo danh mục, xem chi tiết modal
-- **Product Images**: Upload/hiển thị ảnh sản phẩm qua Google Drive
-- **Barcode Scanner**: Quét barcode bằng camera thiết bị
-- **Google Price Search**: Tìm giá sản phẩm trên Google từ modal chi tiết
-- **Price Management**: Cập nhật giá nhập/bán, tự động ghi lịch sử giá (bỏ qua nếu giá không đổi)
-- **Category Management**: Danh mục cha-con (2 cấp)
-- **Inventory**: Quản lý tồn kho, cảnh báo sắp hết hàng, nhập hàng với ghi chú
-- **Reports**: Dashboard tổng quan, báo cáo sắp hết hàng, lịch sử giá, tổng hợp tồn kho
-- **Table Features**: Sắp xếp cột, phân trang
-- **Auth**: Phân quyền admin/viewer theo email
-- **Configurable**: Tên app thay đổi qua Script Properties (`APP_NAME`)
+- **Product Management**: CRUD products, search (by name/barcode/description), filter by category, detail modal
+- **Product Images**: Upload/display product images via Google Drive
+- **Barcode Scanner**: Scan barcodes using device camera
+- **Google Price Search**: Search product prices on Google from detail modal
+- **Price Management**: Update buy/sell prices, auto-log price history (skip if unchanged)
+- **Category Management**: Parent-child categories (2 levels)
+- **Inventory**: Stock management, low stock alerts, restock with notes
+- **Reports**: Overview dashboard, low stock report, price history, inventory summary
+- **Table Features**: Column sorting, pagination
+- **Auth**: Role-based access control (admin/viewer) by email
+- **Configurable**: App name via Script Properties (`APP_NAME`)
 
 ## Architecture
 
-```bash
+```
 Browser SPA <-> google.script.run <-> GAS Backend <-> CacheService + Google Sheets (6 sheets)
                                                    └-> Google Drive (product images)
 ```
