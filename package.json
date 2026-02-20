@@ -33,10 +33,10 @@
   },
   "homepage": "https://github.com/lamngockhuong/grocery-manager#readme",
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@google/clasp": "^3.2.0",
-    "dprint": "^0.51.1",
-    "eslint": "^10.0.0",
-    "globals": "^17.3.0"
+    "@eslint/js": "10.0.1",
+    "@google/clasp": "3.2.0",
+    "dprint": "0.51.1",
+    "eslint": "10.0.0",
+    "globals": "17.3.0"
   }
 }
