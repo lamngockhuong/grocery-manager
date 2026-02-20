@@ -732,14 +732,55 @@ perf(reports): cache dashboard stats
 - GAS script ID secrets
 - Spreadsheet IDs (should be in Config.gs only)
 
+## Formatting & Linting
+
+### dprint (Code Formatter)
+
+**Config:** `dprint.json` in project root.
+
+Formats:
+
+- `.gs` files via typescript plugin (indentWidth: 2, lineWidth: 120, single quotes, no trailing commas, always semicolons)
+- `.html` files via markup plugin (indentWidth: 2)
+- `.md` files via markdown plugin (lineWidth: 120, textWrap: maintain)
+
+**Exception:** `src/index.html` is excluded — GAS template tags (`<?!= ?>`) break the markup parser.
+
+```bash
+pnpm format         # format all files in-place
+pnpm format:check   # check formatting (CI)
+```
+
+### ESLint (Linter)
+
+**Config:** `eslint.config.js` (flat config, ESLint v10).
+
+Lints `.gs` files only. Key settings:
+
+- `ecmaVersion: 2020`, `sourceType: 'script'` (no ES modules)
+- All GAS built-in globals declared as `readonly` (SpreadsheetApp, CacheService, LockService, PropertiesService, Session, Utilities, DriveApp, HtmlService, Logger, ContentService, UrlFetchApp, Blob)
+- All project IIFE modules declared as `writable` (SheetHelper, CacheHelper, Auth, CategoryService, PriceService, ProductService, InventoryService, ImageService, ReportService)
+- Config globals declared as `writable` (APP_NAME, SHEETS, COLUMNS, ID_PREFIXES, CACHE_TTL, ROLES, DRIVE, getSpreadsheetId)
+- `no-var: off`, `prefer-const: off` — GAS convention uses `var`
+- `no-unused-vars: warn` with patterns to suppress false positives for top-level API functions
+
+```bash
+pnpm lint           # lint .gs files
+pnpm lint:fix       # auto-fix lint issues
+pnpm check          # format:check + lint (use in CI)
+```
+
+### Pre-commit Workflow
+
+Run `pnpm check` before committing to verify formatting and linting pass.
+
 ## Future Improvements
 
 **Code Quality:**
 
 1. Migrate to TypeScript + Clasp
-2. Add ESLint for JavaScript
-3. Implement unit testing framework
-4. Add pre-commit hooks for linting
+2. Implement unit testing framework
+3. Add pre-commit hooks for linting
 
 **Performance:**
 

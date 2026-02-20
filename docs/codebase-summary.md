@@ -481,6 +481,29 @@ dashboard.html: update stats cards + warning list
 | role       | string  | 'admin' or 'viewer'       |
 | created_at | ISO8601 | Date added to system      |
 
+## Tooling
+
+### Formatting & Linting (Dev)
+
+| Tool   | Config             | Scope                                           |
+| ------ | ------------------ | ----------------------------------------------- |
+| dprint | `dprint.json`      | `.gs`, `.html` (except `src/index.html`), `.md` |
+| ESLint | `eslint.config.js` | `.gs` files only (flat config, v10)             |
+
+**Scripts:**
+
+| Script              | Command                              |
+| ------------------- | ------------------------------------ |
+| `pnpm format`       | `dprint fmt`                         |
+| `pnpm format:check` | `dprint check`                       |
+| `pnpm lint`         | `eslint src/**/*.gs`                 |
+| `pnpm lint:fix`     | `eslint --fix src/**/*.gs`           |
+| `pnpm check`        | `dprint check && eslint src/**/*.gs` |
+
+**devDependencies:** `dprint ^0.51.1`, `eslint ^10.0.0`, `@eslint/js ^10.0.1`, `globals ^17.3.0`
+
+`src/index.html` is excluded from dprint — GAS `<?!= ?>` template tags break the markup parser.
+
 ## Dependencies
 
 **No npm packages required** - all GAS/browser native APIs:

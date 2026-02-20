@@ -85,15 +85,20 @@ pnpm run deploy    # push code + create new deployment
 
 ### Available Scripts
 
-| Script             | Description                          |
-| ------------------ | ------------------------------------ |
-| `pnpm push`        | Push code to GAS                     |
-| `pnpm push:watch`  | Auto-push on file changes            |
-| `pnpm run deploy`  | Push + create timestamped deployment |
-| `pnpm open`        | Open GAS editor in browser           |
-| `pnpm open:webapp` | Open deployed web app                |
-| `pnpm logs`        | View execution logs                  |
-| `pnpm status`      | Check file sync status               |
+| Script              | Description                                 |
+| ------------------- | ------------------------------------------- |
+| `pnpm push`         | Push code to GAS                            |
+| `pnpm push:watch`   | Auto-push on file changes                   |
+| `pnpm run deploy`   | Push + create timestamped deployment        |
+| `pnpm open`         | Open GAS editor in browser                  |
+| `pnpm open:webapp`  | Open deployed web app                       |
+| `pnpm logs`         | View execution logs                         |
+| `pnpm status`       | Check file sync status                      |
+| `pnpm format`       | Format code with dprint                     |
+| `pnpm format:check` | Check formatting (no changes)               |
+| `pnpm lint`         | Lint `.gs` files with ESLint                |
+| `pnpm lint:fix`     | Auto-fix lint issues                        |
+| `pnpm check`        | Format check + lint (use before committing) |
 
 ## Database (6 Sheets)
 
