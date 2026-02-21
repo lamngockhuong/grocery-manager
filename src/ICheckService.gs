@@ -31,13 +31,24 @@ var ICheckService = (function() {
     }
   }
 
+  var CACHE_KEY = 'icheck_anon_token';
+  var CACHE_TTL = 300; // 5 minutes
+
   function _getToken() {
+    var cache = CacheService.getScriptCache();
+    var cached = cache.get(CACHE_KEY);
+    if (cached) return cached;
+
     var result = _fetch(BASE_URL + '/login/anonymous', {
       method: 'post',
       contentType: 'application/json',
       payload: JSON.stringify({ os: 3, deviceId: _generateDeviceId() })
     });
-    return result && result.data ? result.data.token : null;
+    var token = result && result.data ? result.data.token : null;
+    if (token) {
+      cache.put(CACHE_KEY, token, CACHE_TTL);
+    }
+    return token;
   }
 
   function _searchByBarcode(token, barcode) {
