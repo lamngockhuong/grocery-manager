@@ -241,6 +241,7 @@ Products.render()"
   </div>
   <!-- Fallback: image capture for browsers that block camera in iframes (Firefox) -->
   <div id="scanner-fallback" style="display: none; text-align: center; padding: 20px">
+    <p id="scanner-error-hint" style="color: #ffcdd2; margin-bottom: 8px; font-size: 13px"></p>
     <p style="color: #fff; margin-bottom: 16px">
       Trình duyệt không hỗ trợ quét trực tiếp.<br>Chụp ảnh mã vạch để quét:
     </p>
@@ -278,9 +279,12 @@ var BarcodeScanner = (function() {
     return _detector;
   }
 
-  function showFallback() {
+  function showFallback(hint) {
     document.getElementById('scanner-viewport').style.display = 'none';
-    document.getElementById('scanner-fallback').style.display = 'block';
+    var fallback = document.getElementById('scanner-fallback');
+    fallback.style.display = 'block';
+    var hintEl = document.getElementById('scanner-error-hint');
+    if (hintEl) hintEl.textContent = hint || '';
   }
 
   function _showOverlay(title) {
@@ -332,8 +336,25 @@ var BarcodeScanner = (function() {
       }
       _animId = requestAnimationFrame(scanFrame);
     }).catch(function(err) {
-      console.warn('Camera failed, using image capture fallback:', err.message);
-      showFallback();
+      console.warn('Camera failed, using image capture fallback:', err.name, err.message);
+      var hint = '';
+      switch (err.name) {
+        case 'NotAllowedError':
+          hint = 'Quyền camera bị từ chối. Kiểm tra cài đặt trình duyệt.';
+          break;
+        case 'NotFoundError':
+          hint = 'Không tìm thấy camera trên thiết bị.';
+          break;
+        case 'NotReadableError':
+          hint = 'Camera đang được ứng dụng khác sử dụng.';
+          break;
+        case 'SecurityError':
+          hint = 'Trình duyệt chặn camera trong iframe.';
+          break;
+        default:
+          hint = 'Lỗi camera: ' + err.name;
+      }
+      showFallback(hint);
     });
   }
 
