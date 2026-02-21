@@ -93,7 +93,7 @@ UI Pages (Materialize CSS)
 │   ├── Edit Product modal (with image preview/edit)
 │   ├── Product Detail modal (shows image preview)
 │   ├── Product Image UI (file upload, camera capture, URL paste, compression)
-│   ├── Barcode Scanner (camera-based, QuaggaJS)
+│   ├── Barcode Scanner (camera-based, native BarcodeDetector API via `barcode-detector@3` polyfill)
 │   ├── Google Price Search button (opens Google search in new tab)
 │   └── Price Edit modal (atomic, LockService-protected)
 ├── categories.html
