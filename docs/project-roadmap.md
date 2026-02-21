@@ -21,6 +21,7 @@ All core features implemented and deployed. System handles 500-2,000 SKU grocery
 - [x] Product CRUD + search + filter (by name/barcode/description)
 - [x] Product images (upload, camera, URL paste, compression via Google Drive)
 - [x] Barcode scanner with camera-based scanning
+- [x] iCheck barcode lookup (admin-only, with preview & auto-fill)
 - [x] Google price search from product detail modal
 - [x] Price management + atomic updates + auto history logging
 - [x] Category management (2-level parent-child hierarchy)

@@ -94,6 +94,8 @@ UI Pages (Materialize CSS)
 │   ├── Product Detail modal (shows image preview)
 │   ├── Product Image UI (file upload, camera capture, URL paste, compression)
 │   ├── Barcode Scanner (camera-based, native BarcodeDetector API via `barcode-detector@3` polyfill)
+│   ├── iCheck Lookup button (admin-only, queries iCheck API for product info by barcode)
+│   │   └── Preview modal: name, price, image, auto-fill form button
 │   ├── Google Price Search button (opens Google search in new tab)
 │   └── Price Edit modal (atomic, LockService-protected)
 ├── categories.html
@@ -123,7 +125,7 @@ Code.gs (API Gateway)
 ├── doGet(e) → Returns SPA shell (index.html)
 ├── include(filename) → Server-side includes for HTML
 ├── setupSheets() → One-time initialization
-└── API Wrappers (23 functions)
+└── API Wrappers (24 functions)
     ├── Auth: apiGetAuthInfo()
     ├── Products: apiGetProducts, apiCreateProduct, apiUpdateProduct,
     │            apiDeleteProduct, apiSearchProducts
@@ -134,6 +136,7 @@ Code.gs (API Gateway)
     │             apiSetMinStock, apiGetLowStock
     ├── Images: apiUploadProductImage, apiDeleteProductImage,
     │           apiCleanupOrphanImages (admin-only)
+    ├── Barcode: apiLookupBarcode (admin-only, queries iCheck API)
     └── Reports: apiGetDashboardStats, apiGetLowStockReport,
                apiGetPriceHistoryReport, apiGetInventorySummaryReport
 
@@ -181,11 +184,15 @@ Service Layer (IIFE Modules)
 │   ├── getLowStockReport() → All low stock items with details
 │   ├── getPriceHistoryReport(productId, start, end) → Timeline
 │   └── getInventorySummaryReport() → Inventory value by category
-└── ImageService.gs (91 LOC) - Product Images
+├── ImageService.gs (91 LOC) - Product Images
     ├── uploadImage(base64Data, fileName, mimeType) → Google Drive storage
     │   └── Returns thumbnail URL: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
     ├── deleteImage(imageUrl) → Move to trash
     └── cleanupOrphanImages() → Trash unreferenced Drive files (admin-triggered, user-scoped)
+└── ICheckService.gs (107 LOC) - iCheck API Integration
+    └── lookupBarcode(barcode) → Lookup product info from iCheck API
+        ├── Returns {name, barcode, price, imageUrl} or null
+        └── Validates barcode format (8-14 digits), handles auth & error
 
 Utility Layer
 ├── SheetHelper.gs (169 LOC) - Generic CRUD

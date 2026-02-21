@@ -4,10 +4,10 @@
 
 The Grocery Manager codebase is organized into two main layers:
 
-1. **Backend** (Google Apps Script): 11 .gs files handling API, services, and data access
+1. **Backend** (Google Apps Script): 12 .gs files handling API, services, and data access
 2. **Frontend** (HTML/JS/CSS): 8 .html files for SPA UI, routing, and styling
 
-Total: 20 files, ~4,484 LOC in `src/` directory.
+Total: 21 files, ~4,600 LOC in `src/` directory.
 
 ## Directory Structure
 
@@ -23,6 +23,7 @@ src/
 ├── CategoryService.gs       # Category CRUD
 ├── InventoryService.gs      # Inventory CRUD + restock
 ├── ImageService.gs          # Product image upload/delete via Google Drive
+├── ICheckService.gs         # iCheck API integration for barcode lookup
 ├── ReportService.gs         # Dashboard & reports
 ├── index.html               # SPA shell & routing
 ├── app.js.html              # State manager, API wrapper, utils
@@ -156,6 +157,36 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
   - Scoped to current user's Drive due to USER_ACCESSING execution mode
 
 **Dependencies:** Config.gs (DRIVE constants), SheetHelper.gs
+
+#### ICheckService.gs (107 LOC)
+
+**Methods:**
+
+- `lookupBarcode(barcode)` - Lookup product info from iCheck API by barcode
+  - Validates barcode format (8-14 digits, alphanumeric trimmed)
+  - Returns null if barcode empty or invalid format
+  - Authenticates with iCheck API (anonymous login, generates device ID)
+  - Searches iCheck product database by barcode
+  - Fetches product detail (name, price, images)
+  - Extracts first image URL from media array
+  - Returns `{ name, barcode, price, imageUrl }` or null
+
+**Private Helpers:**
+
+- `_generateDeviceId()` - Generate random 32-char device ID for iCheck auth
+- `_fetch(url, options)` - HTTP wrapper with error handling (muteHttpExceptions)
+- `_getToken()` - Anonymous login to iCheck API, returns Bearer token
+- `_searchByBarcode(token, barcode)` - Search iCheck product by barcode/code
+- `_getProductDetail(token, code)` - Fetch full product detail (name, price, media)
+- `_extractImageUrl(product)` - Extract first image URL from media array
+
+**API Endpoints Used:**
+
+- `POST https://api-social.icheck.com.vn/login/anonymous` - Anonymous auth
+- `GET https://api-social.icheck.com.vn/social/api/products/search` - Search by barcode
+- `GET https://api-social.icheck.com.vn/social/api/products/code/{code}` - Product detail
+
+**Error Handling:** Returns null on any API failure (network, invalid response, no results)
 
 ### Layer 3: Utilities
 

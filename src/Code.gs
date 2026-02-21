@@ -232,6 +232,21 @@ function apiCleanupOrphanImages() {
   }
 }
 
+// iCheck barcode lookup
+function apiLookupBarcode(barcode) {
+  try {
+    Auth.requireAdmin();
+    if (!barcode || !String(barcode).trim()) {
+      throw new Error('Mã vạch không được để trống');
+    }
+    var result = ICheckService.lookupBarcode(String(barcode).trim());
+    return { success: true, data: result };
+  } catch (e) {
+    Logger.log('apiLookupBarcode error: ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
 // Prices
 function apiUpdatePrice(productId, buyPrice, sellPrice) {
   try {

@@ -32,6 +32,7 @@ module.exports = [
         InventoryService: 'writable',
         ImageService: 'writable',
         ReportService: 'writable',
+        ICheckService: 'writable',
         // Config globals
         APP_NAME: 'writable',
         SHEETS: 'writable',
