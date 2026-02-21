@@ -103,11 +103,20 @@ var ICheckService = (function() {
     if (!detail || !detail.basicInfo) return null;
 
     var info = detail.basicInfo;
+    // description from information[0].shortContent
+    var description = '';
+    if (detail.information && detail.information.length && detail.information[0].shortContent) {
+      description = detail.information[0].shortContent;
+    }
+
     return {
       name: info.name || '',
       barcode: info.barcode || cleaned,
       price: Number(info.price) || 0,
-      imageUrl: _extractImageUrl(detail)
+      imageUrl: _extractImageUrl(detail),
+      description: description,
+      manufacturer: (detail.owner && detail.owner.name) || '',
+      origin: (info.country && info.country.name) || ''
     };
   }
 

@@ -266,6 +266,9 @@
           <p><strong id="icheck-preview-name"></strong></p>
           <p>Mã vạch: <span id="icheck-preview-barcode"></span></p>
           <p>Giá: <strong id="icheck-preview-price"></strong></p>
+          <p id="icheck-preview-manufacturer" style="display:none">Nhà SX: <span></span></p>
+          <p id="icheck-preview-origin" style="display:none">Xuất xứ: <span></span></p>
+          <p id="icheck-preview-description" style="display:none;font-size:13px;color:#666"><span></span></p>
         </div>
       </div>
     </div>
@@ -1192,6 +1195,24 @@
         ? formatCurrency(data.price)
         : "—";
 
+      // Extra fields - show only if available
+      var extras = [
+        { id: "icheck-preview-manufacturer", value: data.manufacturer },
+        { id: "icheck-preview-origin", value: data.origin },
+        { id: "icheck-preview-description", value: data.description },
+      ];
+      extras.forEach(function (item) {
+        var el = document.getElementById(item.id);
+        if (el) {
+          if (item.value) {
+            el.querySelector("span").textContent = item.value;
+            el.style.display = "";
+          } else {
+            el.style.display = "none";
+          }
+        }
+      });
+
       M.Modal.getInstance(
         document.getElementById("icheck-preview-modal"),
       ).open();
@@ -1207,6 +1228,16 @@
 
       if (data.price) {
         document.getElementById("product-sell-price").value = data.price;
+      }
+
+      // Build description from extra fields
+      var descParts = [];
+      if (data.manufacturer) descParts.push("NSX: " + data.manufacturer);
+      if (data.origin) descParts.push("Xuất xứ: " + data.origin);
+      if (data.description) descParts.push(data.description);
+      if (descParts.length) {
+        document.getElementById("product-description").value =
+          descParts.join(" | ");
       }
 
       if (data.imageUrl) {
