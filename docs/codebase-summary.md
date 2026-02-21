@@ -158,7 +158,7 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
 
 **Dependencies:** Config.gs (DRIVE constants), SheetHelper.gs
 
-#### ICheckService.gs (107 LOC)
+#### ICheckService.gs (117 LOC)
 
 **Methods:**
 
@@ -171,18 +171,25 @@ Each service is an Immediately Invoked Function Expression (IIFE) exporting publ
   - Extracts first image URL from media array
   - Returns `{ name, barcode, price, imageUrl }` or null
 
+**Caching Strategy:**
+
+- Anonymous token cached via `CacheService.getScriptCache()` with 5-minute TTL
+- Cache key: `icheck_anon_token`
+- Reduces HTTP roundtrips from 3 to 2 for repeated lookups within cache window
+- Cache miss gracefully falls back to fresh token fetch
+
 **Private Helpers:**
 
 - `_generateDeviceId()` - Generate random 32-char device ID for iCheck auth
 - `_fetch(url, options)` - HTTP wrapper with error handling (muteHttpExceptions)
-- `_getToken()` - Anonymous login to iCheck API, returns Bearer token
+- `_getToken()` - Anonymous login to iCheck API with cache, returns Bearer token (300s TTL)
 - `_searchByBarcode(token, barcode)` - Search iCheck product by barcode/code
 - `_getProductDetail(token, code)` - Fetch full product detail (name, price, media)
 - `_extractImageUrl(product)` - Extract first image URL from media array
 
 **API Endpoints Used:**
 
-- `POST https://api-social.icheck.com.vn/login/anonymous` - Anonymous auth
+- `POST https://api-social.icheck.com.vn/login/anonymous` - Anonymous auth (cached 5min)
 - `GET https://api-social.icheck.com.vn/social/api/products/search` - Search by barcode
 - `GET https://api-social.icheck.com.vn/social/api/products/code/{code}` - Product detail
 

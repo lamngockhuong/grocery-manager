@@ -185,14 +185,15 @@ Service Layer (IIFE Modules)
 │   ├── getPriceHistoryReport(productId, start, end) → Timeline
 │   └── getInventorySummaryReport() → Inventory value by category
 ├── ImageService.gs (91 LOC) - Product Images
-    ├── uploadImage(base64Data, fileName, mimeType) → Google Drive storage
-    │   └── Returns thumbnail URL: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
-    ├── deleteImage(imageUrl) → Move to trash
-    └── cleanupOrphanImages() → Trash unreferenced Drive files (admin-triggered, user-scoped)
-└── ICheckService.gs (107 LOC) - iCheck API Integration
+│   ├── uploadImage(base64Data, fileName, mimeType) → Google Drive storage
+│   │   └── Returns thumbnail URL: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
+│   ├── deleteImage(imageUrl) → Move to trash
+│   └── cleanupOrphanImages() → Trash unreferenced Drive files (admin-triggered, user-scoped)
+└── ICheckService.gs (117 LOC) - iCheck API Integration
     └── lookupBarcode(barcode) → Lookup product info from iCheck API
         ├── Returns {name, barcode, price, imageUrl} or null
-        └── Validates barcode format (8-14 digits), handles auth & error
+        ├── Validates barcode format (8-14 digits), handles auth & error
+        └── Caches anonymous token (5min TTL) to reduce API roundtrips
 
 Utility Layer
 ├── SheetHelper.gs (169 LOC) - Generic CRUD

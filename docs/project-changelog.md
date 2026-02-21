@@ -21,9 +21,10 @@ All notable changes to the Grocery Manager project are documented here. Format f
 ### Technical Details
 
 - ICheckService uses iCheck's public API endpoints:
-  - Anonymous authentication (no API key required)
+  - Anonymous authentication (no API key required, cached 5 minutes)
   - Barcode search: `/social/api/products/search`
   - Product detail: `/social/api/products/code/{code}`
+- Caching optimization: Anonymous token cached via `CacheService` (5min TTL) reduces HTTP roundtrips from 3 to 2 for repeated lookups
 - Products.html updated with iCheck lookup UI components
 - Atomic with existing barcode scanner - both methods coexist
 - Admin-only access enforced via `Auth.requireAdmin()`
@@ -78,10 +79,10 @@ Initial production release with core features:
 
 ## Version History
 
-| Version | Release Date | Status           | Key Feature                                      |
-| ------- | ------------ | ---------------- | ------------------------------------------------ |
-| 1.0.1   | 2026-02-21   | Released         | iCheck barcode lookup integration                |
-| 1.0.0   | 2026-02-19   | Production       | Initial release with core inventory management  |
+| Version | Release Date | Status     | Key Feature                                    |
+| ------- | ------------ | ---------- | ---------------------------------------------- |
+| 1.0.1   | 2026-02-21   | Released   | iCheck barcode lookup integration              |
+| 1.0.0   | 2026-02-19   | Production | Initial release with core inventory management |
 
 ---
 
