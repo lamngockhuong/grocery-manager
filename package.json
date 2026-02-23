@@ -1,6 +1,6 @@
 {
   "name": "grocery-manager",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Website quản lý giá sản phẩm cho tạp hoá (500-2000 SKU), full-stack trên Google Apps Script + Google Sheets.",
   "main": "index.js",
   "directories": {
