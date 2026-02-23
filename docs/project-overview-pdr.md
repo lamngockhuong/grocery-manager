@@ -230,13 +230,14 @@ Tertiary: Store accountants/business analysts
 
 ## Development Status
 
-**Current Version:** v1.0.0 (Production — February 2026)
+**Current Version:** v1.0.2 (Production — February 2026)
 
-- 20 files total (11 .gs, 8 .html, 1 appsscript.json)
-- ~4,484 LOC in src/
+- 20 files total (11 .gs, 8 .html, 1 appsscript.json) + LICENSE file
+- ~4,500+ LOC in src/
 - All core features implemented and tested
-- Includes: barcode scanner, product images, Google price search, sorting/pagination
+- Includes: barcode scanner, product images, Google price search, sorting/pagination, About modal, footer
 - Code quality: dprint (formatting) + ESLint (linting)
+- Licensed under ISC License (Copyright 2026 Lam Ngoc Khuong)
 
 **Maintenance:** Ongoing (bugfixes, performance tuning)
 

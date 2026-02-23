@@ -1,4 +1,14 @@
 <style>
+/* Sticky footer */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.page-footer {
+  margin-top: auto;
+  padding-top: 0;
+}
 .spin {
   animation: spin 0.8s linear infinite;
 }
@@ -264,6 +274,15 @@ nav .brand-logo {
   transform: translateX(-50%) !important;
 }
 
+/* Footer */
+.page-footer .footer-copyright {
+  padding: 0 0.75rem;
+}
+.page-footer .footer-copyright i {
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
 @media (max-width: 600px) {
   .hide-on-small {
     display: none;
@@ -368,6 +387,10 @@ nav .brand-logo {
   }
   .row .col {
     padding: 0 4px;
+  }
+  /* Footer */
+  .page-footer .footer-copyright .container {
+    font-size: 0.85rem;
   }
 }
 </style>

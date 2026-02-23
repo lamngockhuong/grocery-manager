@@ -381,6 +381,8 @@ var Paginator = {
 // === Init ===
 document.addEventListener('DOMContentLoaded', function() {
   M.AutoInit();
+  var yearEl = document.getElementById('copyright-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
   var contentEl = document.getElementById('main-content');
   if (contentEl) showLoading('main-content');
 

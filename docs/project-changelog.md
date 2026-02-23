@@ -4,6 +4,24 @@ All notable changes to the Grocery Manager project are documented here. Format f
 
 ## Unreleased
 
+## [1.0.2] - 2026-02-23
+
+### Added
+
+- **About Modal & Footer** - Improved app discoverability and transparency
+  - About modal accessible from sidenav (mobile) and footer (desktop/mobile)
+  - Modal displays author info: name, email, GitHub repo, version, license (ISC)
+  - Page footer with dynamic copyright year, clickable author name (modal trigger), app version, GitHub repo link
+  - Footer CSS with responsive design (desktop + mobile optimized)
+  - Dynamic copyright year via JavaScript (auto-updates annually)
+  - GitHub repo link in footer points to `lamngockhuong/grocery-manager`
+  - Author: Lâm Ngọc Khương <me@ngockhuong.com>
+
+### Other
+
+- **Added ISC LICENSE file** at project root (Copyright 2026 Lam Ngoc Khuong)
+- Improves project discoverability via GitHub (public repository link in-app)
+
 ## [1.0.1] - 2026-02-21
 
 ### Added
@@ -81,6 +99,7 @@ Initial production release with core features:
 
 | Version | Release Date | Status     | Key Feature                                    |
 | ------- | ------------ | ---------- | ---------------------------------------------- |
+| 1.0.2   | 2026-02-23   | Released   | About modal, footer, author info, ISC license  |
 | 1.0.1   | 2026-02-21   | Released   | iCheck barcode lookup integration              |
 | 1.0.0   | 2026-02-19   | Production | Initial release with core inventory management |
 
@@ -114,6 +133,6 @@ Initial production release with core features:
 
 ---
 
-**Last Updated:** 2026-02-21
+**Last Updated:** 2026-02-23
 **Maintainer:** Development Team
 **Format:** [Keep a Changelog](https://keepachangelog.com/)

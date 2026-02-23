@@ -277,7 +277,7 @@ ID_PREFIXES = {...};          // Prefixes for ID generation (P, PR, INV, PH, CAT
 **API Wrapper:**
 
 ```javascript
-api.call("apiGetProducts", []).then((result) => {
+api.call('apiGetProducts', []).then((result) => {
   if (result.success) {
     /* use result.data */
   } else {
@@ -296,8 +296,8 @@ api.call("apiGetProducts", []).then((result) => {
 **Router:**
 
 ```javascript
-app.router.on("products", showProductsPage);
-app.router.on("inventory", showInventoryPage);
+app.router.on('products', showProductsPage);
+app.router.on('inventory', showInventoryPage);
 // Hash-based routing via hashchange event
 ```
 
@@ -581,7 +581,7 @@ try {
   // perform operation
   return { success: true, data: result };
 } catch (e) {
-  Logger.log("Error: " + e.message);
+  Logger.log('Error: ' + e.message);
   return { success: false, error: e.message };
 }
 ```
@@ -589,11 +589,11 @@ try {
 ### Caching Pattern
 
 ```javascript
-var cached = CacheHelper.get("products");
+var cached = CacheHelper.get('products');
 if (cached) return cached;
 
 var data = SheetHelper.getAll(SHEETS.PRODUCTS);
-CacheHelper.set("products", data, CACHE_TTL);
+CacheHelper.set('products', data, CACHE_TTL);
 return data;
 ```
 

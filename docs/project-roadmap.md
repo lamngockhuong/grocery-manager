@@ -321,11 +321,11 @@ All core features implemented and deployed. System handles 500-2,000 SKU grocery
 
 ### Recommended for Growth
 
-| Phase            | Developers | QA  | Designers | Est. Time   |
-| ---------------- | ---------- | --- | --------- | ----------- |
-| v2.0 (features)  | 1-2        | 1   | 0.5       | 12-16 weeks |
-| v3.0 (analytics) | 2          | 1   | 1         | 16-20 weeks |
-| v4.0 (major)     | 3          | 2   | 1         | 20-24 weeks |
+| Phase            | Developers | QA | Designers | Est. Time   |
+| ---------------- | ---------- | -- | --------- | ----------- |
+| v2.0 (features)  | 1-2        | 1  | 0.5       | 12-16 weeks |
+| v3.0 (analytics) | 2          | 1  | 1         | 16-20 weeks |
+| v4.0 (major)     | 3          | 2  | 1         | 20-24 weeks |
 
 ## Budget Estimates (Developer Hours)
 
