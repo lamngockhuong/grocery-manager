@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/lamngockhuong/grocery-manager/compare/v1.0.0...v1.1.0) (2026-02-23)
+
+
+### Features
+
+* add author info footer, About modal, and ISC LICENSE ([9e8c340](https://github.com/lamngockhuong/grocery-manager/commit/9e8c340fb2fc60f3716c7e0600abda3e0e24eb68))
+
 ## 1.0.0 (2026-02-21)
 
 ### Features
