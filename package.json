@@ -37,6 +37,6 @@
     "@google/clasp": "3.3.0",
     "dprint": "0.51.1",
     "eslint": "10.2.0",
-    "globals": "17.4.0"
+    "globals": "17.12.0"
   }
 }
