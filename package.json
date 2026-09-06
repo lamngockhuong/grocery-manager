@@ -35,7 +35,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@google/clasp": "3.3.0",
-    "dprint": "0.51.1",
+    "dprint": "0.57.4",
     "eslint": "10.2.0",
     "globals": "17.4.0"
   }
